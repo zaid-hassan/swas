@@ -1,9 +1,10 @@
+import Hero from '@/components/sections/hero/Hero'
 import React from 'react'
 
 function page() {
   return (
     <div>
-        <h1>home page</h1>
+        <h1><Hero /></h1>
     </div>
   )
 }

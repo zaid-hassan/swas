@@ -1,14 +1,29 @@
-import Navbar from '@/components/global/navbar/Navbar'
-import React from 'react'
+import Navbar from "@/components/global/navbar/Navbar";
+import { StickyBanner } from "@/components/ui/sticky-banner";
+import React from "react";
 
 function Layout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  return <div>
-    <div className=""><Navbar /></div>
-    {children}</div>
+  return (
+    <div>
+      <StickyBanner className="bg-linear-to-b from-yellow-500 to-yellow-600" hideOnScroll={true}>
+        {/* Add content here if needed */}
+        <p className="mx-0 max-w-[90%] text-white drop-shadow-md">
+          Visit Our Store at.{" "}
+          <a href="#" className="transition duration-200 hover:underline">
+            Ranchi Jharkhand
+          </a>
+        </p>
+      </StickyBanner>
+      <div className="">
+        <Navbar />
+      </div>
+      {children}
+    </div>
+  );
 }
 
-export default Layout
+export default Layout;
