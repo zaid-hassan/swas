@@ -9,28 +9,28 @@ const products = [
     title: "Gold Ring",
     price: "₹45,000",
     image:
-      "https://images.unsplash.com/photo-1663765970236-f2acfde22237?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1713950920412-97799efdf870?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: 2,
     title: "Diamond Necklace",
     price: "₹1,20,000",
     image:
-      "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1689775707172-cceca4ce565a?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: 3,
     title: "Bracelet",
     price: "₹32,000",
     image:
-      "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: 4,
     title: "Earrings",
     price: "₹28,000",
     image:
-      "https://images.unsplash.com/photo-1585386959984-a41552231693?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1693213085235-ea6deadf8cee?q=80&w=1200&auto=format&fit=crop",
   },
 ];
 
