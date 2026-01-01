@@ -40,10 +40,10 @@ function Showcase() {
       <div className="mx-auto max-w-7xl px-4">
         {/* Section Heading */}
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-semibold md:text-4xl">
+          <h2 className="text-3xl font-heading font-semibold md:text-4xl">
             Featured Collection
           </h2>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 text-muted-foreground font-light">
             Handpicked designs crafted to perfection
           </p>
         </div>

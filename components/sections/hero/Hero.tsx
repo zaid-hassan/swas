@@ -20,12 +20,12 @@ export default function Hero() {
 
           {/* TEXT / CTA */}
           <div className="flex flex-col gap-6 text-center md:text-left">
-            <h1 className="text-3xl font-semibold leading-tight md:text-5xl">
+            <h1 className="text-3xl font-heading font-semibold leading-tight md:text-5xl">
               Handcrafted Jewelry <br className="hidden md:block" />
               Made to Shine
             </h1>
 
-            <p className="max-w-xl text-muted-foreground">
+            <p className="max-w-xl text-muted-foreground font-light">
               Discover timeless designs crafted with precision and care. Each
               piece tells a story of elegance, beauty, and tradition.
             </p>

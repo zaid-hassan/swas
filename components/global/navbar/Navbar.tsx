@@ -33,8 +33,8 @@ export default function Navbar() {
             <Menu size={26} />
           </button>
 
-          <a href="/" className="text-lg font-semibold md:text-xl">
-            Logo
+          <a href="/" className="text-lg font-heading font-bold md:text-xl">
+            <h1>SWAS</h1>
           </a>
         </div>
 
@@ -44,7 +44,7 @@ export default function Navbar() {
             <a
               key={link.name}
               href={link.href}
-              className="text-sm font-medium hover:text-yellow-500 transition"
+              className="text-sm font-body font-light hover:text-yellow-500 transition"
             >
               {link.name}
             </a>
@@ -99,7 +99,7 @@ export default function Navbar() {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-base font-medium hover:text-yellow-500"
+                className="text-base font-body font-light hover:text-yellow-500"
                 onClick={() => setOpen(false)}
               >
                 {link.name}
