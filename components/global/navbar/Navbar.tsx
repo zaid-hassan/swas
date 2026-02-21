@@ -1,127 +1,333 @@
 "use client";
 
-import React, { useState } from "react";
-import { Menu, X, CircleUser, Heart, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { CircleUser, Heart, ShoppingBag } from "lucide-react";
 
-const links = [
-  { name: "Shop", href: "/shop" },
-  { name: "Best Seller", href: "/bestseller" },
-  { name: "New Arrivals", href: "/newarrivals" },
-];
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
-const buttons = [
-  { name: "Account", href: "/account", icon: <CircleUser size={22} /> },
-  { name: "Wishlist", href: "/wish", icon: <Heart size={22} /> },
-  { name: "Cart", href: "/cart", icon: <ShoppingBag size={22} /> },
-];
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+import { Button } from "@/components/ui/button";
+
+const megaMenu = {
+  Shop: {
+    columns: [
+      {
+        heading: "Jewellery",
+        items: [
+          "Anklets",
+          "Earrings",
+          "Bracelets",
+          "Rings",
+          "Chains",
+          "Toe Rings",
+          "Nose Pins",
+        ],
+      },
+      {
+        heading: "Sets & Special",
+        items: [
+          "Jewellery Sets",
+          "Waist Chains",
+          "Mangalsutra",
+          "Pola Bangles",
+        ],
+      },
+      {
+        heading: "Home & Accessories",
+        items: [
+          "Accessories",
+          "Utensils",
+          "Murtis & Decor",
+          "Sindoor Box",
+          "Paan Patta Supari",
+        ],
+      },
+    ],
+  },
+
+  Wedding: {
+    columns: [
+      {
+        heading: "Wedding Jewellery",
+        items: [
+          "Mangalsutra",
+          "Jewellery Sets",
+          "Pola Bangles",
+        ],
+      },
+      {
+        heading: "Ritual Essentials",
+        items: [
+          "Sindoor Box",
+          "Paan Patta Supari",
+        ],
+      },
+    ],
+  },
+
+  Men: {
+    columns: [
+      {
+        heading: "Men's Collection",
+        items: ["Rings", "Bracelets", "Chains"],
+      },
+    ],
+  },
+
+  Custom: {
+    columns: [
+      {
+        heading: "Custom Orders",
+        items: ["Custom Jewellery", "Custom Pendants"],
+      },
+    ],
+  },
+};
+
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
-
   return (
     <header className="border-b bg-white">
-      {/* TOP BAR */}
-      <div className="flex items-center justify-between px-4 py-3 md:px-8">
-
-        {/* LEFT: Hamburger (mobile) / Logo (desktop) */}
+      <div className="flex items-center justify-between px-4 py-4 md:px-8">
+        {/* LEFT SECTION */}
         <div className="flex items-center gap-4">
-          <button
-            className="md:hidden"
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu size={26} />
-          </button>
+          {/* MOBILE MENU */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <span className="sr-only">Open Menu</span>☰
+              </Button>
+            </SheetTrigger>
 
-          <a href="/" className="text-lg font-heading font-bold md:text-xl">
-            <h1>SWAS</h1>
-          </a>
-        </div>
-
-        {/* CENTER: LINKS (desktop only) */}
-        <nav className="hidden md:flex gap-8">
-          {links.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className="text-sm font-body font-light hover:text-yellow-500 transition"
+            <SheetContent
+              side="left"
+              className="
+    w-[85%]
+    max-w-95
+    bg-white
+    px-8
+    py-10
+    overflow-y-auto
+    border-r border-neutral-100
+    shadow-[20px_0_60px_-20px_rgba(0,0,0,0.25)]
+  "
             >
-              {link.name}
-            </a>
-          ))}
-        </nav>
+              <SheetHeader className="space-y-2">
+                <SheetTitle className="font-heading text-xl tracking-wide">
+                  SWAS
+                </SheetTitle>
+                <SheetDescription className="text-sm text-neutral-500">
+                  Explore timeless collections
+                </SheetDescription>
+              </SheetHeader>
 
-        {/* RIGHT: ICONS */}
-        <div className="flex items-center gap-4">
-          {buttons.map((button) => (
-            <a
-              key={button.name}
-              href={button.href}
-              className="hover:text-yellow-500 transition"
-              aria-label={button.name}
-            >
-              {button.icon}
-            </a>
-          ))}
-        </div>
-      </div>
+              <div className="mt-6">
+                <Accordion type="single" collapsible className="mt-8 space-y-6">
 
-      {/* MOBILE MENU */}
-      <div
-        className={`fixed inset-0 z-50 transition-all duration-300 ${
-          open ? "pointer-events-auto" : "pointer-events-none"
-        }`}
+  {Object.entries(megaMenu).map(([title, menu]) => (
+    <AccordionItem
+      key={title}
+      value={title}
+      className="border-b border-neutral-100"
+    >
+      <AccordionTrigger
+        className="
+          text-base
+          font-medium
+          tracking-wide
+          hover:no-underline
+        "
       >
-        {/* BACKDROP */}
-        <div
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-            open ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={() => setOpen(false)}
-        />
+        {title}
+      </AccordionTrigger>
 
-        {/* SLIDE PANEL */}
-        <div
-          className={`absolute left-0 top-0 h-full w-64 bg-white p-5 shadow-lg
-          transform transition-transform duration-300 ease-in-out
-          ${open ? "translate-x-0" : "-translate-x-full"}`}
-        >
-          <button
-            className="mb-6"
-            onClick={() => setOpen(false)}
-            aria-label="Close menu"
-          >
-            <X size={26} />
-          </button>
+      <AccordionContent>
+        <div className="mt-4 space-y-3 pl-2 text-sm text-neutral-600">
 
-          <div className="flex flex-col gap-4">
-            {links.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-base font-body font-light hover:text-yellow-500"
-                onClick={() => setOpen(false)}
+          {menu.columns.map((col) =>
+            col.items.map((item) => (
+              <Link
+                key={item}
+                href="#"
+                className="
+                  block
+                  py-1
+                  transition
+                  hover:text-black
+                "
               >
-                {link.name}
-              </a>
-            ))}
-          </div>
+                {item}
+              </Link>
+            ))
+          )}
 
-          <hr className="my-6" />
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  ))}
 
-          <div className="flex flex-col gap-4">
-            {buttons.map((button) => (
-              <a
-                key={button.name}
-                href={button.href}
-                className="flex items-center gap-3 text-sm hover:text-yellow-500"
-                onClick={() => setOpen(false)}
-              >
-                {button.icon}
-                {button.name}
-              </a>
+</Accordion>
+
+
+                <div className="mt-6 space-y-3 border-t pt-6">
+                  <Link href="/bestseller" className="block font-medium">
+                    Best Seller
+                  </Link>
+                  <Link href="/newarrivals" className="block font-medium">
+                    New Arrivals
+                  </Link>
+                  <Link href="/shop" className="block font-medium">
+                    All Products
+                  </Link>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* LOGO */}
+          <Link href="/" className="text-xl font-heading font-bold">
+            SWAS
+          </Link>
+        </div>
+
+        {/* DESKTOP MEGA NAV */}
+        <NavigationMenu className="hidden md:flex">
+          <NavigationMenuList>
+            {Object.entries(megaMenu).map(([title, menu]) => (
+              <NavigationMenuItem key={title}>
+                <NavigationMenuTrigger className="font-body font-light">
+                  {title}
+                </NavigationMenuTrigger>
+
+                <NavigationMenuContent>
+                  <div
+                    className="
+      w-[900px]
+      p-10
+      grid grid-cols-3 gap-12
+      bg-white
+      rounded-2xl
+      shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)]
+      border border-neutral-100
+      animate-in fade-in-0 zoom-in-95
+      duration-200
+  "
+                  >
+                    {menu.columns.map((col, idx) => (
+                      <div key={idx}>
+                        <h4
+                          className="
+          mb-6
+          text-sm
+          tracking-wider
+          uppercase
+          text-neutral-500
+        "
+                        >
+                          {col.heading}
+                        </h4>
+
+                        <ul className="space-y-3 text-sm">
+                          {col.items.map((item) => (
+                            <li key={item}>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="#"
+                                  className="
+                    relative
+                    text-neutral-700
+                    transition
+                    hover:text-black
+                    after:absolute
+                    after:left-0
+                    after:-bottom-1
+                    after:h-[1px]
+                    after:w-0
+                    after:bg-black
+                    after:transition-all
+                    hover:after:w-full
+                  "
+                                >
+                                  {item}
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
             ))}
-          </div>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/bestseller"
+                  className="px-4 py-2 text-sm font-body font-light"
+                >
+                  Best Seller
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/newarrivals"
+                  className="px-4 py-2 text-sm font-body font-light"
+                >
+                  New Arrivals
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/shop"
+                  className="px-4 py-2 text-sm font-body font-light"
+                >
+                  All Products
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        {/* RIGHT ICONS */}
+        <div className="flex items-center gap-4">
+          <Link href="/account">
+            <CircleUser size={22} />
+          </Link>
+          <Link href="/wish">
+            <Heart size={22} />
+          </Link>
+          <Link href="/cart">
+            <ShoppingBag size={22} />
+          </Link>
         </div>
       </div>
     </header>
