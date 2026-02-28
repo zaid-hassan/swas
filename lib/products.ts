@@ -20,3 +20,29 @@ export async function getProducts() {
       .replace(/(^-|-$)/g, ""),
   }));
 }
+
+export async function getCategories() {
+  const products = await getProducts();
+
+  const map = new Map<
+    string,
+    { title: string; slug: string; image: string }
+  >();
+
+  for (const product of products) {
+    const title = product.category.trim();
+
+    if (!map.has(title)) {
+      map.set(title, {
+        title,
+        slug: title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, ""),
+        image: product.image, // first product image of category
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
