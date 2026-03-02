@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { CircleUser, Heart, ShoppingBag } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
   NavigationMenu,
@@ -71,18 +73,11 @@ const megaMenu = {
     columns: [
       {
         heading: "Wedding Jewellery",
-        items: [
-          "Mangalsutra",
-          "Jewellery Sets",
-          "Pola Bangles",
-        ],
+        items: ["Mangalsutra", "Jewellery Sets", "Pola Bangles"],
       },
       {
         heading: "Ritual Essentials",
-        items: [
-          "Sindoor Box",
-          "Paan Patta Supari",
-        ],
+        items: ["Sindoor Box", "Paan Patta Supari"],
       },
     ],
   },
@@ -106,8 +101,8 @@ const megaMenu = {
   },
 };
 
-
 export default function Navbar() {
+  const { user, loading } = useAuth();
   return (
     <header className="border-b bg-white">
       <div className="flex items-center justify-between px-4 py-4 md:px-8">
@@ -145,51 +140,46 @@ export default function Navbar() {
 
               <div className="mt-6">
                 <Accordion type="single" collapsible className="mt-8 space-y-6">
-
-  {Object.entries(megaMenu).map(([title, menu]) => (
-    <AccordionItem
-      key={title}
-      value={title}
-      className="border-b border-neutral-100"
-    >
-      <AccordionTrigger
-        className="
+                  {Object.entries(megaMenu).map(([title, menu]) => (
+                    <AccordionItem
+                      key={title}
+                      value={title}
+                      className="border-b border-neutral-100"
+                    >
+                      <AccordionTrigger
+                        className="
           text-base
           font-medium
           tracking-wide
           hover:no-underline
         "
-      >
-        {title}
-      </AccordionTrigger>
+                      >
+                        {title}
+                      </AccordionTrigger>
 
-      <AccordionContent>
-        <div className="mt-4 space-y-3 pl-2 text-sm text-neutral-600">
-
-          {menu.columns.map((col) =>
-            col.items.map((item) => (
-              <Link
-                key={item}
-                href="#"
-                className="
+                      <AccordionContent>
+                        <div className="mt-4 space-y-3 pl-2 text-sm text-neutral-600">
+                          {menu.columns.map((col) =>
+                            col.items.map((item) => (
+                              <Link
+                                key={item}
+                                href="#"
+                                className="
                   block
                   py-1
                   transition
                   hover:text-black
                 "
-              >
-                {item}
-              </Link>
-            ))
-          )}
-
-        </div>
-      </AccordionContent>
-    </AccordionItem>
-  ))}
-
-</Accordion>
-
+                              >
+                                {item}
+                              </Link>
+                            ))
+                          )}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
 
                 <div className="mt-6 space-y-3 border-t pt-6">
                   <Link href="/bestseller" className="block font-medium">
@@ -319,8 +309,30 @@ export default function Navbar() {
 
         {/* RIGHT ICONS */}
         <div className="flex items-center gap-4">
-          <Link href="/account">
-            <CircleUser size={22} />
+          <Link href="/account" className="flex items-center">
+            {loading ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+            ) : user ? (
+              <Avatar className="h-8 w-8">
+                {user.photoURL ? (
+                  <AvatarImage
+                    src={user.photoURL}
+                    alt={user.displayName || "User"}
+                  />
+                ) : null}
+                <AvatarFallback>
+                  {user.displayName
+                    ? user.displayName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                    : "U"}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <CircleUser size={22} />
+            )}
           </Link>
           <Link href="/wish">
             <Heart size={22} />
