@@ -3,6 +3,8 @@
 import { onAuthStateChanged, User } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
+import { useCartStore } from "@/lib/store/cart-store"
+import { loadLocalCart } from "@/lib/cart/cart-sync"
 
 type AuthContextType = {
   user: User | null;
@@ -19,7 +21,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  
       setUser(user);
       setLoading(false);
     });

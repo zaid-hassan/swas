@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/accordion";
 
 import { Button } from "@/components/ui/button";
+import { CartBadge } from "@/components/cart/CartControls";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const megaMenu = {
   Shop: {
@@ -337,9 +339,7 @@ export default function Navbar() {
           <Link href="/wish">
             <Heart size={22} />
           </Link>
-          <Link href="/cart">
-            <ShoppingBag size={22} />
-          </Link>
+          <CartDrawer />
         </div>
       </div>
     </header>

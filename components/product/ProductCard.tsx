@@ -4,14 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AddToCartButton } from "../cart/CartControls";
+import { Product } from "@/types/products";
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  image?: string;
-  slug: string;
-};
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -68,14 +63,15 @@ export default function ProductCard({ product }: { product: Product }) {
             </Button>
           </Link>
 
-          <Button
+          <AddToCartButton product={product} />
+          {/* <Button
             size="icon"
             variant="outline"
             className="rounded-full"
             aria-label="Add to bag"
           >
             <ShoppingBag size={16} />
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>
