@@ -29,7 +29,7 @@ export default async function Showcase() {
               <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
 
                 <Image
-                  src={category.image}
+                  src={category.image || "/placeholder-category.jpg"}
                   alt={category.title}
                   fill
                   sizes="(max-width: 768px) 50vw, 25vw"

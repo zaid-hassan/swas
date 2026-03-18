@@ -1,6 +1,8 @@
 "use client"
 
 import { create } from "zustand"
+import { auth } from "@/lib/firebase"
+import { syncCartDebounced } from "@/lib/cart/firestore-sync"
 
 export type CartItem = {
   id: string
@@ -44,12 +46,24 @@ export const useCartStore = create<CartState>((set,get)=>({
     set({items:updated})
 
     localStorage.setItem("cart",JSON.stringify(updated))
+
+    const user = auth.currentUser
+    if(user){
+      syncCartDebounced(user.uid, updated)
+    }
   },
 
   removeItem:(id)=>{
     const updated=get().items.filter(i=>i.id!==id)
+
     set({items:updated})
+
     localStorage.setItem("cart",JSON.stringify(updated))
+
+    const user = auth.currentUser
+    if(user){
+      syncCartDebounced(user.uid, updated)
+    }
   },
 
   increase:(id)=>{
@@ -58,7 +72,13 @@ export const useCartStore = create<CartState>((set,get)=>({
     )
 
     set({items:updated})
+
     localStorage.setItem("cart",JSON.stringify(updated))
+
+    const user = auth.currentUser
+    if(user){
+      syncCartDebounced(user.uid, updated)
+    }
   },
 
   decrease:(id)=>{
@@ -67,12 +87,24 @@ export const useCartStore = create<CartState>((set,get)=>({
       .filter(i=>i.quantity>0)
 
     set({items:updated})
+
     localStorage.setItem("cart",JSON.stringify(updated))
+
+    const user = auth.currentUser
+    if(user){
+      syncCartDebounced(user.uid, updated)
+    }
   },
 
   clearCart:()=>{
     set({items:[]})
+
     localStorage.removeItem("cart")
+
+    const user = auth.currentUser
+    if(user){
+      syncCartDebounced(user.uid, [])
+    }
   }
 
 }))

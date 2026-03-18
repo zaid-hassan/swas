@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -9,6 +10,8 @@ import { Separator } from "@/components/ui/separator"
 import { ShoppingBag } from "lucide-react"
 
 import { useCartStore } from "@/lib/store/cart-store"
+import { useMounted } from "@/lib/hooks/use-mounted"
+
 import {
   CartBadge,
   CartQuantityControls,
@@ -17,7 +20,18 @@ import {
 } from "@/components/cart/CartControls"
 
 export function CartDrawer() {
+
+  const mounted = useMounted()
   const items = useCartStore((s) => s.items)
+
+  if (!mounted) {
+    return (
+      <button className="relative flex items-center">
+        <ShoppingBag size={22} />
+      </button>
+    )
+  }
+
   const subtotal = CartSubtotal()
 
   return (
@@ -48,10 +62,8 @@ export function CartDrawer() {
           )}
 
           {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-4"
-            >
+            <div key={item.id} className="flex gap-4">
+
               <div className="relative w-16 h-16 rounded-md overflow-hidden border">
                 <Image
                   src={item.image}
@@ -78,6 +90,7 @@ export function CartDrawer() {
                 <CartQuantityControls id={item.id} />
 
               </div>
+
             </div>
           ))}
 
@@ -97,18 +110,19 @@ export function CartDrawer() {
 
           <div className="flex flex-col gap-y-4">
 
-          <Link href="/cart">
-            <Button className="w-full" variant="outline">
-              View Cart
-            </Button>
-          </Link>
+            <Link href="/cart">
+              <Button className="w-full" variant="outline">
+                View Cart
+              </Button>
+            </Link>
 
-          <Link href="/checkout">
-            <Button className="w-full">
-              Checkout
-            </Button>
-          </Link>
-</div>
+            <Link href="/checkout">
+              <Button className="w-full">
+                Checkout
+              </Button>
+            </Link>
+
+          </div>
 
         </div>
 
