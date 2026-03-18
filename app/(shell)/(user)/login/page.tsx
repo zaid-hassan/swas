@@ -30,8 +30,9 @@ import { Loader2 } from "lucide-react"
 
 export default function LoginPage({
   className,
-  ...props
-}: React.ComponentProps<"div">) {
+}: {
+  className?: string
+}) {
 
   const router = useRouter()
   const [email, setEmail] = useState("")
@@ -78,7 +79,6 @@ export default function LoginPage({
         "flex min-h-screen items-center justify-center px-4 py-12",
         className
       )}
-      {...props}
     >
       <Card className="w-full max-w-md">
         <CardHeader>

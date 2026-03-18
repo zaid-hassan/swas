@@ -7,7 +7,7 @@ import Link from "next/link"
 import {
   CartQuantityControls,
   RemoveFromCartButton,
-  CartSubtotal
+  calculateCartSubtotal
 } from "@/components/cart/CartControls"
 
 import { CheckoutSummary } from "@/components/cart/CheckoutSummary"
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 
 export default function CartPage() {
   const items = useCartStore((s) => s.items)
-  const subtotal = CartSubtotal()
+  const subtotal = calculateCartSubtotal(items)
 
   if (items.length === 0) {
     return (

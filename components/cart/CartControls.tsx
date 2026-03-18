@@ -133,9 +133,7 @@ export function CartBadge() {
 /* CART SUBTOTAL                                                              */
 /* -------------------------------------------------------------------------- */
 
-export function CartSubtotal() {
-  const items = useCartStore((s) => s.items)
-
+export function calculateCartSubtotal(items: any[]) {
   return items.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0

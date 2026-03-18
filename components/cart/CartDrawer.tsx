@@ -16,7 +16,7 @@ import {
   CartBadge,
   CartQuantityControls,
   RemoveFromCartButton,
-  CartSubtotal
+  calculateCartSubtotal
 } from "@/components/cart/CartControls"
 
 export function CartDrawer() {
@@ -32,7 +32,7 @@ export function CartDrawer() {
     )
   }
 
-  const subtotal = CartSubtotal()
+  const subtotal = calculateCartSubtotal(items)
 
   return (
     <Sheet>
