@@ -4,6 +4,23 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+
+  /* ── Colours ─────────────────────────────────────────────────────────── */
+  --color-maroon:       #8B1A1A;
+  --color-maroon-dark:  #6B0F0F;
+  --color-maroon-deep:  #3D0808;
+ 
+  --color-gold:         #C8952A;
+  --color-gold-light:   #E4B84A;
+  --color-gold-pale:    #F5E8C0;
+ 
+  --color-cream:        #FDF8F0;
+  --color-warm:         #FAF5EE;
+  --color-ink:          #1A0A0A;
+ 
+  --color-swas-border:  #EDE0CC;
+  --color-swas-grey:    #888888;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 

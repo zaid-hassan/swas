@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CircleUser, Heart, X } from "lucide-react";
+import { CircleUser, Heart, Menu, X } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SearchBar from "@/components/search/SearchBar";
@@ -99,9 +99,10 @@ export default function Navbar() {
                   aria-label="Open menu"
                   className="flex md:hidden flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer shrink-0"
                 >
-                  <span className="block w-[22px] h-[1.5px] bg-ink transition-all duration-300" />
-                  <span className="block w-[22px] h-[1.5px] bg-ink transition-all duration-300" />
-                  <span className="block w-[22px] h-[1.5px] bg-ink transition-all duration-300" />
+                  {/* <span className="block w-[22px] h-[1.5px] bg-black transition-all duration-300" />
+                  <span className="block w-[22px] h-[1.5px] bg-black transition-all duration-300" />
+                  <span className="block w-[22px] h-[1.5px] bg-black transition-all duration-300" /> */}
+                  <Menu />
                 </button>
               </SheetTrigger>
 
@@ -110,10 +111,11 @@ export default function Navbar() {
                 side="left"
                 className="
                   w-[78%] max-w-[300px]
-                  bg-maroon-deep border-none
+                  bg-[#8B1A1A] border-none
                   px-7 pt-14 pb-9 overflow-y-auto
                   [&>button]:text-white/35 [&>button]:hover:text-white/80
                   [&>button]:transition-colors
+                  z-[500]
                 "
               >
                 <SheetHeader className="mb-8 space-y-0.5 text-left">
