@@ -1,3 +1,4 @@
+import Footer from "@/components/global/footer/Footer";
 import Navbar from "@/components/global/navbar/Navbar";
 import { StickyBanner } from "@/components/ui/sticky-banner";
 import React from "react";
@@ -22,6 +23,9 @@ function Layout({
         <Navbar />
       </div>
       {children}
+      <div className="">
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -2,78 +2,174 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Heart } from "lucide-react";
 import { AddToCartButton } from "../cart/CartControls";
 import { Product } from "@/types/products";
 
+/**
+ * ProductCard
+ * Path: components/product/ProductCard.tsx
+ *
+ * Luxury card matching SWAS .pcard design system:
+ *   • White bg, razor-thin shadow, zero border-radius (jewellery is precise)
+ *   • 3 : 4 image with scale-on-hover
+ *   • Optional badge (maroon or gold variant)
+ *   • Wishlist toggle (invisible → visible on desktop hover; always visible on mobile)
+ *   • Slide-up "Add to Bag" bar on desktop hover; static button on mobile
+ *   • Category label in gold, name in Cormorant, price in maroon
+ *   • Optional oldPrice shows strikethrough
+ *
+ * Props:
+ *   product    — standard Product type
+ *   badge      — e.g. "Bestseller" | "New" | "Limited" | "Bridal"
+ *   badgeStyle — "maroon" (default) | "gold"
+ *   oldPrice   — e.g. "₹5,500"
+ *   catLabel   — override category display label, e.g. "Choker Set"
+ */
 
-export default function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps {
+  product:     Product;
+  badge?:      string;
+  badgeStyle?: "maroon" | "gold";
+  oldPrice?:   string;
+  catLabel?:   string;
+}
+
+export default function ProductCard({
+  product,
+  badge,
+  badgeStyle = "maroon",
+  oldPrice,
+  catLabel = "Silver",
+}: ProductCardProps) {
+  const [wished, setWished] = useState(false);
+
   return (
-    <div className="group flex flex-col bg-neutral-100 p-4 rounded-2xl border border-neutral-200">
-      {/* Image Section */}
-      <div className="relative aspect-3/4 overflow-hidden rounded-2xl bg-neutral-100">
-        {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width:768px) 100vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            No Image
-          </div>
+    <article className="group relative bg-white overflow-hidden rounded-[3px] shadow-[0_1px_8px_rgba(26,10,10,0.06)] hover:shadow-[0_6px_28px_rgba(26,10,10,0.11)] transition-shadow duration-300">
+
+      {/* ── IMAGE ─────────────────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden">
+
+        {/* 3:4 aspect container */}
+        <div className="relative w-full" style={{ paddingBottom: "133.33%" }}>
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(max-width:768px) 50vw, 25vw"
+              className="object-cover transition-transform duration-[620ms] ease-out group-hover:scale-[1.05]"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-[12px] text-swas-grey bg-warm">
+              No Image
+            </div>
+          )}
+        </div>
+
+        {/* Badge — top-left */}
+        {badge && (
+          <span
+            className={[
+              "absolute top-2.5 left-2.5 z-10",
+              "text-[8.5px] tracking-[0.18em] uppercase px-2.5 py-[5px]",
+              "font-sans font-normal leading-none",
+              badgeStyle === "gold"
+                ? "bg-gold text-maroon-deep"
+                : "bg-maroon text-white",
+            ].join(" ")}
+          >
+            {badge}
+          </span>
         )}
 
-        {/* Wishlist Button */}
+        {/* Wishlist — top-right */}
+        {/*   Desktop: hidden until hover. Mobile: always visible. */}
         <button
-          className="
-            absolute right-3 top-3
-            rounded-full bg-white/90
-            p-2 shadow-sm
-            transition
-            hover:scale-110 hover:bg-white
-          "
-          aria-label="Add to wishlist"
+          onClick={() => setWished((w) => !w)}
+          aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+          className={[
+            "absolute top-2.5 right-2.5 z-10",
+            "w-8 h-8 rounded-full border-none cursor-pointer",
+            "flex items-center justify-center",
+            "bg-white/90 backdrop-blur-[2px]",
+            "shadow-[0_1px_6px_rgba(0,0,0,0.10)]",
+            "transition-all duration-200",
+            /* visibility */
+            "max-md:opacity-100",
+            wished
+              ? "opacity-100 text-maroon"
+              : "opacity-0 group-hover:opacity-100 text-swas-grey hover:text-maroon",
+          ].join(" ")}
         >
-          <Heart size={18} className="text-neutral-700" />
+          <Heart
+            size={14}
+            strokeWidth={1.5}
+            fill={wished ? "currentColor" : "none"}
+          />
         </button>
-      </div>
 
-      {/* Content */}
-      <div className="mt-4 flex flex-col gap-2">
-        <h3 className="text-base font-medium leading-snug line-clamp-2 min-h-[44px]">
-          {product.name}
-        </h3>
-
-        <p className="text-sm text-muted-foreground font-medium">
-          ₹{product.price}
-        </p>
-
-        {/* Actions */}
-        <div className="mt-3 flex gap-2">
-          <Link href={`/shop/${product.slug}`} className="flex-1">
-            <Button
-              size="sm"
-              className="w-full rounded-full text-xs tracking-wide"
-            >
-              View Details
-            </Button>
-          </Link>
-
-          <AddToCartButton product={product} />
-          {/* <Button
-            size="icon"
-            variant="outline"
-            className="rounded-full"
-            aria-label="Add to bag"
-          >
-            <ShoppingBag size={16} />
-          </Button> */}
+        {/* ── Slide-up Add to Bag — desktop only ───────────────────────────
+            We render AddToCartButton inside a full-width container and
+            override its child button's styles via Tailwind group selectors. */}
+        <div
+          className="
+            absolute bottom-0 left-0 right-0 z-10
+            translate-y-full group-hover:translate-y-0
+            transition-transform duration-[280ms] ease-out
+            hidden md:block
+          "
+        >
+          {/*
+            AddToCartButton renders its own <button>. We override styles
+            with [&_button] selectors so the cart logic is completely untouched.
+          */}
+          <div className="[&_button]:w-full [&_button]:rounded-none [&_button]:border-none [&_button]:cursor-pointer [&_button]:py-3 [&_button]:bg-maroon [&_button]:text-white [&_button]:text-[9.5px] [&_button]:tracking-[0.2em] [&_button]:uppercase [&_button]:font-sans [&_button]:font-normal [&_button]:transition-colors [&_button]:duration-150 [&_button:hover]:bg-maroon-dark">
+            <AddToCartButton product={product} />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* ── BODY ──────────────────────────────────────────────────────────── */}
+      <div className="px-3 pt-3.5 pb-4 max-md:px-2.5 max-md:pt-2.5 max-md:pb-3">
+
+        {/* Category — gold, ultra-small caps */}
+        <p className="text-[9.5px] tracking-[0.2em] uppercase text-gold mb-1.5 font-sans font-normal">
+          {catLabel}
+        </p>
+
+        {/* Name — Cormorant serif */}
+        <Link href={`/shop/${product.slug}`} className="block no-underline">
+          <h3
+            className="text-ink hover:text-maroon transition-colors duration-150 mb-2 leading-[1.22]"
+            style={{
+              fontSize: "clamp(15px, 2vw, 17px)",
+              fontFamily: "var(--font-cormorant), Georgia, serif",
+              fontWeight: 400,
+            }}
+          >
+            {product.name}
+          </h3>
+        </Link>
+
+        {/* Prices */}
+        <div className="flex items-baseline gap-2">
+          <span className="text-[14.5px] font-medium text-maroon tracking-tight">
+            ₹{product.price}
+          </span>
+          {oldPrice && (
+            <span className="text-[11.5px] text-swas-grey line-through">
+              {oldPrice}
+            </span>
+          )}
+        </div>
+
+        {/* Mobile Add to Bag — always visible */}
+        <div className="mt-3 md:hidden [&_button]:w-full [&_button]:rounded-none [&_button]:border-none [&_button]:cursor-pointer [&_button]:py-2.5 [&_button]:bg-maroon [&_button]:text-white [&_button]:text-[9.5px] [&_button]:tracking-[0.2em] [&_button]:uppercase [&_button]:font-sans [&_button]:font-normal [&_button]:transition-colors [&_button]:duration-150 [&_button:hover]:bg-maroon-dark">
+          <AddToCartButton product={product} />
+        </div>
+      </div>
+    </article>
   );
 }

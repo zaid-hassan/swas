@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 // import { Playfair_Display, Inter } from "next/font/google";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+// import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,17 +17,32 @@ import { Toaster } from "@/components/ui/sonner";
 //   variable: "--font-body",
 //   display: "swap",
 // });
-const headingFont = Cormorant_Garamond({
+// const headingFont = Cormorant_Garamond({
+//   subsets: ["latin"],
+//   variable: "--font-heading",
+//   weight: ["400", "500", "600", "700"],
+//   display: "swap",
+// });
+
+// const bodyFont = Manrope({
+//   subsets: ["latin"],
+//   variable: "--font-body",
+//   weight: ["300", "400", "500", "600"],
+//   display: "swap",
+// });
+
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-heading",
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
   display: "swap",
 });
-
-const bodyFont = Manrope({
+ 
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-body",
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500"],
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -41,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${headingFont.variable} ${bodyFont.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
       <body className="antialiased">
         <AuthProvider>{children}
           <Toaster />
