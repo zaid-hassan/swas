@@ -8,7 +8,6 @@ function page() {
   return (
     <div>
         <Hero />
-        <TrustBar />
         <Showcase />
         <Catalogue />
     </div>

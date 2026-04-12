@@ -81,28 +81,26 @@ const H: React.CSSProperties = { fontFamily: "var(--font-cormorant), Georgia, se
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function Navbar() {
   const { user, loading } = useAuth();
-  const [announceDismissed, setAnnounceDismissed] = useState(false);
 
   return (
-    <div className="sticky top-0 z-[300]">
+    // Changed z-[300] to z-40 so the Sheet overlay (z-50) covers it properly
+    <div className="sticky top-0 z-40 bg-white shadow-sm">
+      
       {/* ── MAIN NAV BAR ─────────────────────────────────────────────────── */}
-      <nav className="bg border-b border-swas-border">
-        <div className="max-w-[1280px] mx-auto px-10 max-md:px-4 h-[68px] max-md:h-[54px] flex items-center justify-between gap-6">
+      <nav className="border-b border-black/5">
+        <div className="max-w-[1280px] mx-auto px-5 md:px-10 h-[64px] md:h-[72px] flex items-center justify-between gap-8">
 
           {/* LEFT: hamburger · logo · desktop mega-nav */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6 md:gap-10">
 
             {/* MOBILE HAMBURGER */}
             <Sheet>
               <SheetTrigger asChild>
                 <button
                   aria-label="Open menu"
-                  className="flex md:hidden flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer shrink-0"
+                  className="flex md:hidden flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer shrink-0 text-ink"
                 >
-                  {/* <span className="block w-[22px] h-[1.5px] bg-black transition-all duration-300" />
-                  <span className="block w-[22px] h-[1.5px] bg-black transition-all duration-300" />
-                  <span className="block w-[22px] h-[1.5px] bg-black transition-all duration-300" /> */}
-                  <Menu />
+                  <Menu strokeWidth={1.5} size={26} />
                 </button>
               </SheetTrigger>
 
@@ -110,58 +108,62 @@ export default function Navbar() {
               <SheetContent
                 side="left"
                 className="
-                  w-[78%] max-w-[300px]
+                  w-[85%] max-w-[340px]
                   bg-[#8B1A1A] border-none
-                  px-7 pt-14 pb-9 overflow-y-auto
-                  [&>button]:text-white/35 [&>button]:hover:text-white/80
-                  [&>button]:transition-colors
-                  z-[500]
+                  px-8 pt-16 pb-10 overflow-y-auto
+                  [&>button]:text-white/50 [&>button]:hover:text-white
+                  z-[500] flex flex-col
                 "
               >
-                <SheetHeader className="mb-8 space-y-0.5 text-left">
+                <SheetHeader className="mb-10 text-left">
                   <SheetTitle
-                    className="text-[30px] text-gold-light tracking-[0.18em] font-semibold leading-none"
+                    className="text-[32px] text-[#D4AF37] tracking-[0.15em] font-medium leading-none"
                     style={H}
                   >
                     SWAS
                   </SheetTitle>
-                  <SheetDescription className="text-[9px] tracking-[0.22em] uppercase text-white/25 font-light mt-1">
+                  <SheetDescription className="text-[10px] tracking-[0.25em] uppercase text-white/40 mt-2 font-sans">
                     By Swastika · Ranchi
                   </SheetDescription>
                 </SheetHeader>
 
                 {/* Accordion mega categories */}
-                <Accordion type="single" collapsible>
+                <Accordion type="single" collapsible className="w-full">
                   {Object.entries(megaMenu).map(([title, menu]) => (
                     <AccordionItem
                       key={title}
                       value={title}
-                      className="border-b-0 border-t border-t-white/[0.06]"
+                      className="border-b border-white/10"
                     >
                       <AccordionTrigger
                         style={H}
                         className="
-                          py-[14px] text-[22px] font-normal italic
-                          text-white/70 hover:text-gold-light hover:no-underline
-                          [&>svg]:text-gold [&>svg]:opacity-40 [&>svg]:transition-opacity
-                          hover:[&>svg]:opacity-70 transition-colors
+                          py-4 text-[24px] font-normal italic
+                          text-white/90 hover:text-[#D4AF37] hover:no-underline
+                          [&>svg]:text-[#D4AF37] [&>svg]:opacity-50
+                          transition-colors
                         "
                       >
                         {title}
                       </AccordionTrigger>
-                      <AccordionContent className="pb-3">
-                        <div className="pl-1 flex flex-col gap-1.5">
-                          {menu.columns.flatMap((col) =>
-                            col.items.map((item) => (
-                              <Link
-                                key={item}
-                                href="#"
-                                className="text-[13px] text-white/40 hover:text-gold-light transition-colors py-0.5"
-                              >
-                                {item}
-                              </Link>
-                            ))
-                          )}
+                      <AccordionContent className="pb-5">
+                        <div className="pl-2 flex flex-col gap-5 mt-2">
+                          {menu.columns.map((col, idx) => (
+                            <div key={idx} className="flex flex-col gap-2">
+                              <span className="text-[9px] tracking-[0.2em] uppercase text-[#D4AF37]/70 font-sans mb-1">
+                                {col.heading}
+                              </span>
+                              {col.items.map((item) => (
+                                <Link
+                                  key={item}
+                                  href="#"
+                                  className="text-[14px] text-white/60 hover:text-white transition-colors py-0.5"
+                                >
+                                  {item}
+                                </Link>
+                              ))}
+                            </div>
+                          ))}
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -169,39 +171,37 @@ export default function Navbar() {
                 </Accordion>
 
                 {/* Quick links */}
-                <div className="border-t border-white/[0.06]">
+                <div className="mt-8 flex flex-col gap-4">
+                  <span className="text-[9px] tracking-[0.2em] uppercase text-[#D4AF37]/70 font-sans mb-1">
+                    Explore
+                  </span>
                   {quickLinks.map(({ label, href }) => (
                     <Link
                       key={label}
                       href={href}
-                      style={H}
-                      className="
-                        flex justify-between items-center py-[14px]
-                        border-b border-white/[0.06]
-                        text-[22px] italic text-white/70 hover:text-gold-light transition-colors
-                      "
+                      className="text-[15px] text-white/80 hover:text-white transition-colors flex justify-between items-center"
                     >
                       {label}
-                      <span className="text-[13px] not-italic text-gold/60 font-sans">→</span>
+                      <span className="text-[12px] text-[#D4AF37]/50">→</span>
                     </Link>
                   ))}
                 </div>
 
                 {/* Bottom WhatsApp CTA */}
-                <div className="mt-8 pt-6 border-t border-white/[0.06]">
+                <div className="mt-auto pt-10">
                   <a
                     href="https://wa.me/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="
                       flex items-center justify-center gap-2
-                      w-full py-3 bg-gold/10 border border-gold/25
-                      text-[11px] tracking-[0.18em] uppercase text-gold-light
-                      hover:bg-gold hover:text-maroon-deep hover:border-gold
-                      transition-all duration-200 font-sans
+                      w-full py-3.5 bg-white/5 border border-white/10
+                      text-[11px] tracking-[0.2em] uppercase text-[#D4AF37]
+                      hover:bg-[#D4AF37] hover:text-[#8B1A1A] hover:border-[#D4AF37]
+                      transition-all duration-300 font-sans font-medium
                     "
                   >
-                    WhatsApp Us →
+                    WhatsApp Us
                   </a>
                 </div>
               </SheetContent>
@@ -211,26 +211,24 @@ export default function Navbar() {
             <Link
               href="/"
               style={H}
-              className="text-[26px] tracking-[0.22em] text-ink font-semibold leading-none shrink-0 hover:text-maroon transition-colors duration-200"
+              className="text-[28px] md:text-[32px] tracking-[0.2em] text-ink font-semibold leading-none shrink-0 hover:text-maroon transition-colors duration-300"
             >
               SWAS
             </Link>
 
-            {/* DESKTOP MEGA NAV */}
-            <NavigationMenu className="hidden md:flex">
-              <NavigationMenuList className="gap-0">
+            {/* DESKTOP MEGA NAV (Cleaned up: Only main categories) */}
+            <NavigationMenu className="hidden md:flex ml-4">
+              <NavigationMenuList className="gap-2">
                 {Object.entries(megaMenu).map(([title, menu]) => (
                   <NavigationMenuItem key={title}>
                     <NavigationMenuTrigger
                       className="
-                        h-auto px-3 py-2
-                        text-[11.5px] font-normal tracking-[0.14em] uppercase
-                        text-swas-grey hover:text-maroon
+                        px-3 py-2
+                        text-[11px] font-medium tracking-[0.18em] uppercase
+                        text-ink/80 hover:text-maroon
                         bg-transparent hover:bg-transparent
                         data-[state=open]:bg-transparent data-[state=open]:text-maroon
-                        data-[active]:bg-transparent
-                        focus:bg-transparent
-                        transition-colors duration-150
+                        transition-colors duration-300
                       "
                     >
                       {title}
@@ -238,26 +236,26 @@ export default function Navbar() {
 
                     <NavigationMenuContent>
                       <div
-                        className="p-8 bg-white border border-swas-border shadow-[0_24px_64px_-12px_rgba(26,10,10,0.12)]"
+                        className="p-10 bg-white border border-black/5 shadow-2xl"
                         style={{
-                          width: `${Math.max(menu.columns.length, 2) * 220}px`,
+                          width: `${Math.max(menu.columns.length, 2) * 240}px`,
                           display: "grid",
                           gridTemplateColumns: `repeat(${menu.columns.length}, 1fr)`,
-                          gap: "2.5rem",
+                          gap: "3rem",
                         }}
                       >
                         {menu.columns.map((col, idx) => (
                           <div key={idx}>
-                            <p className="mb-4 text-[9.5px] tracking-[0.28em] uppercase text-gold font-normal">
+                            <p className="mb-5 text-[10px] tracking-[0.25em] uppercase text-gold font-semibold">
                               {col.heading}
                             </p>
-                            <ul className="space-y-2">
+                            <ul className="space-y-3">
                               {col.items.map((item) => (
                                 <li key={item}>
                                   <NavigationMenuLink asChild>
                                     <Link
                                       href="#"
-                                      className="text-[13px] text-swas-grey hover:text-maroon transition-colors duration-150"
+                                      className="text-[13px] text-ink/70 hover:text-maroon transition-colors duration-200"
                                     >
                                       {item}
                                     </Link>
@@ -271,81 +269,50 @@ export default function Navbar() {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                 ))}
-
-                {/* Flat quick links */}
-                {quickLinks.map(({ label, href }) => (
-                  <NavigationMenuItem key={label}>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        href={href}
-                        className="px-3 py-2 text-[11.5px] tracking-[0.14em] uppercase text-swas-grey hover:text-maroon transition-colors duration-150"
-                      >
-                        {label}
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                ))}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
 
           {/* CENTER: search — desktop only */}
-          <div className="hidden md:block flex-1 max-w-[380px]">
+          <div className="hidden md:block flex-1 max-w-[320px]">
             <SearchBar />
           </div>
 
           {/* RIGHT: icons + CTA */}
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1 md:gap-2">
 
-            {/* Account */}
-            <Link
-              href="/account"
-              aria-label="Account"
-              className="w-10 h-10 flex items-center justify-center text-ink rounded hover:bg-warm transition-colors duration-150"
-            >
+            <Link href="/account" aria-label="Account" className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300">
               {loading ? (
-                <div className="h-[26px] w-[26px] animate-pulse rounded-full bg-swas-border" />
+                <div className="h-6 w-6 animate-pulse rounded-full bg-black/10" />
               ) : user ? (
-                <Avatar className="h-[26px] w-[26px]">
-                  {user.photoURL && (
-                    <AvatarImage src={user.photoURL} alt={user.displayName ?? "User"} />
-                  )}
+                <Avatar className="h-6 w-6">
+                  {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName ?? "User"} />}
                   <AvatarFallback className="text-[10px] bg-maroon text-white">
-                    {user.displayName
-                      ? user.displayName.split(" ").map((n) => n[0]).join("").toUpperCase()
-                      : "U"}
+                    {user.displayName ? user.displayName.split(" ").map((n) => n[0]).join("").toUpperCase() : "U"}
                   </AvatarFallback>
                 </Avatar>
               ) : (
-                <CircleUser size={19} strokeWidth={1.4} />
+                <CircleUser size={22} strokeWidth={1.2} />
               )}
             </Link>
 
-            {/* Wishlist */}
-            <Link
-              href="/wish"
-              aria-label="Wishlist"
-              className="w-10 h-10 flex items-center justify-center text-ink rounded hover:bg-warm transition-colors duration-150"
-            >
-              <Heart size={19} strokeWidth={1.4} />
+            <Link href="/wish" aria-label="Wishlist" className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300">
+              <Heart size={22} strokeWidth={1.2} />
             </Link>
 
-            {/* Cart */}
-            <div className="relative w-10 h-10 flex items-center justify-center rounded hover:bg-warm transition-colors duration-150">
+            <div className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors duration-300">
               <CartDrawer />
             </div>
 
-            {/* Desktop CTA */}
+            {/* Desktop CTA (Fixed colors & border issue) */}
             <Link
               href="/newarrivals"
               className="
-                hidden md:inline-flex ml-3
-                px-5 py-2.5
-                bg-maroon hover:bg-maroon-dark
-                text-black text-[10.5px] tracking-[0.18em] uppercase
-                rounded-[2px] whitespace-nowrap
-                transition-colors duration-200 font-sans font-normal
-                border hover:border-maroon-dark hover:border-2            A
+                hidden lg:inline-flex ml-2
+                px-6 py-2.5
+                bg-[#8B1A1A] hover:bg-black
+                text-white text-[10px] tracking-[0.2em] uppercase font-semibold
+                transition-all duration-300 whitespace-nowrap
               "
             >
               New Arrivals
@@ -355,7 +322,7 @@ export default function Navbar() {
       </nav>
 
       {/* ── MOBILE SEARCH ROW ────────────────────────────────────────────── */}
-      <div className="md:hidden bg-white border-b border-swas-border px-4 py-2.5">
+      <div className="md:hidden bg-[#FCFAFA] border-b border-black/5 px-5 py-3">
         <SearchBar />
       </div>
     </div>

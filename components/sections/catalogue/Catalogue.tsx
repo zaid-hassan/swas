@@ -2,19 +2,17 @@
 
 import { useState } from "react";
 import { Heart, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 
 /**
  * Catalogue (TopStyles)
  * Path: components/sections/catalogue/Catalogue.tsx
  *
- * Redesigned to match SWAS HTML design system precisely:
- *   • Pill filter tabs with maroon active state
- *   • 4-col responsive product grid (→ 2-col mobile)
- *   • Cards: white, shadow, 3:4 image, badge, wishlist, slide-up bag button
- *   • "View All Products" outlined CTA at bottom
- *
- * Note: This section uses local demo data (as in the original).
- * Wire up to a real data source (getProducts) when needed.
+ * Premium Redesign:
+ * • Architectural rounded cards with subtle borders
+ * • Cinematic slow-zoom image hovers
+ * • Elegant centered typography for the product info
+ * • Slide-up "Add to Bag" matched to the global CTA style
  */
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
@@ -90,29 +88,30 @@ function CatalogCard({ item }: { item: Item }) {
   const [wished, setWished] = useState(false);
 
   return (
-    <article className="group relative bg-white overflow-hidden rounded-[3px] shadow-[0_1px_8px_rgba(26,10,10,0.06)] hover:shadow-[0_6px_28px_rgba(26,10,10,0.11)] transition-shadow duration-300">
+    <article className="group relative bg-white overflow-hidden rounded-[12px] md:rounded-[16px] border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col">
 
-      {/* Image */}
-      <div className="relative overflow-hidden">
-        <div className="relative w-full" style={{ paddingBottom: "133.33%" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={item.image}
-            alt={item.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[620ms] ease-out group-hover:scale-[1.05]"
-          />
-        </div>
+      {/* Image Container */}
+      <div className="relative overflow-hidden w-full aspect-[3/4] bg-[#FCFAFA]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={item.image}
+          alt={item.name}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1000ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110"
+        />
+
+        {/* Dark Vignette to make buttons pop */}
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500 pointer-events-none" />
 
         {/* Badge */}
         {item.badge && (
           <span
             className={[
-              "absolute top-2.5 left-2.5 z-10",
-              "text-[8.5px] tracking-[0.18em] uppercase px-2.5 py-[5px]",
-              "font-sans font-normal leading-none",
+              "absolute top-3 left-3 md:top-4 md:left-4 z-10",
+              "text-[8px] tracking-[0.25em] uppercase px-3 py-1.5 shadow-sm",
+              "font-sans font-semibold leading-none rounded-full",
               item.badgeStyle === "gold"
-                ? "bg-gold text-maroon-deep"
-                : "bg-maroon text-rose-900",
+                ? "bg-[#D4AF37] text-white"
+                : "bg-[#8B1A1A] text-white",
             ].join(" ")}
           >
             {item.badge}
@@ -124,60 +123,58 @@ function CatalogCard({ item }: { item: Item }) {
           onClick={() => setWished((w) => !w)}
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           className={[
-            "absolute top-2.5 right-2.5 z-10",
-            "w-8 h-8 rounded-full border-none cursor-pointer",
+            "absolute top-3 right-3 md:top-4 md:right-4 z-10",
+            "w-8 h-8 rounded-full border border-black/5 cursor-pointer",
             "flex items-center justify-center",
-            "bg-white/90 backdrop-blur-[2px]",
-            "shadow-[0_1px_6px_rgba(0,0,0,0.10)]",
-            "transition-all duration-200",
+            "bg-white shadow-md",
+            "transition-all duration-300",
             "max-md:opacity-100",
             wished
-              ? "opacity-100 text-maroon"
-              : "opacity-0 group-hover:opacity-100 text-swas-grey hover:text-maroon",
+              ? "opacity-100 text-[#8B1A1A] border-[#8B1A1A]"
+              : "opacity-0 group-hover:opacity-100 text-ink/40 hover:text-[#8B1A1A]",
           ].join(" ")}
         >
           <Heart size={14} strokeWidth={1.5} fill={wished ? "currentColor" : "none"} />
         </button>
 
-        {/* Slide-up Add to Bag — desktop */}
+        {/* Slide-up Add to Bag — Desktop */}
         <button
           className="
             absolute bottom-0 left-0 right-0 z-10
             hidden md:flex items-center justify-center gap-2
-            py-3 border-none cursor-pointer
-            bg-maroon hover:bg-maroon-dark text-rose-900
-            text-[9.5px] tracking-[0.2em] uppercase
-            font-sans font-normal
-            transition-all duration-[280ms] ease-out
+            py-4 border-none cursor-pointer
+            bg-[#8B1A1A] hover:bg-black text-white
+            text-[9px] tracking-[0.25em] uppercase font-semibold
+            transition-all duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)]
             translate-y-full group-hover:translate-y-0
           "
         >
-          <ShoppingBag size={13} strokeWidth={1.5} />
+          <ShoppingBag size={14} strokeWidth={1.5} />
           Add to Bag
         </button>
       </div>
 
       {/* Body */}
-      <div className="px-3 pt-3.5 pb-4 max-md:px-2.5 max-md:pt-2.5 max-md:pb-3">
-        <p className="text-[9.5px] tracking-[0.2em] uppercase text-gold mb-1.5 font-sans font-normal">
+      <div className="flex-1 flex flex-col items-center text-center p-4 md:p-6 bg-white z-20">
+        <p className="text-[9px] tracking-[0.25em] uppercase text-[#D4AF37] mb-2 font-sans font-medium">
           {item.catLabel}
         </p>
         <h3
-          className="text-ink mb-2 leading-[1.22]"
+          className="text-ink mb-3 leading-[1.2] tracking-wide"
           style={{
-            fontSize: "clamp(15px, 2vw, 17px)",
+            fontSize: "clamp(16px, 2vw, 20px)",
             fontFamily: "var(--font-cormorant), Georgia, serif",
-            fontWeight: 400,
           }}
         >
           {item.name}
         </h3>
-        <div className="flex items-baseline gap-2">
-          <span className="text-[14.5px] font-medium text-maroon tracking-tight">
+        
+        <div className="mt-auto flex items-baseline justify-center gap-2.5">
+          <span className="text-[14px] md:text-[15px] font-medium text-[#8B1A1A] tracking-wider">
             {item.price}
           </span>
           {item.oldPrice && (
-            <span className="text-[11.5px] text-swas-grey line-through">
+            <span className="text-[11px] md:text-[12px] text-ink/40 line-through tracking-wider">
               {item.oldPrice}
             </span>
           )}
@@ -186,12 +183,12 @@ function CatalogCard({ item }: { item: Item }) {
         {/* Mobile Add to Bag */}
         <button
           className="
-            mt-3 w-full md:hidden
+            mt-4 w-full md:hidden
             flex items-center justify-center gap-2
-            py-2.5 border-none cursor-pointer
-            bg-maroon hover:bg-maroon-dark text-rose-900
-            text-[9.5px] tracking-[0.2em] uppercase
-            font-sans font-normal transition-colors duration-150
+            py-3 border border-[#8B1A1A]/20 cursor-pointer rounded-full
+            bg-transparent hover:bg-[#8B1A1A] text-[#8B1A1A] hover:text-white
+            text-[9px] tracking-[0.2em] uppercase font-semibold
+            transition-colors duration-300
           "
         >
           <ShoppingBag size={13} strokeWidth={1.5} />
@@ -208,39 +205,45 @@ export default function TopStyles() {
   const visible = ITEMS.filter((p) => active === "all" || p.category === active);
 
   return (
-    <section className="w-full">
-      <div className="max-w-[1280px] mx-auto px-10 max-md:px-4">
+    <section className="w-full bg-white pt-16 pb-20 max-md:pt-10 max-md:pb-14">
+      <div className="max-w-[1280px] mx-auto px-5 md:px-10">
 
         {/* ── Header ──────────────────────────────────────────────────── */}
-        <div className="flex justify-between items-end flex-wrap gap-3 pt-12 pb-7 max-md:pt-9 max-md:pb-5">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-4 mb-10 max-md:mb-8">
           <div>
-            <p className="text-[10px] tracking-[0.32em] uppercase text-gold mb-2.5 font-sans font-light">
-              Curated for You
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-[1px] bg-[#D4AF37]/60" />
+              <p className="text-[10px] md:text-[11px] tracking-[0.35em] uppercase text-[#D4AF37] font-sans font-medium">
+                Curated for You
+              </p>
+            </div>
             <h2
-              className="font-heading italic text-ink leading-none"
+              className="text-ink leading-none tracking-tight"
               style={{
-                fontSize: "clamp(22px, 3vw, 36px)",
+                fontSize: "clamp(28px, 4vw, 46px)",
                 fontFamily: "var(--font-cormorant), Georgia, serif",
-                fontWeight: 400,
               }}
             >
-              Top Styles
+              <span className="italic font-light">Top</span> Styles
             </h2>
-            <p className="mt-1.5 text-[13px] text-swas-grey font-sans font-light">
-              Explore our most loved designs
-            </p>
           </div>
-          <a
+          
+          <Link
             href="/shop"
-            className="text-[11px] tracking-[0.16em] uppercase text-maroon border-b border-b-maroon pb-px hover:text-gold hover:border-b-gold transition-colors duration-200 font-sans font-light"
+            className="
+              group flex items-center gap-2
+              text-[10px] tracking-[0.2em] uppercase text-ink
+              hover:text-[#D4AF37] transition-colors duration-300 font-sans font-medium
+              md:pb-2
+            "
           >
-            All Products →
-          </a>
+            <span>All Products</span>
+            <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+          </Link>
         </div>
 
         {/* ── Filter pills ─────────────────────────────────────────────── */}
-        <div className="flex gap-2 mb-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-0.5">
+        <div className="flex gap-3 md:gap-4 mb-10 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-2 -mx-5 px-5 md:mx-0 md:px-0">
           {FILTERS.map((f) => {
             const isOn = active === f.value;
             return (
@@ -248,11 +251,10 @@ export default function TopStyles() {
                 key={f.value}
                 onClick={() => setActive(f.value)}
                 className={[
-                  "shrink-0 px-5 py-[7px] rounded-[20px] text-[11.5px] cursor-pointer font-sans font-light whitespace-nowrap",
-                  "transition-all duration-200 border",
+                  "shrink-0 px-6 py-2.5 rounded-full text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-semibold transition-all duration-300 border whitespace-nowrap",
                   isOn
-                    ? "bg-maroon border-maroon text-rose-900"
-                    : "bg-transparent border-swas-border text-swas-grey hover:border-maroon/50 hover:text-maroon",
+                    ? "bg-[#8B1A1A] border-[#8B1A1A] text-white shadow-md"
+                    : "bg-white border-black/10 text-ink/60 hover:border-[#D4AF37] hover:text-[#D4AF37]",
                 ].join(" ")}
               >
                 {f.label}
@@ -262,26 +264,27 @@ export default function TopStyles() {
         </div>
 
         {/* ── Product grid ─────────────────────────────────────────────── */}
-        <div className="grid grid-cols-4 gap-4 mb-4 max-lg:grid-cols-3 max-md:grid-cols-2 max-md:gap-2.5 max-[430px]:gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-12">
           {visible.map((item) => (
             <CatalogCard key={item.id} item={item} />
           ))}
         </div>
 
         {/* ── View all CTA ──────────────────────────────────────────────── */}
-        <div className="text-center pt-6 pb-14 max-md:pb-10">
-          <a
+        <div className="flex justify-center mt-8">
+          <Link
             href="/shop"
             className="
-              inline-block px-12 py-3.5
-              bg-transparent text-maroon border border-maroon
-              text-[10.5px] tracking-[0.22em] uppercase font-sans font-light
-              transition-all duration-200
-              hover:bg-maroon hover:text-rose-900
+              inline-flex items-center justify-center
+              px-10 py-3.5 md:px-12 md:py-4
+              bg-transparent text-ink border border-ink/20
+              text-[10px] tracking-[0.25em] uppercase font-semibold
+              transition-all duration-300
+              hover:bg-ink hover:text-white hover:border-ink
             "
           >
-            View All Products
-          </a>
+            Explore Complete Collection
+          </Link>
         </div>
       </div>
     </section>
