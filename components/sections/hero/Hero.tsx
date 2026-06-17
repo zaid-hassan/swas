@@ -17,11 +17,11 @@ const slides = [
     titleLine3: "WEEK",
     titleLine4: "2026",
     brandLogo: "T",
-    brandName: "Tanishq",
+    brandName: "Swas",
     collabTop: "DESERT",
     collabMid: "DIAMONDS",
     collabBot: "RAHUL MISHRA",
-    footerLogos: "Tanishq × De Beers Group · For Natural Diamonds",
+    footerLogos: "Swas × De Beers Group · For Natural Diamonds",
     ctaLabel: "KNOW MORE",
     ctaHref: "/shop",
   },
@@ -33,7 +33,7 @@ const slides = [
     titleLine3: "AUTUMN",
     titleLine4: "2025",
     brandLogo: "T",
-    brandName: "Tanishq",
+    brandName: "Swas",
     collabTop: "WEDDING",
     collabMid: "EDITION",
     collabBot: "EXCLUSIVE",
@@ -49,7 +49,7 @@ const slides = [
     titleLine3: "NOW",
     titleLine4: "OPEN",
     brandLogo: "T",
-    brandName: "Tanishq",
+    brandName: "Swas",
     collabTop: "BESPOKE",
     collabMid: "JEWELLERY",
     collabBot: "YOUR VISION",
@@ -71,10 +71,10 @@ export default function Hero() {
     (i: number) => setCurrent(((i % TOTAL) + TOTAL) % TOTAL),
     []
   );
-  const advance = useCallback((dir: 1 | -1) => go(current + dir), [
-    current,
-    go,
-  ]);
+  const advance = useCallback(
+    (dir: 1 | -1) => go(current + dir),
+    [current, go]
+  );
 
   /* Auto-advance */
   useEffect(() => {
@@ -192,7 +192,7 @@ export default function Hero() {
 }
 
 /* ─── SlideCard ─────────────────────────────────────────────────────────── */
-function SlideCard({ slide }: { slide: typeof slides[number] }) {
+function SlideCard({ slide }: { slide: (typeof slides)[number] }) {
   return (
     <div className="relative min-w-full shrink-0 overflow-hidden rounded-[20px] h-[550px] max-md:h-[480px]">
       {/* Background Image */}
@@ -215,7 +215,6 @@ function SlideCard({ slide }: { slide: typeof slides[number] }) {
 
       {/* ── CONTENT OVERLAYS ─────────────────────────────────────────────── */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
-        
         {/* Top Left: A SWAS PRODUCT */}
         <div className="absolute top-6 left-6 md:top-8 md:left-10">
           <span className="text-white text-[8px] md:text-[9px] tracking-[0.25em] font-bold uppercase drop-shadow-md">
@@ -230,10 +229,18 @@ function SlideCard({ slide }: { slide: typeof slides[number] }) {
             className="text-white text-center leading-[1.1] drop-shadow-lg"
             style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
           >
-            <span className="block text-[40px] tracking-wide">{slide.titleLine1}</span>
-            <span className="block text-[44px] tracking-wide">{slide.titleLine2}</span>
-            <span className="block text-[40px] tracking-wide">{slide.titleLine3}</span>
-            <span className="block text-[36px] tracking-wide">{slide.titleLine4}</span>
+            <span className="block text-[40px] tracking-wide">
+              {slide.titleLine1}
+            </span>
+            <span className="block text-[44px] tracking-wide">
+              {slide.titleLine2}
+            </span>
+            <span className="block text-[40px] tracking-wide">
+              {slide.titleLine3}
+            </span>
+            <span className="block text-[36px] tracking-wide">
+              {slide.titleLine4}
+            </span>
           </h2>
         </div>
 
@@ -241,18 +248,29 @@ function SlideCard({ slide }: { slide: typeof slides[number] }) {
         <div className="absolute top-1/2 -translate-y-1/2 right-12 flex flex-col items-center gap-6 max-md:hidden drop-shadow-lg">
           {/* Brand */}
           <div className="flex flex-col items-center text-white">
-            <span className="text-3xl" style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>
+            <span
+              className="text-3xl"
+              style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
+            >
               {slide.brandLogo}
             </span>
-            <span className="text-2xl tracking-wide mt-1" style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>
+            <span
+              className="text-2xl tracking-wide mt-1"
+              style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
+            >
               {slide.brandName}
             </span>
           </div>
-          
+
           {/* Diamonds Icon Placeholder */}
           <div className="grid grid-cols-3 gap-1 w-6 h-6 opacity-80">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className={`w-1.5 h-1.5 bg-[#D4AF37] rotate-45 ${i === 2 ? 'col-start-2' : ''}`} />
+              <div
+                key={i}
+                className={`w-1.5 h-1.5 bg-[#D4AF37] rotate-45 ${
+                  i === 2 ? "col-start-2" : ""
+                }`}
+              />
             ))}
           </div>
 
@@ -280,12 +298,18 @@ function SlideCard({ slide }: { slide: typeof slides[number] }) {
             <span className="block text-xl">{slide.titleLine3}</span>
             <span className="block text-lg">{slide.titleLine4}</span>
           </h2>
-          
+
           <div className="flex flex-col items-end text-white mb-4">
-            <span className="text-xl" style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>
+            <span
+              className="text-xl"
+              style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
+            >
               {slide.brandLogo}
             </span>
-            <span className="text-lg tracking-wide" style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>
+            <span
+              className="text-lg tracking-wide"
+              style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
+            >
               {slide.brandName}
             </span>
           </div>
@@ -293,7 +317,9 @@ function SlideCard({ slide }: { slide: typeof slides[number] }) {
           <div className="text-white/90 text-[9px] tracking-[0.2em] uppercase leading-tight mb-1">
             {slide.collabTop} {slide.collabMid}
           </div>
-          <span className="text-white/90 text-xs italic font-serif mb-1">x</span>
+          <span className="text-white/90 text-xs italic font-serif mb-1">
+            x
+          </span>
           <div className="text-white text-[10px] tracking-[0.15em] uppercase">
             {slide.collabBot}
           </div>
@@ -301,7 +327,6 @@ function SlideCard({ slide }: { slide: typeof slides[number] }) {
 
         {/* --- BOTTOM ROW (Shared) --- */}
         <div className="absolute bottom-5 md:bottom-8 left-0 w-full px-5 md:px-10 flex flex-col-reverse md:flex-row md:items-end md:justify-between items-center gap-4 pointer-events-auto">
-          
           {/* Bottom Left: Footer Logos */}
           <div className="text-white/60 text-[8px] md:text-[9px] tracking-[0.15em] uppercase text-center md:text-left max-w-[90%] md:max-w-[200px] leading-relaxed">
             {slide.footerLogos}

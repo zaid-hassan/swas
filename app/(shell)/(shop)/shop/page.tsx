@@ -6,25 +6,34 @@ import { Button } from "@/components/ui/button";
 export default async function AllProducts({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    category?: string;
+  }>;
 }) {
-  const { page } = await searchParams;
+  const { page, category } = await searchParams;
 
   const products = await getProducts();
+
+  let filteredProducts = products;
+
+  if (category) {
+    filteredProducts = products.filter((product: any) =>
+      product.category?.toLowerCase().includes(category.toLowerCase())
+    );
+  }
 
   const currentPage = Number(page) || 1;
   const productsPerPage = 12;
 
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  const paginatedProducts = products.slice(
+  const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * productsPerPage,
     currentPage * productsPerPage
   );
-
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-
       {/* Header */}
       <div className="flex flex-col gap-3 mb-8 sm:mb-12">
         <h1 className="text-2xl sm:text-3xl font-heading font-semibold">
@@ -36,7 +45,8 @@ export default async function AllProducts({
         </p>
 
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Showing {paginatedProducts.length} of {products.length} products
+          Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
+          products
         </p>
       </div>
 
@@ -58,14 +68,13 @@ export default async function AllProducts({
 
       {/* Pagination */}
       <div className="mt-12 sm:mt-16 flex flex-wrap justify-center gap-2">
-
         {/* Previous */}
-        <Link href={`?page=${currentPage - 1}`}>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === 1}
-          >
+        <Link
+          href={`?page=${currentPage - 1}${
+            category ? `&category=${encodeURIComponent(category)}` : ""
+          }`}
+        >
+          <Button variant="outline" size="sm" disabled={currentPage === 1}>
             Prev
           </Button>
         </Link>
@@ -75,7 +84,12 @@ export default async function AllProducts({
           const pageNum = index + 1;
 
           return (
-            <Link key={pageNum} href={`?page=${pageNum}`}>
+            <Link
+              key={pageNum}
+              href={`?page=${pageNum}${
+                category ? `&category=${encodeURIComponent(category)}` : ""
+              }`}
+            >
               <Button
                 size="sm"
                 variant={currentPage === pageNum ? "default" : "outline"}
@@ -87,7 +101,11 @@ export default async function AllProducts({
         })}
 
         {/* Next */}
-        <Link href={`?page=${currentPage + 1}`}>
+        <Link
+          href={`?page=${currentPage + 1}${
+            category ? `&category=${encodeURIComponent(category)}` : ""
+          }`}
+        >
           <Button
             variant="outline"
             size="sm"
@@ -96,9 +114,7 @@ export default async function AllProducts({
             Next
           </Button>
         </Link>
-
       </div>
-
     </section>
   );
 }

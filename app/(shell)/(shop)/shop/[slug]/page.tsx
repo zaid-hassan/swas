@@ -20,6 +20,8 @@ export default async function ProductDetail({
 
   const products = await getProducts();
 
+  console.log("Fetched products:", products); // Debugging line
+
   const product = products.find((p: any) => p.slug?.trim() === slug?.trim());
 
   if (!product) {

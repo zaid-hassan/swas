@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 
 const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/1dvxGw-_Lf9hvF8-MwHEBCgT6vzjMqBVRMF2817P3y58/export?format=csv&gid=127253953";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRBzej5M0bDv8NnJ8xgCxfaEn_FYpdiNZiZMyhed_AMx9BTND-2f90pIk5CWAUiR0MlW4jJHg5ZaHGe/pub?gid=127253953&single=true&output=csv";
 
 export async function fetchSheetProducts() {
   const res = await fetch(CSV_URL, {

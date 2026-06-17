@@ -39,44 +39,107 @@ const megaMenu = {
     columns: [
       {
         heading: "Jewellery",
-        items: ["Anklets","Earrings","Bracelets","Rings","Chains","Toe Rings","Nose Pins"],
+        items: [
+          "Anklets",
+          "Earrings",
+          "Bracelets",
+          "Rings",
+          "Chains",
+          "Toe Rings",
+          "Nose Pins",
+        ],
       },
       {
         heading: "Sets & Special",
-        items: ["Jewellery Sets","Waist Chains","Mangalsutra","Pola Bangles"],
+        items: [
+          "Jewellery Sets",
+          "Waist Chains",
+          "Mangalsutra",
+          "Pola Bangles",
+        ],
       },
       {
         heading: "Home & Accessories",
-        items: ["Accessories","Utensils","Murtis & Decor","Sindoor Box","Paan Patta Supari"],
+        items: [
+          "Accessories",
+          "Utensils",
+          "Murtis & Decor",
+          "Sindoor Box",
+          "Paan Patta Supari",
+        ],
       },
     ],
   },
   Wedding: {
     columns: [
-      { heading: "Wedding Jewellery", items: ["Mangalsutra","Jewellery Sets","Pola Bangles"] },
-      { heading: "Ritual Essentials", items: ["Sindoor Box","Paan Patta Supari"] },
+      {
+        heading: "Wedding Jewellery",
+        items: ["Mangalsutra", "Jewellery Sets", "Pola Bangles"],
+      },
+      {
+        heading: "Ritual Essentials",
+        items: ["Sindoor Box", "Paan Patta Supari"],
+      },
     ],
   },
   Men: {
     columns: [
-      { heading: "Men's Collection", items: ["Rings","Bracelets","Chains"] },
+      { heading: "Men's Collection", items: ["Rings", "Bracelets", "Chains"] },
     ],
   },
   Custom: {
     columns: [
-      { heading: "Custom Orders", items: ["Custom Jewellery","Custom Pendants"] },
+      {
+        heading: "Custom Orders",
+        items: ["Custom Jewellery", "Custom Pendants"],
+      },
     ],
   },
 };
 
 const quickLinks = [
-  { label: "Best Sellers",  href: "/bestseller"  },
-  { label: "New Arrivals",  href: "/newarrivals"  },
-  { label: "All Products",  href: "/shop"         },
+  { label: "Best Sellers", href: "/bestseller" },
+  { label: "New Arrivals", href: "/newarrivals" },
+  { label: "All Products", href: "/shop" },
 ];
 
+const categoryLinks: Record<string, string> = {
+  // Jewellery
+  Anklets: "/shop?category=anklet",
+  Earrings: "/shop?category=earrings",
+  Bracelets: "/shop?category=bracelet",
+  Rings: "/shop?category=ring",
+  Chains: "/shop?category=chain",
+  "Toe Rings": "/shop?category=toe-ring",
+  "Nose Pins": "/shop?category=nose-pin",
+
+  // Sets & Wedding
+  Mangalsutra: "/shop?category=mangalsutra",
+  "Jewellery Sets": "/shop?category=jewellery-set",
+  "Waist Chains": "/shop?category=waist-chain",
+  "Pola Bangles": "/shop?category=pola-bangles",
+  "Sindoor Box": "/shop?category=sindoor-box",
+  "Paan Patta Supari": "/shop?category=paan-patta-supari",
+
+  // Home
+  Accessories: "/shop?category=accessories",
+  Utensils: "/shop?category=utensils",
+  "Murtis & Decor": "/shop?category=murtis-decor",
+
+  // Men
+  "Men's Rings": "/shop?category=ring",
+  "Men's Bracelets": "/shop?category=bracelet",
+  "Men's Chains": "/shop?category=chain",
+
+  // Custom
+  "Custom Jewellery": "/contact",
+  "Custom Pendants": "/contact",
+};
+
 /* ─── Serif CSS var shorthand ────────────────────────────────────────────── */
-const H: React.CSSProperties = { fontFamily: "var(--font-cormorant), Georgia, serif" };
+const H: React.CSSProperties = {
+  fontFamily: "var(--font-cormorant), Georgia, serif",
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function Navbar() {
@@ -85,14 +148,11 @@ export default function Navbar() {
   return (
     // Changed z-[300] to z-40 so the Sheet overlay (z-50) covers it properly
     <div className="sticky top-0 z-40 bg-white shadow-sm">
-      
       {/* ── MAIN NAV BAR ─────────────────────────────────────────────────── */}
       <nav className="border-b border-black/5">
         <div className="max-w-[1280px] mx-auto px-5 md:px-10 h-[64px] md:h-[72px] flex items-center justify-between gap-8">
-
           {/* LEFT: hamburger · logo · desktop mega-nav */}
           <div className="flex items-center gap-6 md:gap-10">
-
             {/* MOBILE HAMBURGER */}
             <Sheet>
               <SheetTrigger asChild>
@@ -156,8 +216,14 @@ export default function Navbar() {
                               {col.items.map((item) => (
                                 <Link
                                   key={item}
-                                  href="#"
-                                  className="text-[14px] text-white/60 hover:text-white transition-colors py-0.5"
+                                  href={categoryLinks[item] || "/shop"}
+                                  className="
+    text-[14px]
+    text-white/60
+    hover:text-white
+    transition-colors
+    py-0.5
+  "
                                 >
                                   {item}
                                 </Link>
@@ -254,8 +320,14 @@ export default function Navbar() {
                                 <li key={item}>
                                   <NavigationMenuLink asChild>
                                     <Link
-                                      href="#"
-                                      className="text-[13px] text-ink/70 hover:text-maroon transition-colors duration-200"
+                                      href={categoryLinks[item] || "/shop"}
+                                      className="
+    text-[13px]
+    text-ink/70
+    hover:text-maroon
+    transition-colors
+    duration-200
+  "
                                     >
                                       {item}
                                     </Link>
@@ -280,15 +352,29 @@ export default function Navbar() {
 
           {/* RIGHT: icons + CTA */}
           <div className="flex items-center gap-1 md:gap-2">
-
-            <Link href="/account" aria-label="Account" className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300">
+            <Link
+              href="/account"
+              aria-label="Account"
+              className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300"
+            >
               {loading ? (
                 <div className="h-6 w-6 animate-pulse rounded-full bg-black/10" />
               ) : user ? (
                 <Avatar className="h-6 w-6">
-                  {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName ?? "User"} />}
+                  {user.photoURL && (
+                    <AvatarImage
+                      src={user.photoURL}
+                      alt={user.displayName ?? "User"}
+                    />
+                  )}
                   <AvatarFallback className="text-[10px] bg-maroon text-white">
-                    {user.displayName ? user.displayName.split(" ").map((n) => n[0]).join("").toUpperCase() : "U"}
+                    {user.displayName
+                      ? user.displayName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                      : "U"}
                   </AvatarFallback>
                 </Avatar>
               ) : (
@@ -296,7 +382,11 @@ export default function Navbar() {
               )}
             </Link>
 
-            <Link href="/wish" aria-label="Wishlist" className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300">
+            <Link
+              href="/wish"
+              aria-label="Wishlist"
+              className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300"
+            >
               <Heart size={22} strokeWidth={1.2} />
             </Link>
 
