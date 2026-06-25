@@ -43,6 +43,5 @@ export async function getCategories() {
       });
     }
   }
-
   return Array.from(map.values());
 }
