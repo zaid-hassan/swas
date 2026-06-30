@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import CheckoutAddressSection from "@/components/checkout/CheckoutAddressSection"
 
 type ValidatedItem = {
   id: string
@@ -65,65 +66,7 @@ export default function CheckoutPage() {
       <div className="grid lg:grid-cols-[1fr_420px] gap-10">
 
         {/* Shipping Form */}
-        <Card>
-
-          <CardHeader>
-            <CardTitle>Shipping Information</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-
-            <div className="grid md:grid-cols-2 gap-4">
-
-              <div>
-                <Label>First Name</Label>
-                <Input placeholder="John" />
-              </div>
-
-              <div>
-                <Label>Last Name</Label>
-                <Input placeholder="Doe" />
-              </div>
-
-            </div>
-
-            <div>
-              <Label>Email</Label>
-              <Input type="email" placeholder="john@example.com" />
-            </div>
-
-            <div>
-              <Label>Phone</Label>
-              <Input placeholder="9876543210" />
-            </div>
-
-            <div>
-              <Label>Address</Label>
-              <Input placeholder="Street address" />
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4">
-
-              <div>
-                <Label>City</Label>
-                <Input placeholder="City" />
-              </div>
-
-              <div>
-                <Label>State</Label>
-                <Input placeholder="State" />
-              </div>
-
-              <div>
-                <Label>PIN Code</Label>
-                <Input placeholder="400001" />
-              </div>
-
-            </div>
-
-          </CardContent>
-
-        </Card>
+        <CheckoutAddressSection />
 
         {/* Order Summary */}
         <Card className="h-fit">

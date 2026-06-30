@@ -1,76 +1,106 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
-} from "firebase/auth"
-import { auth } from "@/lib/firebase"
+} from "firebase/auth";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/firebase";
+import { ensureUserDocument } from "@/lib/create-user-document";
+
+import { cn } from "@/lib/utils";
+
+import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+} from "@/components/ui/field";
+
+import { Input } from "@/components/ui/input";
+
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage({
   className,
 }: {
-  className?: string
+  className?: string;
 }) {
+  const router = useRouter();
 
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
-    toast.promise(
-      signInWithEmailAndPassword(auth, email, password),
-      {
-        loading: "Logging you in...",
-        success: () => {
-          router.push("/")
-          return "Welcome back 👋"
-        },
-        error: (err: any) =>
-          err?.message || "Invalid email or password",
-      }
-    )
+    try {
+      setLoading(true);
+
+      const userCredential =
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+      await ensureUserDocument(userCredential.user);
+
+      toast.success("Welcome back 👋");
+
+      router.push("/");
+    } catch (error: any) {
+      toast.error(
+        error?.message || "Invalid email or password"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleGoogleLogin() {
-    const provider = new GoogleAuthProvider()
+    try {
+      setGoogleLoading(true);
 
-    toast.promise(
-      signInWithPopup(auth, provider),
-      {
-        loading: "Signing in with Google...",
-        success: () => {
-          router.push("/")
-          return "Logged in with Google 👋"
-        },
-        error: (err: any) =>
-          err?.message || "Google login failed",
-      }
-    )
+      const provider = new GoogleAuthProvider();
+
+      const result = await signInWithPopup(
+        auth,
+        provider
+      );
+
+      await ensureUserDocument(result.user);
+
+      toast.success("Logged in with Google 👋");
+
+      router.push("/");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(
+        error?.message || "Google login failed"
+      );
+    } finally {
+      setGoogleLoading(false);
+    }
   }
 
   return (
@@ -85,32 +115,42 @@ export default function LoginPage({
           <CardTitle className="text-xl md:text-2xl">
             Login to your account
           </CardTitle>
+
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below to login to your
+            account
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form
+            onSubmit={handleLogin}
+            className="space-y-6"
+          >
             <FieldGroup className="space-y-4">
-
               <Field>
                 <FieldLabel>Email</FieldLabel>
+
                 <Input
                   type="email"
                   placeholder="m@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
                   required
                 />
               </Field>
 
               <Field>
                 <FieldLabel>Password</FieldLabel>
+
                 <Input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
                   required
                 />
               </Field>
@@ -119,8 +159,16 @@ export default function LoginPage({
                 <Button
                   type="submit"
                   className="w-full"
+                  disabled={loading || googleLoading}
                 >
-                  Login
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Logging in...
+                    </>
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
 
                 <Button
@@ -128,8 +176,16 @@ export default function LoginPage({
                   variant="outline"
                   className="w-full"
                   onClick={handleGoogleLogin}
+                  disabled={loading || googleLoading}
                 >
-                  Continue with Google
+                  {googleLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    "Continue with Google"
+                  )}
                 </Button>
 
                 <FieldDescription className="text-center text-sm">
@@ -142,11 +198,10 @@ export default function LoginPage({
                   </a>
                 </FieldDescription>
               </Field>
-
             </FieldGroup>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
