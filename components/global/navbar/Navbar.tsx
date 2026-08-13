@@ -382,13 +382,13 @@ export default function Navbar() {
               )}
             </Link>
 
-            <Link
+            {/* <Link
               href="/wish"
               aria-label="Wishlist"
               className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300"
             >
               <Heart size={22} strokeWidth={1.2} />
-            </Link>
+            </Link> */}
 
             <div className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors duration-300">
               <CartDrawer />
@@ -396,7 +396,7 @@ export default function Navbar() {
 
             {/* Desktop CTA (Fixed colors & border issue) */}
             <Link
-              href="/newarrivals"
+              href="/shop"
               className="
                 hidden lg:inline-flex ml-2
                 px-6 py-2.5
@@ -405,7 +405,7 @@ export default function Navbar() {
                 transition-all duration-300 whitespace-nowrap
               "
             >
-              New Arrivals
+             Shop
             </Link>
           </div>
         </div>
