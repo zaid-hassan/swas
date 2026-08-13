@@ -128,7 +128,7 @@ export default function CheckoutPage() {
             </div>
 
             <Button
-              className="w-full mt-4"
+              className="w-full bg-button mt-4"
               disabled={loading}
             >
               Continue to Payment

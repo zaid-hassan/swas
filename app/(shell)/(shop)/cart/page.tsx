@@ -32,12 +32,13 @@ export default function CartPage() {
         </p>
 
         <Link href="/shop">
-          <Button>Continue Shopping</Button>
+          <Button className="bg-button">Continue Shopping</Button>
         </Link>
 
       </section>
     )
   }
+
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-10 lg:py-16">
@@ -64,7 +65,7 @@ export default function CartPage() {
 
               <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-md overflow-hidden border">
                 <Image
-                  src={item.image}
+                  src={item?.image}
                   alt={item.name}
                   fill
                   className="object-cover"

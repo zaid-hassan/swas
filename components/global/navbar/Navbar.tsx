@@ -169,7 +169,7 @@ export default function Navbar() {
                 side="left"
                 className="
                   w-[85%] max-w-[340px]
-                  bg-[#8B1A1A] border-none
+                  bg-button border-none
                   px-8 pt-16 pb-10 overflow-y-auto
                   [&>button]:text-white/50 [&>button]:hover:text-white
                   z-[500] flex flex-col
@@ -400,7 +400,7 @@ export default function Navbar() {
               className="
                 hidden lg:inline-flex ml-2
                 px-6 py-2.5
-                bg-[#8B1A1A] hover:bg-black
+                bg-button hover:bg-black
                 text-white text-[10px] tracking-[0.2em] uppercase font-semibold
                 transition-all duration-300 whitespace-nowrap
               "

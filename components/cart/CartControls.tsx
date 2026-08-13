@@ -1,19 +1,27 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 
-import { useCartStore } from "@/lib/store/cart-store"
-import { toast } from "sonner"
-import { Product } from "@/types/products"
+import { useCartStore } from "@/lib/store/cart-store";
+import { toast } from "sonner";
+import { Product } from "@/types/products";
 
 /* -------------------------------------------------------------------------- */
 /* ADD TO CART                                                                */
 /* -------------------------------------------------------------------------- */
 
-export function AddToCartButton({ product }: { product: Product }) {
-  const addItem = useCartStore((s) => s.addItem)
+type AddToCartButtonProps = {
+  product: Product;
+  variant?: "icon" | "button";
+};
+
+export function AddToCartButton({
+  product,
+  variant = "icon",
+}: AddToCartButtonProps) {
+  const addItem = useCartStore((s) => s.addItem);
 
   function handleAdd() {
     addItem({
@@ -21,16 +29,35 @@ export function AddToCartButton({ product }: { product: Product }) {
       name: product.name,
       price: product.price,
       image: product.image ?? "",
-    })
+    });
 
-    toast.success("Added to cart")
+    toast.success("Added to cart");
+  }
+
+  if (variant === "icon") {
+    return (
+      <Button
+        type="button"
+        size="icon"
+        onClick={handleAdd}
+        aria-label={`Add ${product.name} to cart`}
+        className="rounded-full bg-button"
+      >
+        <ShoppingBag size={17} />
+      </Button>
+    );
   }
 
   return (
-    <Button className="w-fit" onClick={handleAdd}>
-      <ShoppingBag size={16} />
+    <Button
+      type="button"
+      onClick={handleAdd}
+      className="w-full bg-button rounded-full gap-2"
+    >
+      <ShoppingBag size={17} />
+      Add to Cart
     </Button>
-  )
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -38,22 +65,17 @@ export function AddToCartButton({ product }: { product: Product }) {
 /* -------------------------------------------------------------------------- */
 
 export function CartQuantityControls({ id }: { id: string }) {
-  const items = useCartStore((s) => s.items)
-  const increase = useCartStore((s) => s.increase)
-  const decrease = useCartStore((s) => s.decrease)
+  const items = useCartStore((s) => s.items);
+  const increase = useCartStore((s) => s.increase);
+  const decrease = useCartStore((s) => s.decrease);
 
-  const item = items.find((i) => i.id === id)
+  const item = items.find((i) => i.id === id);
 
-  if (!item) return null
+  if (!item) return null;
 
   return (
     <div className="flex items-center rounded-md border">
-
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => decrease(id)}
-      >
+      <Button variant="ghost" size="icon" onClick={() => decrease(id)}>
         <Minus size={16} />
       </Button>
 
@@ -61,16 +83,11 @@ export function CartQuantityControls({ id }: { id: string }) {
         {item.quantity}
       </span>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => increase(id)}
-      >
+      <Button variant="ghost" size="icon" onClick={() => increase(id)}>
         <Plus size={16} />
       </Button>
-
     </div>
-  )
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -78,22 +95,18 @@ export function CartQuantityControls({ id }: { id: string }) {
 /* -------------------------------------------------------------------------- */
 
 export function RemoveFromCartButton({ id }: { id: string }) {
-  const removeItem = useCartStore((s) => s.removeItem)
+  const removeItem = useCartStore((s) => s.removeItem);
 
   function handleRemove() {
-    removeItem(id)
-    toast.success("Item removed")
+    removeItem(id);
+    toast.success("Item removed");
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={handleRemove}
-    >
+    <Button variant="ghost" size="icon" onClick={handleRemove}>
       <Trash2 size={16} />
     </Button>
-  )
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -101,14 +114,11 @@ export function RemoveFromCartButton({ id }: { id: string }) {
 /* -------------------------------------------------------------------------- */
 
 export function CartBadge() {
-  const items = useCartStore((s) => s.items)
+  const items = useCartStore((s) => s.items);
 
-  const count = items.reduce(
-    (acc, item) => acc + item.quantity,
-    0
-  )
+  const count = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  if (!count) return null
+  if (!count) return null;
 
   return (
     <Badge
@@ -126,7 +136,7 @@ export function CartBadge() {
     >
       {count}
     </Badge>
-  )
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -134,8 +144,5 @@ export function CartBadge() {
 /* -------------------------------------------------------------------------- */
 
 export function calculateCartSubtotal(items: any[]) {
-  return items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  )
+  return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 }

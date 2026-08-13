@@ -15,7 +15,6 @@ type Product = {
 
 function CatalogCard({ item }: { item: Product }) {
   const [wished, setWished] = useState(false);
-
   return (
     <article className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <Link href={`/shop/${item.slug}`}>
@@ -36,9 +35,7 @@ function CatalogCard({ item }: { item: Product }) {
             <Heart
               size={18}
               className={
-                wished
-                  ? "fill-red-500 text-red-500"
-                  : "text-neutral-700"
+                wished ? "fill-red-500 text-red-500" : "text-neutral-700"
               }
             />
           </button>
@@ -59,7 +56,7 @@ function CatalogCard({ item }: { item: Product }) {
         </p>
 
         <Link href={`/shop/${item.slug}`}>
-          <button className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-3 text-sm text-white transition hover:opacity-90">
+          <button className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-button px-4 py-3 text-sm text-white transition hover:opacity-90">
             <ShoppingBag size={16} />
             View Product
           </button>
@@ -69,18 +66,12 @@ function CatalogCard({ item }: { item: Product }) {
   );
 }
 
-export default function CatalogueClient({
-  products,
-}: {
-  products: Product[];
-}) {
+export default function CatalogueClient({ products }: { products: Product[] }) {
   const [activeFilter, setActiveFilter] = useState("All");
 
   // Automatically create filters from product categories
   const filters = useMemo(() => {
-    const categories = Array.from(
-      new Set(products.map((p) => p.category))
-    );
+    const categories = Array.from(new Set(products.map((p) => p.category)));
 
     return ["All", ...categories];
   }, [products]);
@@ -89,9 +80,16 @@ export default function CatalogueClient({
   const filteredProducts = useMemo(() => {
     if (activeFilter === "All") return products;
 
-    return products.filter(
-      (product) => product.category === activeFilter
-    );
+    return products.filter((product) => product.category === activeFilter);
+  }, [products, activeFilter]);
+
+  const visibleProducts = useMemo(() => {
+    const filtered =
+      activeFilter === "All"
+        ? products
+        : products.filter((product) => product.category === activeFilter);
+
+    return filtered.filter((product) => product.image?.trim());
   }, [products, activeFilter]);
 
   return (
@@ -117,7 +115,7 @@ export default function CatalogueClient({
               className={`rounded-full border px-5 py-2 text-sm transition-all duration-300
                 ${
                   activeFilter === filter
-                    ? "bg-black text-white"
+                    ? "bg-button text-white"
                     : "bg-white hover:bg-neutral-100"
                 }`}
             >
@@ -127,9 +125,9 @@ export default function CatalogueClient({
         </div>
 
         {/* Products */}
-        {filteredProducts.length > 0 ? (
+        {visibleProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {filteredProducts.map((product) => (
+            {visibleProducts.map((product) => (
               <CatalogCard key={product.id} item={product} />
             ))}
           </div>

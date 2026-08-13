@@ -40,7 +40,7 @@ export function CheckoutSummary({ subtotal }: { subtotal: number }) {
         </div>
 
         <Link href="/checkout">
-          <Button className="w-full mt-4">
+          <Button className="w-full bg-button mt-4">
             Proceed to Checkout
           </Button>
         </Link>
