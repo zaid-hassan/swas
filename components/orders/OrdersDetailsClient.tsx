@@ -60,7 +60,7 @@ export default function OrderDetailsClient({ orderId }: Props) {
         const res = await fetch(`/api/tracking/${orderId}`);
 
         const data = await res.json();
-        console.log(data)
+        console.log(data);
         setTracking(data);
       } catch (err) {
         console.error("Tracking fetch failed:", err);
@@ -154,11 +154,7 @@ export default function OrderDetailsClient({ orderId }: Props) {
               </div>
 
               {trackingUrl && (
-                <a
-                  href={trackingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={trackingUrl} target="_blank" rel="noopener noreferrer">
                   <Button className="w-full">Track Package</Button>
                 </a>
               )}
@@ -169,6 +165,35 @@ export default function OrderDetailsClient({ orderId }: Props) {
               once the parcel is dispatched.
             </div>
           )}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={async () => {
+              const reason = prompt("Reason for refund");
+
+              if (!reason) return;
+
+              await fetch("/api/refunds/create", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  orderId,
+                  customer:
+                    order.customer.displayName ||
+                    order.shippingAddress.fullName,
+                  email: order.customer.email,
+                  amount: order.pricing.total,
+                  reason,
+                }),
+              });
+
+              alert("Refund request submitted.");
+            }}
+          >
+            Request Refund
+          </Button>
         </CardContent>
       </Card>
     </section>

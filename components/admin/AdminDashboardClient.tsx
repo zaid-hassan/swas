@@ -33,6 +33,18 @@ type Product = {
   mrp: number;
 };
 
+type Refund = {
+  refundId: string;
+  orderId: string;
+  customer: string;
+  email: string;
+  amount: number;
+  reason: string;
+  status: string;
+  coinsAdded: string;
+  date: string;
+};
+
 export default function AdminDashboardClient() {
   const router = useRouter();
 
@@ -40,6 +52,7 @@ export default function AdminDashboardClient() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [refunds, setRefunds] = useState<Refund[]>([]);
 
   const [activeTab, setActiveTab] = useState<"products" | "sales" | "refunds">(
     "sales"
@@ -344,15 +357,116 @@ export default function AdminDashboardClient() {
       {/* ------------------------------------------------------------------ */}
 
       {activeTab === "refunds" && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <h2 className="text-xl font-semibold mb-2">Refund Management</h2>
+        <>
+          {/* Refund Stats */}
 
-            <p className="text-muted-foreground">
-              This tab will display refund requests and their approval status.
-            </p>
-          </CardContent>
-        </Card>
+          <div className="grid md:grid-cols-3 gap-5">
+            <Card>
+              <CardContent className="p-6">
+                <Package className="mb-3 text-blue-600" />
+                <p className="text-2xl font-bold">{refunds.length}</p>
+                <p className="text-sm text-muted-foreground">Total Requests</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <Truck className="mb-3 text-orange-600" />
+                <p className="text-2xl font-bold">
+                  {refunds.filter((r) => r.status === "Pending").length}
+                </p>
+                <p className="text-sm text-muted-foreground">Pending</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <CircleCheck className="mb-3 text-green-600" />
+                <p className="text-2xl font-bold">
+                  {refunds.filter((r) => r.status === "Approved").length}
+                </p>
+                <p className="text-sm text-muted-foreground">Approved</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Refund Table */}
+
+          <Card>
+            <CardContent className="p-0 overflow-auto">
+              {refunds.length === 0 ? (
+                <div className="p-12 text-center text-muted-foreground">
+                  No refund requests yet.
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="border-b bg-muted/40">
+                    <tr className="text-left">
+                      <th className="p-4">Refund</th>
+                      <th className="p-4">Customer</th>
+                      <th className="p-4">Amount</th>
+                      <th className="p-4">Reason</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4">Coins</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {refunds.map((refund) => (
+                      <tr key={refund.refundId} className="border-b">
+                        <td className="p-4">
+                          <div>
+                            <p className="font-medium">{refund.refundId}</p>
+
+                            <p className="text-xs text-muted-foreground">
+                              {refund.date}
+                            </p>
+                          </div>
+                        </td>
+
+                        <td className="p-4">
+                          <div>
+                            <p>{refund.customer}</p>
+
+                            <p className="text-xs text-muted-foreground">
+                              {refund.email}
+                            </p>
+                          </div>
+                        </td>
+
+                        <td className="p-4 font-medium">₹{refund.amount}</td>
+
+                        <td className="p-4 max-w-[220px]">
+                          <p className="line-clamp-2">{refund.reason}</p>
+                        </td>
+
+                        <td className="p-4">
+                          <Badge
+                            variant={
+                              refund.status === "Approved"
+                                ? "default"
+                                : "outline"
+                            }
+                          >
+                            {refund.status}
+                          </Badge>
+                        </td>
+
+                        <td className="p-4">
+                          {refund.coinsAdded ? (
+                            <Badge variant="outline">Added</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+        </>
       )}
     </section>
   );
