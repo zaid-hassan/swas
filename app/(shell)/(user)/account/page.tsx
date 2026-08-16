@@ -78,19 +78,19 @@ export default function AccountPage() {
           <CardContent className="space-y-4">
             <Separator />
 
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full justify-start gap-2"
               onClick={() => router.push("/wishlist")}
             >
               <Heart size={16} />
               My Wishlist
-            </Button>
+            </Button> */}
 
             <Button
               variant="outline"
               className="w-full justify-start gap-2"
-              onClick={() => router.push("/orders")}
+              onClick={() => router.push("/account/orders")}
             >
               <Package size={16} />
               My Orders

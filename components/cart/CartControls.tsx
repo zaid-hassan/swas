@@ -25,10 +25,11 @@ export function AddToCartButton({
 
   function handleAdd() {
     addItem({
-      id: product.slug,
+      id: product.id,
       name: product.name,
       price: product.price,
       image: product.image ?? "",
+      slug: product.slug,
     });
 
     toast.success("Added to cart");

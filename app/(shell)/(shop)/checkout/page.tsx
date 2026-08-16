@@ -2,19 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { useCartStore } from "@/lib/store/cart-store";
+import { auth } from "@/lib/firebase";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import CheckoutAddressSection from "@/components/checkout/CheckoutAddressSection";
+import { Address } from "@/types/address";
 
 type ValidatedItem = {
   id: string;
@@ -26,6 +24,7 @@ type ValidatedItem = {
 
 export default function CheckoutPage() {
   const cart = useCartStore((s) => s.items);
+  const router = useRouter();
 
   const [items, setItems] = useState<ValidatedItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
@@ -33,7 +32,9 @@ export default function CheckoutPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  async function validateCart() {
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
+  async function loadCheckoutData() {
     setLoading(true);
 
     try {
@@ -47,10 +48,21 @@ export default function CheckoutPage() {
 
       const data = await res.json();
 
-      setItems(data.items);
-      setSubtotal(data.totals.subtotal);
-      setShipping(data.totals.shipping);
-      setTotal(data.totals.total);
+      if (!res.ok) {
+        throw new Error(data.error || "Checkout validation failed");
+      }
+
+      setItems(data.items ?? []);
+      setSubtotal(data.totals?.subtotal ?? 0);
+      setShipping(data.totals?.shipping ?? 0);
+      setTotal(data.totals?.total ?? 0);
+    } catch (err) {
+      console.error("Checkout validation failed:", err);
+
+      setItems([]);
+      setSubtotal(0);
+      setShipping(0);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -78,6 +90,11 @@ export default function CheckoutPage() {
   }
 
   async function handlePayment() {
+    if (!selectedAddress) {
+      alert("Please select a delivery address.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -93,9 +110,7 @@ export default function CheckoutPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          total,
-        }),
+        body: JSON.stringify({ total }),
       });
 
       if (!res.ok) {
@@ -106,33 +121,67 @@ export default function CheckoutPage() {
 
       const razorpay = new window.Razorpay({
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-
         amount: order.amount,
-
         currency: order.currency,
-
         order_id: order.id,
-
         name: "SWAS",
-
         description: "Handcrafted Silver Jewellery",
-
         image: "/logo.png",
 
-        handler(response: any) {
-          console.log("Payment Successful", response);
-
-          alert("Payment Successful (Verification comes next)");
-        },
-
         prefill: {
-          name: "",
-          email: "",
-          contact: "",
+          name: auth.currentUser?.displayName || selectedAddress.fullName,
+          email: auth.currentUser?.email || "",
+          contact: selectedAddress.phone,
         },
 
         theme: {
           color: "#8B1A1A",
+        },
+
+        handler: async function (response: any) {
+          try {
+            const verify = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ...response,
+
+                userId: auth.currentUser?.uid,
+
+                cart,
+
+                customer: {
+                  name: selectedAddress.fullName,
+                  email: auth.currentUser?.email || "",
+                  phone: selectedAddress.phone,
+                },
+
+                address: selectedAddress,
+
+                totals: {
+                  subtotal,
+                  shipping,
+                  total,
+                },
+              }),
+            });
+
+            const data = await verify.json();
+
+            if (!data.success) {
+              alert("Payment verification failed.");
+              return;
+            }
+
+            useCartStore.getState().clearCart();
+
+            router.push("/checkout/success");
+          } catch (err) {
+            console.error(err);
+            alert("Verification failed.");
+          }
         },
       });
 
@@ -147,18 +196,21 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (cart.length) {
-      validateCart();
+      loadCheckoutData();
+    } else {
+      setItems([]);
+      setSubtotal(0);
+      setShipping(0);
+      setTotal(0);
     }
   }, [cart]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-10 lg:py-16">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-10">
-        Checkout
-      </h1>
+      <h1 className="text-2xl md:text-3xl font-semibold mb-10">Checkout</h1>
 
       <div className="grid lg:grid-cols-[1fr_420px] gap-10">
-        <CheckoutAddressSection />
+        <CheckoutAddressSection onAddressSelect={setSelectedAddress} />
 
         <Card className="h-fit">
           <CardHeader>
@@ -178,9 +230,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="flex flex-col flex-1">
-                  <p className="text-sm font-medium">
-                    {item.name}
-                  </p>
+                  <p className="text-sm font-medium">{item.name}</p>
 
                   <p className="text-sm text-muted-foreground">
                     ₹{item.price} × {item.quantity}
@@ -198,12 +248,7 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between text-sm">
               <span>Shipping</span>
-
-              <span>
-                {shipping === 0
-                  ? "Free"
-                  : `₹${shipping}`}
-              </span>
+              <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
             </div>
 
             <Separator />
@@ -218,9 +263,7 @@ export default function CheckoutPage() {
               disabled={loading || total <= 0}
               onClick={handlePayment}
             >
-              {loading
-                ? "Processing..."
-                : "Continue to Payment"}
+              {loading ? "Processing..." : "Continue to Payment"}
             </Button>
           </CardContent>
         </Card>

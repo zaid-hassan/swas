@@ -10,6 +10,7 @@ export type CartItem = {
   price: number
   image: string
   quantity: number
+  slug: string
 }
 
 type CartState = {
