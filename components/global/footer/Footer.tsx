@@ -58,7 +58,7 @@ export default function Footer() {
             <h3 className="font-medium mb-4">Support</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/contact">Contact Us</Link></li>
-              <li><Link href="/faq">FAQs</Link></li>
+              {/* <li><Link href="/faq">FAQs</Link></li> */}
               <li><Link href="/shipping">Shipping Policy</Link></li>
               <li><Link href="/returns">Return Policy</Link></li>
             </ul>
