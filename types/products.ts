@@ -3,7 +3,7 @@ export type Product = {
   name: string;
   price: number;
   image: string;      // Cover image (used everywhere)
-  images: string[];   // Gallery images (used on product page)
+  images: string[];   // Gallery images 
   slug: string;
   category: string;
   description: string;
