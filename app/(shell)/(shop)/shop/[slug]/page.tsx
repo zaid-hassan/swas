@@ -1,10 +1,10 @@
 import { getProducts } from "@/lib/products";
 import Image from "next/image";
-import Link from "next/link";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/product/ProductCard";
 import { AddToCartButton } from "@/components/cart/CartControls";
+import ProductImageGallery from "@/components/product/ProductImageGallery";
 
 type Props = {
   params: {
@@ -36,23 +36,17 @@ export default async function ProductDetail({
       {/* Top Section */}
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
         {/* Image Column */}
-        <div className="relative w-full max-w-md mx-auto md:max-w-lg">
-          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-neutral-100 shadow-sm">
-            {product.image ? (
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                sizes="(max-width:768px) 100vw, 40vw"
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                No Image Available
-              </div>
-            )}
-          </div>
+        <div className="w-full max-w-md mx-auto md:max-w-lg">
+          <ProductImageGallery
+            images={
+              product.images?.length
+                ? product.images
+                : product.image
+                ? [product.image]
+                : []
+            }
+            name={product.name}
+          />
         </div>
 
         {/* Product Info */}

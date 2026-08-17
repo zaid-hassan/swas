@@ -14,6 +14,15 @@ import { Separator } from "@/components/ui/separator";
 import CheckoutAddressSection from "@/components/checkout/CheckoutAddressSection";
 import { Address } from "@/types/address";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 type ValidatedItem = {
   id: string;
   name: string;
@@ -33,6 +42,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   async function loadCheckoutData() {
     setLoading(true);
@@ -258,9 +269,147 @@ export default function CheckoutPage() {
               <span>₹{total}</span>
             </div>
 
+            {/* Terms & Conditions */}
+
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  checked={acceptedTerms}
+                  onCheckedChange={(checked) =>
+                    setAcceptedTerms(checked === true)
+                  }
+                  className="mt-1"
+                />
+
+                <div className="space-y-1">
+                  <p className="text-sm leading-5">
+                    I have read and agree to the SWAS Terms & Conditions,
+                    Privacy Policy, Shipping Policy, and Refund & Cancellation
+                    Policy.
+                  </p>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        Learn more
+                      </button>
+                    </DialogTrigger>
+
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>SWAS Terms & Policies</DialogTitle>
+                      </DialogHeader>
+
+                      <div className="space-y-6 text-sm leading-6">
+                        <section>
+                          <h3 className="font-semibold mb-2">
+                            Terms & Conditions
+                          </h3>
+
+                          <p>
+                            By placing an order with SWAS, you confirm that the
+                            information provided is accurate and agree to our
+                            Terms & Conditions. Product images are for
+                            representation, and slight variations may occur due
+                            to handcrafted finishes, lighting, or display
+                            settings.
+                          </p>
+
+                          <p className="mt-2">
+                            Prices displayed at checkout are final at the time
+                            of purchase. Orders may be cancelled by SWAS in
+                            cases such as payment failure, suspected fraud,
+                            product unavailability, or technical errors.
+                          </p>
+                        </section>
+
+                        <section>
+                          <h3 className="font-semibold mb-2">
+                            Shipping Policy
+                          </h3>
+
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Orders are shipped within India only.</li>
+                            <li>
+                              Estimated delivery: 3–5 business days after
+                              dispatch.
+                            </li>
+                            <li>Tracking details are shared after dispatch.</li>
+                            <li>
+                              Delivery timelines may vary due to courier or
+                              operational factors.
+                            </li>
+                          </ul>
+                        </section>
+
+                        <section>
+                          <h3 className="font-semibold mb-2">
+                            Refund & Cancellation
+                          </h3>
+
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Orders can be cancelled before dispatch.</li>
+                            <li>
+                              Eligible returns are accepted within 7 days of
+                              delivery.
+                            </li>
+                            <li>
+                              Returned products must be unused, unworn, and in
+                              original packaging.
+                            </li>
+                            <li>
+                              Eligible standard returns are credited to your
+                              SWAS Wallet after inspection.
+                            </li>
+                            <li>
+                              Damaged, defective, or incorrect products are
+                              reviewed for replacement or refund.
+                            </li>
+                          </ul>
+                        </section>
+
+                        <section>
+                          <h3 className="font-semibold mb-2">SWAS Wallet</h3>
+
+                          <p>
+                            Approved eligible returns are credited as SWAS
+                            Wallet Credit, which can be used for future
+                            purchases on the SWAS website. Wallet Credit is
+                            non-withdrawable except where required by law.
+                          </p>
+                        </section>
+
+                        <section>
+                          <h3 className="font-semibold mb-2">Privacy</h3>
+
+                          <p>
+                            SWAS collects only the information required to
+                            process orders, deliver products, provide customer
+                            support, and improve services. Payments are securely
+                            processed through authorized payment partners, and
+                            SWAS does not intentionally store complete card or
+                            banking credentials.
+                          </p>
+                        </section>
+
+                        <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+                          This summary is provided for convenience. Your
+                          purchase remains subject to the complete SWAS Terms &
+                          Policies available on our website.
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </div>
+
             <Button
               className="w-full mt-4 bg-button"
-              disabled={loading || total <= 0}
+              disabled={loading || total <= 0 || !acceptedTerms}
               onClick={handlePayment}
             >
               {loading ? "Processing..." : "Continue to Payment"}
