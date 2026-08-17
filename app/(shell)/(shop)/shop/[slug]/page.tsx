@@ -105,13 +105,13 @@ export default async function ProductDetail({
 
             <AddToCartButton product={product} variant="button" />
 
-            <Button
+            {/* <Button
               variant="outline"
               size="icon"
               className="rounded-full h-11 w-11"
             >
               <Heart size={16} />
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

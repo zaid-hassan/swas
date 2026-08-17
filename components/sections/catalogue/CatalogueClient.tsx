@@ -56,9 +56,9 @@ function CatalogCard({ item }: { item: Product }) {
         </p>
 
         <Link href={`/shop/${item.slug}`}>
-          <button className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-button px-4 py-3 text-sm text-white transition hover:opacity-90">
-            <ShoppingBag size={16} />
-            View Product
+          <button className="mt-3 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-button px-5 py-3.5 text-base font-medium text-white transition active:scale-[0.98] hover:opacity-90 sm:px-4 sm:py-3 sm:text-sm">
+            <ShoppingBag size={18} />
+            <span>View Product</span>
           </button>
         </Link>
       </div>
