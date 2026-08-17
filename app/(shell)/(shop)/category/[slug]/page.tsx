@@ -11,7 +11,7 @@ export default async function CategoryPage({ params }: Props) {
   const products = await getProducts();
 
   const filtered = products.filter((product) => {
-    const categorySlug = product.category
+    const categorySlug = (product?.category ?? "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
@@ -33,7 +33,7 @@ export default async function CategoryPage({ params }: Props) {
 
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {filtered.map((product) => (
-          <ProductCard key={product.slug} product={product} />
+          <ProductCard key={product?.slug} product={product} />
         ))}
       </div>
     </div>
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props) {
   const products = await getProducts();
 
   const match = products.find((product) => {
-    const categorySlug = product.category
+    const categorySlug = (product?.category ?? "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");

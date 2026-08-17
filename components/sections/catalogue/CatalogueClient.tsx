@@ -80,16 +80,16 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
   const filteredProducts = useMemo(() => {
     if (activeFilter === "All") return products;
 
-    return products.filter((product) => product.category === activeFilter);
+    return products.filter((product) => product?.category === activeFilter);
   }, [products, activeFilter]);
 
   const visibleProducts = useMemo(() => {
     const filtered =
       activeFilter === "All"
         ? products
-        : products.filter((product) => product.category === activeFilter);
+        : products.filter((product) => product?.category === activeFilter);
 
-    return filtered.filter((product) => product.image?.trim());
+    return filtered.filter((product) => product?.image?.trim());
   }, [products, activeFilter]);
 
   return (
@@ -128,7 +128,7 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
         {visibleProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {visibleProducts.map((product) => (
-              <CatalogCard key={product.id} item={product} />
+              <CatalogCard key={product?.id} item={product} />
             ))}
           </div>
         ) : (

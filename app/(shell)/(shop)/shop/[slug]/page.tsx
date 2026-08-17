@@ -28,7 +28,7 @@ export default async function ProductDetail({
   }
   // Related products (same category, exclude current)
   const relatedProducts = products
-    .filter((p: any) => p.category === product.category && p.id !== product.id)
+    .filter((p: any) => p.category === product?.category && p.id !== product?.id)
     .slice(0, 4);
 
   return (
@@ -39,13 +39,13 @@ export default async function ProductDetail({
         <div className="w-full max-w-md mx-auto md:max-w-lg">
           <ProductImageGallery
             images={
-              product.images?.length
-                ? product.images
-                : product.image
-                ? [product.image]
+              product?.images?.length
+                ? product?.images
+                : product?.image
+                ? [product?.image]
                 : []
             }
-            name={product.name}
+            name={product?.name}
           />
         </div>
 
@@ -53,45 +53,45 @@ export default async function ProductDetail({
         <div className="flex flex-col space-y-6">
           {/* Category */}
           <p className="text-xs tracking-widest uppercase text-muted-foreground">
-            {product.category}
+            {product?.category}
           </p>
 
           {/* Title */}
           <h1 className="text-2xl md:text-3xl font-heading font-semibold leading-snug">
-            {product.name}
+            {product?.name}
           </h1>
 
           {/* Price */}
-          <p className="text-xl font-semibold">₹{product.price}</p>
+          <p className="text-xl font-semibold">₹{product?.price}</p>
 
           {/* Divider */}
           <div className="h-px bg-neutral-200 w-full" />
 
           {/* Description */}
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {product.description}
+            {product?.description}
           </p>
 
           {/* Specifications Box */}
           <div className="bg-neutral-50 rounded-xl p-5 space-y-3 text-sm">
-            {product.material && (
+            {product?.material && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Material</span>
-                <span className="font-medium">{product.material}</span>
+                <span className="font-medium">{product?.material}</span>
               </div>
             )}
 
-            {product.finish && (
+            {product?.finish && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Finish</span>
-                <span className="font-medium">{product.finish}</span>
+                <span className="font-medium">{product?.finish}</span>
               </div>
             )}
 
-            {product.idealFor && (
+            {product?.idealFor && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Ideal For</span>
-                <span className="font-medium">{product.idealFor}</span>
+                <span className="font-medium">{product?.idealFor}</span>
               </div>
             )}
           </div>

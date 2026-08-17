@@ -36,7 +36,7 @@ export async function getCategories() {
   const map = new Map<string, { title: string; slug: string; image: string }>();
 
   for (const product of products) {
-    const title = product.category?.trim();
+    const title = product?.category?.trim();
 
     if (title && !map.has(title)) {
       map.set(title, {
@@ -45,7 +45,7 @@ export async function getCategories() {
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, ""),
-        image: product.image || "",
+        image: product?.image || "",
       });
     }
   }

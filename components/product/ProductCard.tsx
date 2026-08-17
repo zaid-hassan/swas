@@ -53,10 +53,10 @@ export default function ProductCard({
 
         {/* 3:4 aspect container */}
         <div className="relative w-full" style={{ paddingBottom: "133.33%" }}>
-          {product.image ? (
+          {product?.image ? (
             <Image
-              src={product.image}
-              alt={product.name}
+              src={product?.image}
+              alt={product?.name}
               fill
               sizes="(max-width:768px) 50vw, 25vw"
               className="object-cover transition-transform duration-[620ms] ease-out group-hover:scale-[1.05]"
@@ -140,7 +140,7 @@ export default function ProductCard({
         </p>
 
         {/* Name — Cormorant serif */}
-        <Link href={`/shop/${product.slug}`} className="block no-underline">
+        <Link href={`/shop/${product?.slug}`} className="block no-underline">
           <h3
             className="text-ink hover:text-maroon transition-colors duration-150 mb-2 leading-[1.22]"
             style={{
@@ -149,14 +149,14 @@ export default function ProductCard({
               fontWeight: 400,
             }}
           >
-            {product.name}
+            {product?.name}
           </h3>
         </Link>
 
         {/* Prices */}
         <div className="flex items-baseline gap-2">
           <span className="text-[14.5px] font-medium text-maroon tracking-tight">
-            ₹{product.price}
+            ₹{product?.price}
           </span>
           {oldPrice && (
             <span className="text-[11.5px] text-swas-grey line-through">

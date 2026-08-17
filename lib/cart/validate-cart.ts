@@ -28,12 +28,12 @@ export async function validateCart(
       }
 
       return {
-        id: product.id,         // Keep S No
-        slug: product.slug,     // Keep URL slug
-        name: product.name,
-        image: product.image ?? "",
+        id: product?.id,         // Keep S No
+        slug: product?.slug,     // Keep URL slug
+        name: product?.name,
+        image: product?.image ?? "",
         quantity: item.quantity,
-        price: product.price,
+        price: product?.price,
       };
     })
     .filter(Boolean);

@@ -25,11 +25,11 @@ export function AddToCartButton({
 
   function handleAdd() {
     addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image ?? "",
-      slug: product.slug,
+      id: product?.id,
+      name: product?.name,
+      price: product?.price,
+      image: product?.image ?? "",
+      slug: product?.slug,
     });
 
     toast.success("Added to cart");
@@ -41,7 +41,7 @@ export function AddToCartButton({
         type="button"
         size="icon"
         onClick={handleAdd}
-        aria-label={`Add ${product.name} to cart`}
+        aria-label={`Add ${product?.name} to cart`}
         className="rounded-full bg-button"
       >
         <ShoppingBag size={17} />

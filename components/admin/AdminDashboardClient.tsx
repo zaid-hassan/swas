@@ -187,11 +187,11 @@ export default function AdminDashboardClient() {
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 transition-opacity duration-300">
                   {paginatedProducts.map((product) => (
-                    <div key={product.serial} className="space-y-3">
+                    <div key={product?.serial} className="space-y-3">
                       <div className="relative aspect-square rounded-xl overflow-hidden border bg-muted">
                         <Image
-                          src={product.image}
-                          alt={product.name}
+                          src={product?.image}
+                          alt={product?.name}
                           fill
                           loading="lazy"
                           sizes="(max-width:768px) 50vw, 25vw"
@@ -201,18 +201,18 @@ export default function AdminDashboardClient() {
 
                       <div>
                         <p className="text-xs text-muted-foreground">
-                          #{product.serial} • {product.category}
+                          #{product?.serial} • {product?.category}
                         </p>
 
                         <h3 className="font-medium line-clamp-2">
-                          {product.name}
+                          {product?.name}
                         </h3>
 
                         <p className="text-sm text-muted-foreground">
-                          {product.material}
+                          {product?.material}
                         </p>
 
-                        <p className="font-semibold mt-1">₹{product.mrp}</p>
+                        <p className="font-semibold mt-1">₹{product?.mrp}</p>
                       </div>
                     </div>
                   ))}

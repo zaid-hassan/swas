@@ -19,7 +19,7 @@ export default async function AllProducts({
 
   if (category) {
     filteredProducts = products.filter((product: any) =>
-      product.category?.toLowerCase().includes(category.toLowerCase())
+      product?.category?.toLowerCase().includes(category.toLowerCase())
     );
   }
 
@@ -62,7 +62,7 @@ export default async function AllProducts({
         "
       >
         {paginatedProducts.map((product: any) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product?.id} product={product} />
         ))}
       </div>
 
