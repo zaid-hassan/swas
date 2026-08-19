@@ -9,23 +9,27 @@ function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
-      <StickyBanner className="bg-linear-to-b from-yellow-500 to-yellow-600" hideOnScroll={true}>
-        {/* Add content here if needed */}
-        <p className="mx-0 max-w-[90%] text-white drop-shadow-md">
-          Visit Our Store at.{" "}
-          <a href="#" className="transition duration-200 hover:underline">
-            Ranchi Jharkhand
+    <div className="min-h-screen bg-background text-foreground">
+      <StickyBanner
+        className="bg-gradient-to-r from-gold-soft via-gold-warm to-gold border-b border-gold/40 shadow-sm"
+        hideOnScroll
+      >
+        <p className="mx-auto max-w-[90%] text-center text-sm font-medium tracking-[0.08em] text-burgundy md:text-[15px]">
+          Visit Our Store in{" "}
+          <a
+            href="#"
+            className="font-semibold underline-offset-4 transition-colors duration-300 hover:text-burgundy-rich hover:underline"
+          >
+            Ranchi, Jharkhand
           </a>
         </p>
       </StickyBanner>
-      <div className="">
-        <Navbar />
-      </div>
-      {children}
-      <div className="">
-        <Footer />
-      </div>
+
+      <Navbar />
+
+      <main>{children}</main>
+
+      <Footer />
     </div>
   );
 }

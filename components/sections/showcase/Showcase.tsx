@@ -6,7 +6,7 @@ import Link from "next/link";
  * Showcase — horizontal-scroll category strip.
  * Path: components/sections/showcase/Showcase.tsx
  *
- * Premium Archway aesthetic. Dynamically calculated padding 
+ * Premium Archway aesthetic. Dynamically calculated padding
  * prevents sticking and aligns with the 1280px max-width header.
  */
 export default async function Showcase() {
@@ -15,7 +15,6 @@ export default async function Showcase() {
   // Soft warm off-white background to give an editorial feel
   return (
     <section className="w-full bg-[#FCFAFA] pt-16  max-md:pt-10 ">
-
       {/* ── Section header ──────────────────────────────────────────────── */}
       <div className="max-w-[1280px] mx-auto px-5 md:px-10">
         <div className="flex justify-between items-end flex-wrap gap-4 mb-12 max-md:mb-8 border-b border-black/5 pb-6">
@@ -45,7 +44,9 @@ export default async function Showcase() {
             "
           >
             <span>View All</span>
-            <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+            <span className="group-hover:translate-x-1 transition-transform duration-300">
+              →
+            </span>
           </Link>
         </div>
       </div>
@@ -75,7 +76,8 @@ export default async function Showcase() {
               style={{ scrollSnapAlign: "start" }}
             >
               {/* Image Container — Archway Shape */}
-              <div className="
+              <div
+                className="
                 relative overflow-hidden
                 w-[170px] h-[250px] md:w-[260px] md:h-[380px]
                 rounded-t-full rounded-b-[16px]
@@ -83,7 +85,8 @@ export default async function Showcase() {
                 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
                 /* Thin border that turns gold on hover */
                 border border-black/5 group-hover:border-[#D4AF37]/50
-              ">
+              "
+              >
                 <Image
                   src={cat.image || "/placeholder-category.jpg"}
                   alt={cat.title}
@@ -95,7 +98,7 @@ export default async function Showcase() {
                     group-hover:scale-110
                   "
                 />
-                
+
                 {/* Always-on gradient to anchor the image bottom */}
                 <div
                   aria-hidden
@@ -110,11 +113,13 @@ export default async function Showcase() {
                     flex items-center justify-center
                   "
                 >
-                  <span className="
+                  <span
+                    className="
                     text-white text-[9px] md:text-[10px] tracking-[0.25em] uppercase font-sans border border-white/40 px-5 py-2
                     translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100
                     transition-all duration-500 delay-100 ease-out backdrop-blur-sm
-                  ">
+                  "
+                  >
                     View Collection
                   </span>
                 </div>
@@ -122,16 +127,18 @@ export default async function Showcase() {
 
               {/* Label */}
               <div className="mt-5 text-center px-2">
-                <span className="
+                <span
+                  className="
                   block
                   text-[11px] md:text-[12px] tracking-[0.25em] uppercase
                   text-ink group-hover:text-gold
                   transition-colors duration-300
                   font-sans font-medium
-                ">
+                "
+                >
                   {cat.title}
                 </span>
-                
+
                 {/* Decorative dot below text */}
                 <div className="w-[3px] h-[3px] rounded-full bg-gold/40 mx-auto mt-2.5 transition-all duration-500 group-hover:scale-150 group-hover:bg-gold" />
               </div>

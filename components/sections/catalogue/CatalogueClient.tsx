@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Heart, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
 type Product = {
@@ -15,40 +15,40 @@ type Product = {
 
 function CatalogCard({ item }: { item: Product }) {
   return (
-    <article className="group overflow-hidden rounded-3xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/30 hover:shadow-2xl">
+    <article className="group bg-background">
       <Link href={`/shop/${item.slug}`} className="block">
         {/* Image */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
+        <div className="relative aspect-[3/4] overflow-hidden bg-muted">
           <img
             src={item.image || "/placeholder.webp"}
             alt={item.name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
 
-          {/* Luxury image fade */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+          {/* Bottom fade */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+          {/* Gold frame on hover */}
+          <div className="absolute inset-0 border border-transparent transition-colors duration-500 group-hover:border-gold/60" />
         </div>
 
         {/* Content */}
-        <div className="flex flex-col gap-3 p-4 sm:p-5">
-          <p className="text-center text-[10px] font-medium uppercase tracking-[0.28em] text-[#8B7355] sm:text-xs">
+        <div className="border-x border-b border-border px-3 py-4 md:px-4">
+          <p className="text-gold text-[9px] uppercase tracking-[0.3em] md:text-[10px]">
             {item.category}
           </p>
 
-          <h3 className="min-h-[44px] text-center text-sm font-medium leading-6 text-neutral-900 sm:min-h-[52px] sm:text-base">
+          <h3 className="text-foreground mt-2 min-h-[42px] text-sm leading-5 md:text-base">
             {item.name}
           </h3>
 
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-foreground text-base font-medium md:text-lg">
               {item.price ? `₹${item.price}` : "Price on Request"}
             </span>
-          </div>
 
-          <div className="pt-1">
-            <div className="flex w-full items-center justify-center gap-2 rounded-full bg-button px-4 py-3 text-sm font-medium text-white transition-all duration-300 group-hover:bg-black active:scale-[0.98] sm:py-3.5">
+            <div className="text-foreground group-hover:text-gold transition-colors duration-300">
               <ShoppingBag size={18} />
-              <span className="whitespace-nowrap">View Product</span>
             </div>
           </div>
         </div>
@@ -57,77 +57,85 @@ function CatalogCard({ item }: { item: Product }) {
   );
 }
 
-export default function CatalogueClient({ products }: { products: Product[] }) {
+export default function CatalogueClient({
+  products,
+}: {
+  products: Product[];
+}) {
   const [activeFilter, setActiveFilter] = useState("All");
 
-  // Automatically create filters from product categories
   const filters = useMemo(() => {
     const categories = Array.from(new Set(products.map((p) => p.category)));
-
     return ["All", ...categories];
   }, [products]);
-
-  // Filter products
-  const filteredProducts = useMemo(() => {
-    if (activeFilter === "All") return products;
-
-    return products.filter((product) => product?.category === activeFilter);
-  }, [products, activeFilter]);
 
   const visibleProducts = useMemo(() => {
     const filtered =
       activeFilter === "All"
         ? products
-        : products.filter((product) => product?.category === activeFilter);
+        : products.filter((p) => p.category === activeFilter);
 
-    return filtered.filter((product) => product?.image?.trim());
+    return filtered.filter((p) => p.image?.trim());
   }, [products, activeFilter]);
 
   return (
-    <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4">
-        {/* Heading */}
-        <div className="mb-10 text-center">
-          <h2 className="font-heading text-3xl font-semibold md:text-4xl">
+    <section className="bg-background py-16 md:py-20">
+      {/* Header */}
+      <div className="mx-auto max-w-[1280px] px-5 md:px-10">
+        <div className="mb-10 border-b border-border pb-6 text-center">
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <div className="h-px w-8 bg-gold/60" />
+            <p className="text-gold text-[10px] uppercase tracking-[0.35em]">
+              Featured
+            </p>
+            <div className="h-px w-8 bg-gold/60" />
+          </div>
+
+          <h2
+            className="text-foreground leading-none tracking-tight"
+            style={{
+              fontSize: "clamp(30px,4vw,48px)",
+              fontFamily: "var(--font-heading)",
+            }}
+          >
             Top Styles
           </h2>
 
-          <p className="mt-3 text-muted-foreground">
-            Explore our most loved collections
+          <p className="text-muted-foreground mt-3 text-sm md:text-base">
+            Explore our most loved collections.
           </p>
         </div>
 
         {/* Filters */}
-        <div className="mb-12 flex flex-wrap justify-center gap-3">
+        <div className="mb-10 flex flex-wrap justify-center gap-2">
           {filters.map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`rounded-full border px-5 py-2 text-sm transition-all duration-300
-                ${
-                  activeFilter === filter
-                    ? "bg-button text-white"
-                    : "bg-white hover:bg-neutral-100"
-                }`}
+              className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 md:px-5 ${
+                activeFilter === filter
+                  ? "border-button bg-button text-white"
+                  : "border-border text-foreground hover:border-gold hover:text-gold"
+              }`}
             >
               {filter}
             </button>
           ))}
         </div>
-
-        {/* Products */}
-        {visibleProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {visibleProducts.map((product) => (
-              <CatalogCard key={product?.id} item={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="py-16 text-center text-muted-foreground">
-            No products found in this category.
-          </div>
-        )}
       </div>
+
+      {/* Full-bleed Product Grid */}
+      {visibleProducts.length > 0 ? (
+        <div className="grid grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-4 py-4">
+          {visibleProducts.map((product) => (
+            <CatalogCard key={product.id} item={product} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-16 text-center text-muted-foreground">
+          No products found in this category.
+        </div>
+      )}
     </section>
   );
 }
