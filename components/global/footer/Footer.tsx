@@ -89,7 +89,7 @@ export default function Footer() {
             {/* CONTACT */}
             <div className="space-y-2 text-sm text-muted-foreground pt-4">
               <div className="flex items-center gap-2">
-                <Mail size={14} /> support@swas.com
+                <Mail size={14} /> silverswas@gmail.com
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={14} /> +91 98765 43210

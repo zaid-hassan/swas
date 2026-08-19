@@ -14,54 +14,45 @@ type Product = {
 };
 
 function CatalogCard({ item }: { item: Product }) {
-  const [wished, setWished] = useState(false);
   return (
-    <article className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <Link href={`/shop/${item.slug}`}>
+    <article className="group overflow-hidden rounded-3xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/30 hover:shadow-2xl">
+      <Link href={`/shop/${item.slug}`} className="block">
+        {/* Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
           <img
             src={item.image || "/placeholder.webp"}
             alt={item.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
 
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setWished(!wished);
-            }}
-            className="absolute right-3 top-3 rounded-full bg-white p-2 shadow-md transition hover:scale-110"
-          >
-            <Heart
-              size={18}
-              className={
-                wished ? "fill-red-500 text-red-500" : "text-neutral-700"
-              }
-            />
-          </button>
+          {/* Luxury image fade */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col gap-3 p-4 sm:p-5">
+          <p className="text-center text-[10px] font-medium uppercase tracking-[0.28em] text-[#8B7355] sm:text-xs">
+            {item.category}
+          </p>
+
+          <h3 className="min-h-[44px] text-center text-sm font-medium leading-6 text-neutral-900 sm:min-h-[52px] sm:text-base">
+            {item.name}
+          </h3>
+
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">
+              {item.price ? `₹${item.price}` : "Price on Request"}
+            </span>
+          </div>
+
+          <div className="pt-1">
+            <div className="flex w-full items-center justify-center gap-2 rounded-full bg-button px-4 py-3 text-sm font-medium text-white transition-all duration-300 group-hover:bg-black active:scale-[0.98] sm:py-3.5">
+              <ShoppingBag size={18} />
+              <span className="whitespace-nowrap">View Product</span>
+            </div>
+          </div>
         </div>
       </Link>
-
-      <div className="space-y-3 p-5 text-center">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          {item.category}
-        </p>
-
-        <h3 className="line-clamp-2 min-h-[48px] text-sm font-medium md:text-base">
-          {item.name}
-        </h3>
-
-        <p className="text-lg font-semibold">
-          {item.price ? `₹${item.price}` : "Price on Request"}
-        </p>
-
-        <Link href={`/shop/${item.slug}`}>
-          <button className="mt-3 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-button px-5 py-3.5 text-base font-medium text-white transition active:scale-[0.98] hover:opacity-90 sm:px-4 sm:py-3 sm:text-sm">
-            <ShoppingBag size={18} />
-            <span>View Product</span>
-          </button>
-        </Link>
-      </div>
     </article>
   );
 }

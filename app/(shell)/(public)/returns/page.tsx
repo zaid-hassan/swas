@@ -39,7 +39,7 @@ export default function ReturnsPage() {
           <section>
             <h2 className="mb-2 text-2xl text-black">Refunds</h2>
             <p>
-              Approved refunds are processed through the original payment method
+              Approved refunds are processed through the SWAS coins
               after inspection of the returned item.
             </p>
           </section>
