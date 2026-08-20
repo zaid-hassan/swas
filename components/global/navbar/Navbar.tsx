@@ -312,12 +312,22 @@ export default function Navbar() {
           <div className="flex items-center gap-1 md:gap-2">
             <Link
               href="/account"
-              className="text-cream hover:bg-gold/10 hover:text-gold flex h-10 w-10 items-center justify-center rounded-full transition-all"
+              className="
+    flex h-11 w-11 items-center justify-center
+    rounded-full
+    border border-gold/50
+    text-cream
+    transition-all duration-300
+    hover:border-gold
+    hover:bg-gold/10
+    hover:text-gold
+    hover:shadow-[0_0_12px_rgba(200,149,42,0.25)]
+  "
             >
               {loading ? (
-                <div className="bg-gold/20 h-6 w-6 animate-pulse rounded-full" />
+                <div className="h-6 w-6 animate-pulse rounded-full bg-gold/20" />
               ) : user ? (
-                <Avatar className="h-7 w-7">
+                <Avatar className="h-7 w-7 border border-gold/30">
                   {user.photoURL && (
                     <AvatarImage
                       src={user.photoURL}
@@ -325,7 +335,7 @@ export default function Navbar() {
                     />
                   )}
 
-                  <AvatarFallback className="bg-gold text-burgundy text-[10px]">
+                  <AvatarFallback className="bg-gold text-burgundy text-[10px] font-semibold">
                     {user.displayName
                       ? user.displayName
                           .split(" ")
