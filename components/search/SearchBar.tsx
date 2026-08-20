@@ -23,7 +23,7 @@ export default function SearchBar() {
       <label
         className="
           flex w-full items-center gap-3
-          bg-burgundy-rich
+          bg-burgundy-rich rounded-full
           px-4 py-1.5
           cursor-text
         "
@@ -31,7 +31,7 @@ export default function SearchBar() {
         <Search
           size={16}
           strokeWidth={1.5}
-          className="shrink-0 text-gold-soft transition-colors duration-300"
+          className="shrink-0 text-gold-warm transition-colors duration-300"
         />
 
         <input

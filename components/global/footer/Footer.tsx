@@ -1,9 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 import {
   Instagram,
@@ -12,113 +11,236 @@ import {
   Mail,
   Phone,
   MapPin,
-} from "lucide-react"
+} from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-muted/40 border-t mt-20">
-
-      <div className="max-w-7xl mx-auto px-4 py-14">
-
+    <footer className="mt-20 border-t border-gold/20 bg-burgundy text-cream">
+      <div className="mx-auto max-w-[1280px] px-5 py-14 md:px-10">
         {/* TOP GRID */}
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
-
           {/* BRAND */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold">
+          <div className="space-y-5">
+            <h2
+              className="text-gold text-4xl tracking-[0.08em]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               SWAS
             </h2>
-            <p className="text-sm text-muted-foreground">
+
+            <p className="text-sm leading-7 text-cream/75">
               Timeless handcrafted silver jewellery designed for elegance,
               tradition, and everyday luxury.
             </p>
 
             {/* SOCIAL */}
-            <div className="flex gap-3 pt-2">
-              <Instagram size={18} className="cursor-pointer hover:text-black transition" />
-              <Facebook size={18} className="cursor-pointer hover:text-black transition" />
-              <Twitter size={18} className="cursor-pointer hover:text-black transition" />
+            <div className="flex gap-4 pt-2">
+              {[
+                { Icon: Instagram, href: "#" },
+                { Icon: Facebook, href: "#" },
+                { Icon: Twitter, href: "#" },
+              ].map(({ Icon, href }, i) => (
+                <Link
+                  key={i}
+                  href={href}
+                  className="text-cream/70 transition hover:text-gold"
+                >
+                  <Icon size={19} strokeWidth={1.7} />
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* SHOP */}
           <div>
-            <h3 className="font-medium mb-4">Shop</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/shop">All Products</Link></li>
-              <li><Link href="/category/mangalsutra">Mangalsutra</Link></li>
-              <li><Link href="/category/earrings">Earrings</Link></li>
-              <li><Link href="/category/ring">Rings</Link></li>
-              <li><Link href="/bestseller">Best Sellers</Link></li>
+            <h3 className="mb-5 text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+              Shop
+            </h3>
+
+            <ul className="space-y-3 text-sm text-cream/70">
+              <li>
+                <Link href="/shop" className="hover:text-gold transition">
+                  All Products
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/category/mangalsutra"
+                  className="hover:text-gold transition"
+                >
+                  Mangalsutra
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/category/earrings"
+                  className="hover:text-gold transition"
+                >
+                  Earrings
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/category/ring"
+                  className="hover:text-gold transition"
+                >
+                  Rings
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/bestseller"
+                  className="hover:text-gold transition"
+                >
+                  Best Sellers
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* SUPPORT */}
           <div>
-            <h3 className="font-medium mb-4">Support</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/contact">Contact Us</Link></li>
-              {/* <li><Link href="/faq">FAQs</Link></li> */}
-              <li><Link href="/shipping">Shipping Policy</Link></li>
-              <li><Link href="/returns">Return Policy</Link></li>
+            <h3 className="mb-5 text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+              Support
+            </h3>
+
+            <ul className="space-y-3 text-sm text-cream/70">
+              <li>
+                <Link href="/contact" className="hover:text-gold transition">
+                  Contact Us
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/shipping" className="hover:text-gold transition">
+                  Shipping Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/returns" className="hover:text-gold transition">
+                  Return Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* COMPANY */}
           <div>
-            <h3 className="font-medium mb-4">Company</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/about">About Us</Link></li>
-              <li><Link href="/privacy">Privacy Policy</Link></li>
-              <li><Link href="/terms">Terms & Conditions</Link></li>
+            <h3 className="mb-5 text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+              Company
+            </h3>
+
+            <ul className="space-y-3 text-sm text-cream/70">
+              <li>
+                <Link href="/about" className="hover:text-gold transition">
+                  About Us
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/privacy" className="hover:text-gold transition">
+                  Privacy Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/terms" className="hover:text-gold transition">
+                  Terms & Conditions
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* NEWSLETTER */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Stay Updated</h3>
-            <p className="text-sm text-muted-foreground">
-              Get updates on new collections and exclusive offers.
-            </p>
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+                Stay Updated
+              </h3>
 
-            <div className="flex gap-2">
-              <Input placeholder="Your email" />
-              <Button>Join</Button>
+              <p className="mt-3 text-sm leading-7 text-cream/70">
+                Get updates on new collections and exclusive offers.
+              </p>
             </div>
+
+            <form className="flex gap-2">
+              <Input
+                placeholder="Your email"
+                className="
+                  border-gold/25
+                  bg-burgundy-light
+                  text-cream
+                  placeholder:text-cream/40
+                  focus:border-gold
+                  focus:ring-0
+                "
+              />
+
+              <button
+                type="submit"
+                className="
+                  bg-gold hover:bg-gold-light
+                  px-5
+                  text-[10px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.18em]
+                  text-burgundy
+                  transition
+                "
+              >
+                Join
+              </button>
+            </form>
 
             {/* CONTACT */}
-            <div className="space-y-2 text-sm text-muted-foreground pt-4">
-              <div className="flex items-center gap-2">
-                <Mail size={14} /> silverswas@gmail.com
+            <div className="space-y-3 pt-2 text-sm text-cream/70">
+              <div className="flex items-center gap-3">
+                <Mail size={15} className="text-gold" />
+                <span>silverswas@gmail.com</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone size={14} /> +91 98765 43210
+
+              <div className="flex items-center gap-3">
+                <Phone size={15} className="text-gold" />
+                <span>+91 98765 43210</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={14} /> India
+
+              <div className="flex items-center gap-3">
+                <MapPin size={15} className="text-gold" />
+                <span>Ranchi, Jharkhand, India</span>
               </div>
             </div>
-
           </div>
-
         </div>
 
-        <Separator className="my-10" />
+        <Separator className="my-10 bg-gold/20" />
 
         {/* BOTTOM BAR */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
+          <p className="text-cream/60">
+            © {new Date().getFullYear()} SWAS. All rights reserved.
+          </p>
 
-          <p>© {new Date().getFullYear()} SWAS. All rights reserved.</p>
+          <div className="flex gap-6 text-cream/70">
+            <Link href="/privacy" className="hover:text-gold transition">
+              Privacy
+            </Link>
 
-          <div className="flex gap-4">
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/returns">Returns</Link>
+            <Link href="/terms" className="hover:text-gold transition">
+              Terms
+            </Link>
+
+            <Link href="/returns" className="hover:text-gold transition">
+              Returns
+            </Link>
           </div>
-
         </div>
-
       </div>
     </footer>
-  )
+  );
 }

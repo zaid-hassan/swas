@@ -159,7 +159,7 @@ export default function Navbar() {
 
               <SheetContent
                 side="left"
-                className="border-r border-gold/20 bg-burgundy px-8 pt-16 pb-10"
+                className="border-r border-gold/20 bg-burgundy px-8 pt-16 pb-10 overflow-y-auto"
               >
                 <SheetHeader className="mb-10 text-left">
                   <SheetTitle
@@ -192,7 +192,7 @@ export default function Navbar() {
                         <div className="mt-2 flex flex-col gap-5 pl-2">
                           {menu.columns.map((col, i) => (
                             <div key={i}>
-                              <p className="text-gold-soft mb-2 text-[9px] uppercase tracking-[0.25em]">
+                              <p className="text-gold-soft font-bold mb-2 text-md uppercase tracking-[0.25em]">
                                 {col.heading}
                               </p>
 
@@ -273,7 +273,7 @@ export default function Navbar() {
                       >
                         {menu.columns.map((col, i) => (
                           <div key={i}>
-                            <p className="text-gold mb-5 text-[10px] uppercase tracking-[0.25em]">
+                            <p className="text-gold mb-5 text-sm font-bold uppercase tracking-[0.25em]">
                               {col.heading}
                             </p>
 
@@ -303,7 +303,7 @@ export default function Navbar() {
 
           {/* SEARCH */}
           <div className="hidden max-w-[320px] flex-1 md:block">
-            <div className="rounded-full border border-gold/20 bg-burgundy-rich px-2 py-0.5">
+            <div className="rounded-full border border-gold/70 bg-burgundy-rich px-2 py-0.5">
               <SearchBar />
             </div>
           </div>
@@ -356,7 +356,7 @@ export default function Navbar() {
 
       {/* MOBILE SEARCH */}
       <div className="border-gold/10 bg-burgundy border-t px-5 py-3 md:hidden">
-        <div className="rounded-full border border-gold/20 bg-burgundy-rich px-2 py-0.5">
+        <div className="rounded-full border border-gold/70 bg-burgundy-rich px-2 py-0.5">
           <SearchBar />
         </div>
       </div>

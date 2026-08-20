@@ -230,7 +230,7 @@ export function CartDrawer() {
               Your Cart
             </SheetTitle>
 
-            <span className="text-[9px] font-medium uppercase tracking-[0.22em] text-burgundy/60">
+            <span className="text-sm font-medium uppercase tracking-[0.22em] text-burgundy/60">
               {items.length} {items.length === 1 ? "Item" : "Items"}
             </span>
           </div>

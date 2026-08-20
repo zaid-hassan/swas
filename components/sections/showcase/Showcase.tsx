@@ -26,7 +26,7 @@ export default async function Showcase() {
             <div className="mb-3 flex items-center gap-3">
               <span className="h-px w-7 bg-gold/70" />
 
-              <p className="text-gold text-[9px] font-medium uppercase tracking-[0.35em] md:text-[10px]">
+              <p className="text-gold text-xs font-medium uppercase tracking-[0.35em] md:text-[15px]">
                 Our Collections
               </p>
             </div>
@@ -276,12 +276,12 @@ export default async function Showcase() {
                     text-foreground
                     group-hover:text-gold
                     block
-                    text-[9px]
+                    text-xs
+                    md:text-md
                     font-medium
                     uppercase
                     tracking-[0.25em]
                     transition-colors duration-300
-                    md:text-[10px]
                   "
                 >
                   {cat.title}

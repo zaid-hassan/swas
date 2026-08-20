@@ -408,7 +408,7 @@ export default function CheckoutPage() {
             </div>
 
             <Button
-              className="w-full mt-4 bg-button"
+              className="w-full mt-4 bg-gold text-burgundy hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading || total <= 0 || !acceptedTerms}
               onClick={handlePayment}
             >
