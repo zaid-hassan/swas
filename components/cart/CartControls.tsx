@@ -25,14 +25,14 @@ export function AddToCartButton({
 
   function handleAdd() {
     addItem({
-      id: product?.id,
-      name: product?.name,
-      price: product?.price,
-      image: product?.image ?? "",
-      slug: product?.slug,
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image ?? "",
+      slug: product.slug,
     });
 
-    toast.success("Added to cart");
+    toast.success("Added to your collection");
   }
 
   if (variant === "icon") {
@@ -41,10 +41,20 @@ export function AddToCartButton({
         type="button"
         size="icon"
         onClick={handleAdd}
-        aria-label={`Add ${product?.name} to cart`}
-        className="rounded-full bg-button"
+        aria-label={`Add ${product.name} to cart`}
+        className="
+          h-11 w-11
+          border border-burgundy
+          bg-button
+          text-cream
+          shadow-sm
+          transition-all duration-300
+          hover:bg-burgundy-rich
+          hover:border-gold
+          active:scale-95
+        "
       >
-        <ShoppingBag size={17} />
+        <ShoppingBag size={18} strokeWidth={1.5} />
       </Button>
     );
   }
@@ -53,9 +63,21 @@ export function AddToCartButton({
     <Button
       type="button"
       onClick={handleAdd}
-      className="w-full bg-button rounded-full gap-2"
+      className="
+        bg-button hover:bg-burgundy-rich
+        h-12 w-full
+        gap-2
+        border border-burgundy
+        text-cream
+        text-[11px]
+        font-semibold
+        uppercase
+        tracking-[0.18em]
+        transition-all duration-300
+        hover:border-gold
+      "
     >
-      <ShoppingBag size={17} />
+      <ShoppingBag size={18} strokeWidth={1.5} />
       Add to Cart
     </Button>
   );
@@ -75,18 +97,38 @@ export function CartQuantityControls({ id }: { id: string }) {
   if (!item) return null;
 
   return (
-    <div className="flex items-center rounded-md border">
-      <Button variant="ghost" size="icon" onClick={() => decrease(id)}>
-        <Minus size={16} />
-      </Button>
+    <div className="flex items-center border border-border bg-background">
+      <button
+        type="button"
+        onClick={() => decrease(id)}
+        className="
+          flex h-9 w-9 items-center justify-center
+          text-burgundy
+          transition-colors duration-200
+          hover:bg-warm
+          hover:text-gold
+        "
+      >
+        <Minus size={15} strokeWidth={1.7} />
+      </button>
 
-      <span className="w-10 text-center text-sm font-medium">
+      <span className="text-burgundy w-10 text-center text-sm font-medium">
         {item.quantity}
       </span>
 
-      <Button variant="ghost" size="icon" onClick={() => increase(id)}>
-        <Plus size={16} />
-      </Button>
+      <button
+        type="button"
+        onClick={() => increase(id)}
+        className="
+          flex h-9 w-9 items-center justify-center
+          text-burgundy
+          transition-colors duration-200
+          hover:bg-warm
+          hover:text-gold
+        "
+      >
+        <Plus size={15} strokeWidth={1.7} />
+      </button>
     </div>
   );
 }
@@ -100,13 +142,24 @@ export function RemoveFromCartButton({ id }: { id: string }) {
 
   function handleRemove() {
     removeItem(id);
-    toast.success("Item removed");
+    toast.success("Removed from your collection");
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={handleRemove}>
-      <Trash2 size={16} />
-    </Button>
+    <button
+      type="button"
+      onClick={handleRemove}
+      className="
+        flex h-9 w-9 items-center justify-center
+        text-burgundy/55
+        transition-all duration-200
+        hover:bg-warm
+        hover:text-burgundy
+      "
+      aria-label="Remove item"
+    >
+      <Trash2 size={17} strokeWidth={1.6} />
+    </button>
   );
 }
 
@@ -124,15 +177,21 @@ export function CartBadge() {
   return (
     <Badge
       className="
-      absolute
-      -top-2
-      -right-2
-      h-5
-      min-w-5
-      flex
-      items-center
-      justify-center
-      text-xs
+        absolute
+        -right-2
+        -top-2
+        flex
+        h-5
+        min-w-5
+        items-center
+        justify-center
+        border border-gold
+        bg-gold
+        px-1.5
+        text-[10px]
+        font-bold
+        text-burgundy
+        shadow-sm
       "
     >
       {count}

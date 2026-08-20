@@ -14,6 +14,7 @@ import { CheckoutSummary } from "@/components/cart/CheckoutSummary"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { ArrowRight, ArrowUpRight } from "lucide-react"
 
 export default function CartPage() {
   const items = useCartStore((s) => s.items)
@@ -31,8 +32,8 @@ export default function CartPage() {
           Looks like you haven't added anything yet.
         </p>
 
-        <Link href="/shop">
-          <Button className="bg-button">Continue Shopping</Button>
+        <Link href="/shop" className="group inline-flex items-center gap-2 transition duration-300 ease-in-out">
+          <Button className="bg-burgundy text-gold-highlight">Continue Shopping <ArrowUpRight className="md:hidden group-hover:block" /></Button>
         </Link>
 
       </section>

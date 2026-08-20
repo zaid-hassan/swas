@@ -21,7 +21,7 @@ export default function CheckoutSuccessPage() {
 
       <div className="mt-10 flex justify-center gap-4">
         <Link href="/shop">
-          <Button>Continue Shopping</Button>
+          <Button className="text-gold">Continue Shopping</Button>
         </Link>
 
         <Link href="/account/orders">

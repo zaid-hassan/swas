@@ -38,7 +38,7 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   display: "swap",
 });
- 
+
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500"],
@@ -59,8 +59,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
       <body className="antialiased">
-        <AuthProvider>{children}
-          <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster
+            theme="light"
+            richColors
+            toastOptions={{
+              style: {
+                background: "var(--color-card)",
+                color: "var(--color-burgundy)",
+                border: "1px solid var(--color-border)",
+              },
+            }}
+          />
         </AuthProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ShoppingBag } from "lucide-react";
+import { ArrowUpRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
 type Product = {
@@ -48,7 +48,7 @@ function CatalogCard({ item }: { item: Product }) {
             </span>
 
             <div className="text-foreground group-hover:text-gold transition-colors duration-300">
-              <ShoppingBag size={18} />
+              <ArrowUpRight size={18} />
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function CatalogueClient({
 
       {/* Full-bleed Product Grid */}
       {visibleProducts.length > 0 ? (
-        <div className="grid grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-4 py-4">
+        <div className="grid grid-cols-2 gap-x-4 md:gap-x-8 gap-y-8 md:grid-cols-5 px-4">
           {visibleProducts.map((product) => (
             <CatalogCard key={product.id} item={product} />
           ))}

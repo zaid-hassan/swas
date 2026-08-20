@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { CircleUser, Heart, Menu, X } from "lucide-react";
+import { CircleUser, Menu } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SearchBar from "@/components/search/SearchBar";
@@ -33,7 +32,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-/* ─── Data ───────────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────── */
+
 const megaMenu = {
   Shop: {
     columns: [
@@ -70,6 +70,7 @@ const megaMenu = {
       },
     ],
   },
+
   Wedding: {
     columns: [
       {
@@ -82,11 +83,16 @@ const megaMenu = {
       },
     ],
   },
+
   Men: {
     columns: [
-      { heading: "Men's Collection", items: ["Rings", "Bracelets", "Chains"] },
+      {
+        heading: "Men's Collection",
+        items: ["Rings", "Bracelets", "Chains"],
+      },
     ],
   },
+
   Custom: {
     columns: [
       {
@@ -104,7 +110,6 @@ const quickLinks = [
 ];
 
 const categoryLinks: Record<string, string> = {
-  // Jewellery
   Anklets: "/shop?category=anklet",
   Earrings: "/shop?category=earrings",
   Bracelets: "/shop?category=bracelet",
@@ -113,121 +118,95 @@ const categoryLinks: Record<string, string> = {
   "Toe Rings": "/shop?category=toe-ring",
   "Nose Pins": "/shop?category=nose-pin",
 
-  // Sets & Wedding
   Mangalsutra: "/shop?category=mangalsutra",
   "Jewellery Sets": "/shop?category=jewellery-set",
   "Waist Chains": "/shop?category=waist-chain",
   "Pola Bangles": "/shop?category=pola-bangles",
-  "Sindoor Box": "/shop?category=sindoor-box",
-  "Paan Patta Supari": "/shop?category=paan-patta-supari",
 
-  // Home
   Accessories: "/shop?category=accessories",
   Utensils: "/shop?category=utensils",
   "Murtis & Decor": "/shop?category=murtis-decor",
+  "Sindoor Box": "/shop?category=sindoor-box",
+  "Paan Patta Supari": "/shop?category=paan-patta-supari",
 
-  // Men
-  "Men's Rings": "/shop?category=ring",
-  "Men's Bracelets": "/shop?category=bracelet",
-  "Men's Chains": "/shop?category=chain",
-
-  // Custom
   "Custom Jewellery": "/contact",
   "Custom Pendants": "/contact",
 };
 
-/* ─── Serif CSS var shorthand ────────────────────────────────────────────── */
 const H: React.CSSProperties = {
-  fontFamily: "var(--font-cormorant), Georgia, serif",
+  fontFamily: "var(--font-heading)",
 };
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ───────────────────────────────────────────────────────────── */
+
 export default function Navbar() {
   const { user, loading } = useAuth();
 
   return (
-    // Changed z-[300] to z-40 so the Sheet overlay (z-50) covers it properly
-    <div className="sticky top-0 z-40 bg-white shadow-sm">
-      {/* ── MAIN NAV BAR ─────────────────────────────────────────────────── */}
-      <nav className="border-b border-black/5">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-10 h-[64px] md:h-[72px] flex items-center justify-between gap-8">
-          {/* LEFT: hamburger · logo · desktop mega-nav */}
-          <div className="flex items-center gap-6 md:gap-10">
-            {/* MOBILE HAMBURGER */}
+    <div className="sticky top-0 z-40 border-b border-gold/15 bg-burgundy backdrop-blur-xl">
+      {/* DESKTOP + MOBILE NAV */}
+      <nav className="bg-burgundy">
+        <div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between gap-6 px-5 md:h-[78px] md:px-10">
+          {/* LEFT */}
+          <div className="flex items-center gap-5 md:gap-10">
+            {/* MOBILE MENU */}
             <Sheet>
               <SheetTrigger asChild>
-                <button
-                  aria-label="Open menu"
-                  className="flex md:hidden flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer shrink-0 text-ink"
-                >
-                  <Menu strokeWidth={1.5} size={26} />
+                <button className="text-cream hover:text-gold flex h-9 w-9 items-center justify-center transition-colors md:hidden">
+                  <Menu size={26} strokeWidth={1.6} />
                 </button>
               </SheetTrigger>
 
-              {/* ── MOBILE DRAWER ──────────────────────────────────────── */}
               <SheetContent
                 side="left"
-                className="
-                  w-[85%] max-w-[340px]
-                  bg-button border-none
-                  px-8 pt-16 pb-10 overflow-y-auto
-                  [&>button]:text-white/50 [&>button]:hover:text-white
-                  z-[500] flex flex-col
-                "
+                className="border-r border-gold/20 bg-burgundy px-8 pt-16 pb-10"
               >
                 <SheetHeader className="mb-10 text-left">
                   <SheetTitle
-                    className="text-[32px] text-[#D4AF37] tracking-[0.15em] font-medium leading-none"
                     style={H}
+                    className="text-gold text-[34px] font-semibold tracking-[0.22em]"
                   >
                     SWAS
                   </SheetTitle>
-                  <SheetDescription className="text-[10px] tracking-[0.25em] uppercase text-white/40 mt-2 font-sans">
+
+                  <SheetDescription className="text-gold-soft/60 text-[10px] uppercase tracking-[0.28em]">
                     By Swastika · Ranchi
                   </SheetDescription>
                 </SheetHeader>
 
-                {/* Accordion mega categories */}
                 <Accordion type="single" collapsible className="w-full">
                   {Object.entries(megaMenu).map(([title, menu]) => (
                     <AccordionItem
                       key={title}
                       value={title}
-                      className="border-b border-white/10"
+                      className="border-b border-gold/10"
                     >
                       <AccordionTrigger
                         style={H}
-                        className="
-                          py-4 text-[24px] font-normal italic
-                          text-white/90 hover:text-[#D4AF37] hover:no-underline
-                          [&>svg]:text-[#D4AF37] [&>svg]:opacity-50
-                          transition-colors
-                        "
+                        className="text-cream hover:text-gold py-4 text-[24px] font-normal italic hover:no-underline"
                       >
                         {title}
                       </AccordionTrigger>
+
                       <AccordionContent className="pb-5">
-                        <div className="pl-2 flex flex-col gap-5 mt-2">
-                          {menu.columns.map((col, idx) => (
-                            <div key={idx} className="flex flex-col gap-2">
-                              <span className="text-[9px] tracking-[0.2em] uppercase text-[#D4AF37]/70 font-sans mb-1">
+                        <div className="mt-2 flex flex-col gap-5 pl-2">
+                          {menu.columns.map((col, i) => (
+                            <div key={i}>
+                              <p className="text-gold-soft mb-2 text-[9px] uppercase tracking-[0.25em]">
                                 {col.heading}
-                              </span>
-                              {col.items.map((item) => (
-                                <Link
-                                  key={item}
-                                  href={categoryLinks[item] || "/shop"}
-                                  className="
-    text-[14px]
-    text-white/60
-    hover:text-white
-    transition-colors
-    py-0.5
-  "
-                                >
-                                  {item}
-                                </Link>
-                              ))}
+                              </p>
+
+                              <div className="flex flex-col gap-2">
+                                {col.items.map((item) => (
+                                  <Link
+                                    key={item}
+                                    href={categoryLinks[item] || "/shop"}
+                                    className="text-cream/70 hover:text-gold text-[14px] transition-colors"
+                                  >
+                                    {item}
+                                  </Link>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -236,36 +215,27 @@ export default function Navbar() {
                   ))}
                 </Accordion>
 
-                {/* Quick links */}
                 <div className="mt-8 flex flex-col gap-4">
-                  <span className="text-[9px] tracking-[0.2em] uppercase text-[#D4AF37]/70 font-sans mb-1">
+                  <p className="text-gold-soft text-[9px] uppercase tracking-[0.25em]">
                     Explore
-                  </span>
-                  {quickLinks.map(({ label, href }) => (
+                  </p>
+
+                  {quickLinks.map((link) => (
                     <Link
-                      key={label}
-                      href={href}
-                      className="text-[15px] text-white/80 hover:text-white transition-colors flex justify-between items-center"
+                      key={link.label}
+                      href={link.href}
+                      className="text-cream/80 hover:text-gold flex justify-between text-[15px] transition-colors"
                     >
-                      {label}
-                      <span className="text-[12px] text-[#D4AF37]/50">→</span>
+                      {link.label}
+                      <span>→</span>
                     </Link>
                   ))}
                 </div>
 
-                {/* Bottom WhatsApp CTA */}
                 <div className="mt-auto pt-10">
                   <a
                     href="https://wa.me/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="
-                      flex items-center justify-center gap-2
-                      w-full py-3.5 bg-white/5 border border-white/10
-                      text-[11px] tracking-[0.2em] uppercase text-[#D4AF37]
-                      hover:bg-[#D4AF37] hover:text-[#8B1A1A] hover:border-[#D4AF37]
-                      transition-all duration-300 font-sans font-medium
-                    "
+                    className="bg-gold text-burgundy hover:bg-gold-highlight block w-full rounded-full py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-all"
                   >
                     WhatsApp Us
                   </a>
@@ -277,57 +247,43 @@ export default function Navbar() {
             <Link
               href="/"
               style={H}
-              className="text-[28px] md:text-[32px] tracking-[0.2em] text-ink font-semibold leading-none shrink-0 hover:text-maroon transition-colors duration-300"
+              className="text-gold hover:text-gold-highlight text-[30px] font-semibold tracking-[0.22em] transition-colors md:text-[34px]"
             >
               SWAS
             </Link>
 
-            {/* DESKTOP MEGA NAV (Cleaned up: Only main categories) */}
-            <NavigationMenu className="hidden md:flex ml-4">
-              <NavigationMenuList className="gap-2">
+            {/* DESKTOP MENU */}
+            <NavigationMenu className="ml-4 hidden md:flex">
+              <NavigationMenuList className="gap-1">
                 {Object.entries(megaMenu).map(([title, menu]) => (
                   <NavigationMenuItem key={title}>
-                    <NavigationMenuTrigger
-                      className="
-                        px-3 py-2
-                        text-[11px] font-medium tracking-[0.18em] uppercase
-                        text-ink/80 hover:text-maroon
-                        bg-transparent hover:bg-transparent
-                        data-[state=open]:bg-transparent data-[state=open]:text-maroon
-                        transition-colors duration-300
-                      "
-                    >
+                    <NavigationMenuTrigger className="text-cream/80 hover:text-gold data-[state=open]:text-gold bg-transparent px-3 py-2 text-[11px] uppercase tracking-[0.22em] hover:bg-transparent data-[state=open]:bg-transparent">
                       {title}
                     </NavigationMenuTrigger>
 
                     <NavigationMenuContent>
                       <div
-                        className="p-10 bg-white border border-black/5 shadow-2xl"
+                        className="border-gold/15 bg-burgundy border p-10 shadow-2xl"
                         style={{
                           width: `${Math.max(menu.columns.length, 2) * 240}px`,
                           display: "grid",
-                          gridTemplateColumns: `repeat(${menu.columns.length}, 1fr)`,
+                          gridTemplateColumns: `repeat(${menu.columns.length},1fr)`,
                           gap: "3rem",
                         }}
                       >
-                        {menu.columns.map((col, idx) => (
-                          <div key={idx}>
-                            <p className="mb-5 text-[10px] tracking-[0.25em] uppercase text-gold font-semibold">
+                        {menu.columns.map((col, i) => (
+                          <div key={i}>
+                            <p className="text-gold mb-5 text-[10px] uppercase tracking-[0.25em]">
                               {col.heading}
                             </p>
+
                             <ul className="space-y-3">
                               {col.items.map((item) => (
                                 <li key={item}>
                                   <NavigationMenuLink asChild>
                                     <Link
                                       href={categoryLinks[item] || "/shop"}
-                                      className="
-    text-[13px]
-    text-ink/70
-    hover:text-maroon
-    transition-colors
-    duration-200
-  "
+                                      className="text-cream/70 hover:text-gold text-[13px] transition-colors"
                                     >
                                       {item}
                                     </Link>
@@ -345,29 +301,31 @@ export default function Navbar() {
             </NavigationMenu>
           </div>
 
-          {/* CENTER: search — desktop only */}
-          <div className="hidden md:block flex-1 max-w-[320px]">
-            <SearchBar />
+          {/* SEARCH */}
+          <div className="hidden max-w-[320px] flex-1 md:block">
+            <div className="rounded-full border border-gold/20 bg-burgundy-rich px-2 py-0.5">
+              <SearchBar />
+            </div>
           </div>
 
-          {/* RIGHT: icons + CTA */}
+          {/* RIGHT */}
           <div className="flex items-center gap-1 md:gap-2">
             <Link
               href="/account"
-              aria-label="Account"
-              className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300"
+              className="text-cream hover:bg-gold/10 hover:text-gold flex h-10 w-10 items-center justify-center rounded-full transition-all"
             >
               {loading ? (
-                <div className="h-6 w-6 animate-pulse rounded-full bg-black/10" />
+                <div className="bg-gold/20 h-6 w-6 animate-pulse rounded-full" />
               ) : user ? (
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-7 w-7">
                   {user.photoURL && (
                     <AvatarImage
                       src={user.photoURL}
-                      alt={user.displayName ?? "User"}
+                      alt={user.displayName ?? ""}
                     />
                   )}
-                  <AvatarFallback className="text-[10px] bg-maroon text-white">
+
+                  <AvatarFallback className="bg-gold text-burgundy text-[10px]">
                     {user.displayName
                       ? user.displayName
                           .split(" ")
@@ -378,42 +336,29 @@ export default function Navbar() {
                   </AvatarFallback>
                 </Avatar>
               ) : (
-                <CircleUser size={22} strokeWidth={1.2} />
+                <CircleUser size={22} strokeWidth={1.4} />
               )}
             </Link>
 
-            {/* <Link
-              href="/wish"
-              aria-label="Wishlist"
-              className="w-10 h-10 flex items-center justify-center text-ink rounded-full hover:bg-black/5 transition-colors duration-300"
-            >
-              <Heart size={22} strokeWidth={1.2} />
-            </Link> */}
-
-            <div className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors duration-300">
+            <div className="text-cream hover:bg-gold/10 hover:text-gold flex h-10 w-10 items-center justify-center rounded-full transition-all">
               <CartDrawer />
             </div>
 
-            {/* Desktop CTA (Fixed colors & border issue) */}
             <Link
               href="/shop"
-              className="
-                hidden lg:inline-flex ml-2
-                px-6 py-2.5
-                bg-button hover:bg-black
-                text-white text-[10px] tracking-[0.2em] uppercase font-semibold
-                transition-all duration-300 whitespace-nowrap
-              "
+              className="bg-gold text-burgundy hover:bg-gold-highlight ml-2 hidden rounded-full px-7 py-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] transition-all duration-300 hover:scale-[1.02] lg:inline-flex"
             >
-             Shop
+              Shop
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ── MOBILE SEARCH ROW ────────────────────────────────────────────── */}
-      <div className="md:hidden bg-[#FCFAFA] border-b border-black/5 px-5 py-3">
-        <SearchBar />
+      {/* MOBILE SEARCH */}
+      <div className="border-gold/10 bg-burgundy border-t px-5 py-3 md:hidden">
+        <div className="rounded-full border border-gold/20 bg-burgundy-rich px-2 py-0.5">
+          <SearchBar />
+        </div>
       </div>
     </div>
   );

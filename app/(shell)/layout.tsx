@@ -11,7 +11,7 @@ function Layout({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <StickyBanner
-        className="bg-gradient-to-r from-gold-soft via-gold-warm to-gold border-b border-gold/40 shadow-sm"
+        className="bg-gold border-b border-gold/40 shadow-sm"
         hideOnScroll
       >
         <p className="mx-auto max-w-[90%] text-center text-sm font-medium tracking-[0.08em] text-burgundy md:text-[15px]">
