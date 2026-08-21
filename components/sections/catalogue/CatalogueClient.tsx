@@ -122,7 +122,7 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
 
       {/* Full-bleed Product Grid */}
       {visibleProducts.length > 0 ? (
-        <div className="grid grid-cols-2 gap-4 px-3 md:grid-cols-4 md:gap-6 md:px-4">
+        <div className="grid grid-cols-2 gap-4 px-3 md:grid-cols-5 md:gap-6 md:px-4">
           {visibleProducts.map((product) => (
             <CatalogCard key={product.id} item={product} />
           ))}
