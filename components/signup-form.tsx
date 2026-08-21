@@ -17,22 +17,13 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-
 import { Input } from "@/components/ui/input";
 
 export default function SignupForm({
@@ -64,32 +55,23 @@ export default function SignupForm({
     try {
       setLoading(true);
 
-      const userCredential =
-        await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
       await updateProfile(userCredential.user, {
         displayName: name,
       });
 
-      await ensureUserDocument(
-        userCredential.user,
-        name
-      );
+      await ensureUserDocument(userCredential.user, name);
 
-      toast.success(
-        "Account created successfully 🎉"
-      );
+      toast.success("Welcome to SWAS");
 
       router.push("/");
     } catch (error: any) {
-      toast.error(
-        error?.message ||
-          "Signup failed. Please try again."
-      );
+      toast.error(error?.message || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -101,115 +83,129 @@ export default function SignupForm({
 
       const provider = new GoogleAuthProvider();
 
-      const result = await signInWithPopup(
-        auth,
-        provider
-      );
+      const result = await signInWithPopup(auth, provider);
 
       await ensureUserDocument(result.user);
 
-      toast.success("Welcome to SWAS 👋");
+      toast.success("Welcome to SWAS");
 
       router.push("/");
     } catch (error: any) {
-      toast.error(
-        error?.message || "Google signup failed."
-      );
+      toast.error(error?.message || "Google signup failed.");
     } finally {
       setGoogleLoading(false);
     }
   }
 
   return (
-    <Card {...props} className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Create an account</CardTitle>
+    <>
+      {/* Heading */}
 
-        <CardDescription>
-          Enter your information below to create
-          your account
-        </CardDescription>
-      </CardHeader>
+      <div className="mb-10 text-center">
+        <p className="text-gold text-[10px] font-semibold uppercase tracking-[0.35em]">
+          Join SWAS
+        </p>
 
-      <CardContent>
-        <form
-          onSubmit={handleSignup}
-          className="space-y-6"
+        <h1
+          className="text-burgundy mt-4 text-4xl font-light md:text-5xl"
+          style={{ fontFamily: "var(--font-heading)" }}
         >
-          <FieldGroup className="space-y-4">
+          Create Account
+        </h1>
 
-            <Field>
-              <FieldLabel>Full Name</FieldLabel>
+        <p className="text-burgundy/65 mt-4 text-sm leading-7">
+          Create your SWAS account to save your favourites, track orders and
+          enjoy a seamless shopping experience.
+        </p>
+      </div>
 
-              <Input
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) =>
-                  setName(e.target.value)
-                }
-                required
-              />
-            </Field>
+      <Card
+        {...props}
+        className="border-gold/20 bg-white shadow-[0_20px_60px_rgba(41,7,7,0.06)]"
+      >
+        <CardContent className="p-6 md:p-8">
+          <form onSubmit={handleSignup}>
+            <FieldGroup className="space-y-6">
+              {/* Name */}
 
-            <Field>
-              <FieldLabel>Email</FieldLabel>
+              <Field>
+                <FieldLabel className="text-burgundy mb-2 uppercase tracking-[0.16em] text-[11px]">
+                  Full Name
+                </FieldLabel>
 
-              <Input
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                required
-              />
+                <Input
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="bg-background border-gold/20 focus:border-gold h-12 rounded-none"
+                />
+              </Field>
 
-              <FieldDescription>
-                We'll use this to contact you.
-              </FieldDescription>
-            </Field>
+              {/* Email */}
 
-            <Field>
-              <FieldLabel>Password</FieldLabel>
+              <Field>
+                <FieldLabel className="text-burgundy mb-2 uppercase tracking-[0.16em] text-[11px]">
+                  Email
+                </FieldLabel>
 
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                required
-              />
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-background border-gold/20 focus:border-gold h-12 rounded-none"
+                />
 
-              <FieldDescription>
-                Must be at least 8 characters long.
-              </FieldDescription>
-            </Field>
+                <FieldDescription className="text-burgundy/55 mt-2">
+                  We'll use this to contact you.
+                </FieldDescription>
+              </Field>
 
-            <Field>
-              <FieldLabel>
-                Confirm Password
-              </FieldLabel>
+              {/* Password */}
 
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) =>
-                  setConfirmPassword(e.target.value)
-                }
-                required
-              />
-            </Field>
+              <Field>
+                <FieldLabel className="text-burgundy mb-2 uppercase tracking-[0.16em] text-[11px]">
+                  Password
+                </FieldLabel>
 
-            <Field className="space-y-3 pt-2">
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-background border-gold/20 focus:border-gold h-12 rounded-none"
+                />
+
+                <FieldDescription className="text-burgundy/55 mt-2">
+                  Must be at least 8 characters long.
+                </FieldDescription>
+              </Field>
+
+              {/* Confirm Password */}
+
+              <Field>
+                <FieldLabel className="text-burgundy mb-2 uppercase tracking-[0.16em] text-[11px]">
+                  Confirm Password
+                </FieldLabel>
+
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="bg-background border-gold/20 focus:border-gold h-12 rounded-none"
+                />
+              </Field>
+
+              {/* Primary CTA */}
 
               <Button
                 type="submit"
-                className="w-full"
-                disabled={
-                  loading || googleLoading
-                }
+                disabled={loading || googleLoading}
+                className="bg-button hover:bg-burgundy-light h-12 w-full rounded-none text-[11px] font-semibold uppercase tracking-[0.18em]"
               >
                 {loading ? (
                   <>
@@ -221,14 +217,28 @@ export default function SignupForm({
                 )}
               </Button>
 
+              {/* Divider */}
+
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="bg-gold/20 h-px w-full" />
+                </div>
+
+                <div className="relative flex justify-center">
+                  <span className="bg-white text-burgundy/50 px-4 text-[11px] uppercase tracking-[0.18em]">
+                    or
+                  </span>
+                </div>
+              </div>
+
+              {/* Google */}
+
               <Button
                 variant="outline"
                 type="button"
-                className="w-full"
                 onClick={handleGoogleSignup}
-                disabled={
-                  loading || googleLoading
-                }
+                disabled={loading || googleLoading}
+                className="border-gold/25 hover:bg-warm h-12 w-full rounded-none text-burgundy hover:border-gold"
               >
                 {googleLoading ? (
                   <>
@@ -236,25 +246,47 @@ export default function SignupForm({
                     Connecting...
                   </>
                 ) : (
-                  "Sign up with Google"
+                  <>
+                    <svg
+                      className="mr-3 h-5 w-5"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill="#EA4335"
+                        d="M12 10.2v3.9h5.5c-.2 1.3-.9 2.4-2 3.2l3.2 2.5c1.9-1.8 3-4.4 3-7.5 0-.7-.1-1.4-.2-2H12z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 22c2.7 0 5-0.9 6.7-2.5l-3.2-2.5c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.3H2.9v2.7C4.6 19.8 8 22 12 22z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M6.2 13.6c-.2-.6-.3-1.1-.3-1.7s.1-1.2.3-1.7V7.5H2.9A10 10 0 0 0 2 12c0 1.6.4 3.1.9 4.5l3.3-2.9z"
+                      />
+                      <path
+                        fill="#4285F4"
+                        d="M12 5.1c1.5 0 2.8.5 3.8 1.5l2.8-2.8C17 2.3 14.7 1.3 12 1.3 8 1.3 4.6 3.5 2.9 7.5l3.3 2.6C7 6.9 9.3 5.1 12 5.1z"
+                      />
+                    </svg>
+
+                    Continue with Google
+                  </>
                 )}
               </Button>
 
-              <FieldDescription className="text-center text-sm">
+              <FieldDescription className="text-burgundy/65 pt-2 text-center text-sm">
                 Already have an account?{" "}
                 <a
                   href="/login"
-                  className="underline hover:text-foreground"
+                  className="text-gold hover:text-burgundy font-medium transition"
                 >
-                  Sign in
+                  Sign In
                 </a>
               </FieldDescription>
-
-            </Field>
-
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+    </>
   );
 }
