@@ -15,7 +15,7 @@ const features = [
   },
   {
     icon: Truck,
-    title: "Free Shipping",
+    title: "Shipping",
     subtitle: "Across India",
   },
   {

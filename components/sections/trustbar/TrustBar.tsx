@@ -11,7 +11,7 @@ const badges = [
   { icon: "◈", label: "92.5 Pure Silver"  },
   { icon: "◈", label: "Easy Returns"      },
   { icon: "◈", label: "COD Available"     },
-  { icon: "◈", label: "Free Shipping ₹999+" },
+  { icon: "◈", label: "Shipping ₹999+" },
 ] as const;
 
 export default function TrustBar() {

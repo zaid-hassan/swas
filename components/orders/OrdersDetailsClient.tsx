@@ -369,7 +369,7 @@ export default function OrderDetailsClient({ orderId }: Props) {
             {[
               {
                 icon: Truck,
-                title: "Free Shipping",
+                title: "Shipping",
                 text: "All India delivery",
               },
               {

@@ -108,7 +108,7 @@ function TrustFeatures() {
         />
 
         <p className="text-[9px] font-medium leading-4 text-burgundy/75 sm:text-[10px]">
-          Free Shipping
+          Shipping
           <br />
           All India
         </p>

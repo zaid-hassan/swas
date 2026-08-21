@@ -42,7 +42,7 @@ const navigation = [
 const benefits = [
   {
     icon: Truck,
-    title: "Free Shipping",
+    title: "Shipping",
     text: "All India delivery",
   },
   {
