@@ -18,7 +18,7 @@ function CatalogCard({ item }: { item: Product }) {
     <article className="group bg-background">
       <Link href={`/shop/${item.slug}`} className="block">
         {/* Image */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+        <div className="relative aspect-[4/5] overflow-hidden bg-muted md:aspect-[3/4]">
           <img
             src={item.image || "/placeholder.webp"}
             alt={item.name}
@@ -33,22 +33,22 @@ function CatalogCard({ item }: { item: Product }) {
         </div>
 
         {/* Content */}
-        <div className="border-x border-b border-border px-3 py-4 md:px-4">
-          <p className="text-gold text-[9px] uppercase tracking-[0.3em] md:text-[10px]">
+        <div className="border-x border-b border-border px-2.5 py-3 md:px-4 md:py-4">
+          <p className="text-gold text-[8px] uppercase tracking-[0.28em] md:text-[10px]">
             {item.category}
           </p>
 
-          <h3 className="text-foreground mt-2 min-h-[42px] text-sm leading-5 md:text-base">
+          <h3 className="text-foreground mt-1.5 min-h-[38px] text-[13px] leading-5 md:mt-2 md:min-h-[42px] md:text-base">
             {item.name}
           </h3>
 
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-foreground text-base font-medium md:text-lg">
+          <div className="mt-2.5 flex items-center justify-between md:mt-3">
+            <span className="text-foreground text-[15px] font-medium md:text-lg">
               {item.price ? `₹${item.price}` : "Price on Request"}
             </span>
 
-            <div className="text-foreground group-hover:text-gold transition-colors duration-300">
-              <ArrowUpRight size={18} />
+            <div className="text-foreground transition-colors duration-300 group-hover:text-gold">
+              <ArrowUpRight size={16} className="md:h-[18px] md:w-[18px]" />
             </div>
           </div>
         </div>
@@ -57,11 +57,7 @@ function CatalogCard({ item }: { item: Product }) {
   );
 }
 
-export default function CatalogueClient({
-  products,
-}: {
-  products: Product[];
-}) {
+export default function CatalogueClient({ products }: { products: Product[] }) {
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filters = useMemo(() => {
@@ -126,7 +122,7 @@ export default function CatalogueClient({
 
       {/* Full-bleed Product Grid */}
       {visibleProducts.length > 0 ? (
-        <div className="grid grid-cols-2 gap-x-4 md:gap-x-8 gap-y-8 md:grid-cols-5 px-4">
+        <div className="grid grid-cols-2 gap-4 px-3 md:grid-cols-4 md:gap-6 md:px-4">
           {visibleProducts.map((product) => (
             <CatalogCard key={product.id} item={product} />
           ))}

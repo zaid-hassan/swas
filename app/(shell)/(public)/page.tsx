@@ -4,6 +4,7 @@ import Catalogue from '@/components/sections/catalogue/Catalogue'
 import React from 'react'
 import TrustBar from '@/components/sections/trustbar/TrustBar'
 import HeroFeatures from '@/components/sections/features/HeroFeatures'
+import FeaturedVideoCarousel from '@/components/sections/features/FeaturedVideoCarousel'
 
 function page() {
   return (
@@ -11,6 +12,7 @@ function page() {
         <Hero />
         <Showcase />
         <Catalogue />
+        <FeaturedVideoCarousel />
         <HeroFeatures />
     </div>
   )

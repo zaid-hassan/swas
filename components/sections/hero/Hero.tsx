@@ -16,7 +16,7 @@ export default function Hero() {
           preload="auto"
           poster="/hero-poster.webp"
         >
-          <source src="/videos/hero.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/dndppvnjl/video/upload/v1787232893/0820_vhpjoo.mp4" type="video/mp4" />
         </video>
 
         {/* Luxury Overlay */}
