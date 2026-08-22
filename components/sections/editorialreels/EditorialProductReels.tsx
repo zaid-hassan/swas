@@ -7,13 +7,13 @@ const products = [
     name: "Minimal Silver Ring",
     price: "₹1,499",
     video:
-      "https://res.cloudinary.com/dndppvnjl/video/upload/v1787232893/0820_vhpjoo.mp4",
+      "https://drive.google.com/file/d/1PtqFH9ymkaSiiTWJQ2-qqrHSGIlDkDmv/view?usp=drive_link",
   },
   {
     name: "Heritage Mangalsutra",
     price: "₹3,899",
     video:
-      "https://res.cloudinary.com/dndppvnjl/video/upload/v1787232893/0820_vhpjoo.mp4",
+      "https://drive.google.com/file/d/1pRbPsqcAEfe_WxUYEEmIpjNyHCkL0WOr/view?usp=drive_link",
   },
 ];
 
