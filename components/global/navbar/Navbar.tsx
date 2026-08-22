@@ -170,7 +170,7 @@ export default function Navbar() {
                   </SheetTitle>
 
                   <SheetDescription className="text-gold-soft/60 text-[10px] uppercase tracking-[0.28em]">
-                    By Swastika · Ranchi
+                    By Swastika
                   </SheetDescription>
                 </SheetHeader>
 

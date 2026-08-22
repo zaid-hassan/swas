@@ -30,11 +30,11 @@ export default function Hero() {
               style={{ fontFamily: "var(--font-heading)" }}
             >
               <span className="text-lg font-light tracking-[0.15em] sm:text-2xl md:text-3xl">
-                Timeless
+                Heritage
               </span>
 
               <span className="my-2 text-4xl font-semibold tracking-[0.08em] text-gold sm:text-5xl md:text-6xl">
-                SALE
+                Timeless
               </span>
 
               <span className="text-lg font-light tracking-[0.15em] sm:text-2xl md:text-3xl">

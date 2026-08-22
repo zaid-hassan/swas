@@ -10,7 +10,7 @@ function Layout({
 }>) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <StickyBanner
+      {/* <StickyBanner
         className="bg-gold border-b border-gold/40 shadow-sm"
         hideOnScroll
       >
@@ -23,7 +23,7 @@ function Layout({
             Ranchi, Jharkhand
           </a>
         </p>
-      </StickyBanner>
+      </StickyBanner> */}
 
       <Navbar />
 
