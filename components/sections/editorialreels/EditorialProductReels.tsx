@@ -56,9 +56,11 @@ export default function EditorialProductReels() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-background py-20 md:py-32 overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="bg-background py-20 md:py-32 overflow-hidden"
+    >
       <div className="relative mx-auto max-w-[1400px] px-5 md:px-10">
-
         {/* subtle diagonal guide */}
         <div className="pointer-events-none absolute inset-0 hidden md:block">
           <svg
@@ -79,7 +81,12 @@ export default function EditorialProductReels() {
 
         {/* ---------------- DESKTOP ---------------- */}
         <div className="relative hidden h-[560px] md:block">
-
+          <h2
+            className="text-foreground text-[32px] font-light leading-none tracking-tight sm:text-[38px] md:text-[46px]"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            <span className="italic">Taruni Collection</span>
+          </h2>
           {/* LEFT REEL */}
           <div className="absolute left-0 top-0 w-[240px]">
             <div className="overflow-hidden rounded-[26px] shadow-[0_30px_80px_rgba(41,7,7,.12)] aspect-[9/14]">
@@ -100,9 +107,7 @@ export default function EditorialProductReels() {
               {products[0].name}
             </h3>
 
-            <p className="mt-3 text-burgundy/65 text-lg">
-              {products[0].price}
-            </p>
+            <p className="mt-3 text-burgundy/65 text-lg">{products[0].price}</p>
           </div>
 
           {/* RIGHT REEL */}
@@ -125,14 +130,18 @@ export default function EditorialProductReels() {
               {products[1].name}
             </h3>
 
-            <p className="mt-3 text-burgundy/65 text-lg">
-              {products[1].price}
-            </p>
+            <p className="mt-3 text-burgundy/65 text-lg">{products[1].price}</p>
           </div>
         </div>
 
         {/* ---------------- MOBILE ---------------- */}
         <div className="space-y-14 md:hidden">
+          <h2
+            className="text-foreground text-[32px] font-light leading-none tracking-tight sm:text-[38px] md:text-[46px]"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            <span className="italic">Taruni Collection</span>
+          </h2>
 
           {/* Top composition */}
           <div className="flex items-start gap-5">
@@ -152,9 +161,7 @@ export default function EditorialProductReels() {
                 {products[0].name}
               </h3>
 
-              <p className="mt-2 text-burgundy/65">
-                {products[0].price}
-              </p>
+              <p className="mt-2 text-burgundy/65">{products[0].price}</p>
             </div>
           </div>
 
@@ -176,14 +183,10 @@ export default function EditorialProductReels() {
                 {products[1].name}
               </h3>
 
-              <p className="mt-2 text-burgundy/65">
-                {products[1].price}
-              </p>
+              <p className="mt-2 text-burgundy/65">{products[1].price}</p>
             </div>
           </div>
-
         </div>
-
       </div>
     </section>
   );
