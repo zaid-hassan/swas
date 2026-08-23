@@ -52,7 +52,7 @@ export default function CollectionFilm({
         playsInline
         preload="metadata"
         className="
-    absolute inset-0 h-full w-full object-cover
+    absolute inset-h-full w-full object-cover
 
     md:left-1/2 md:top-1/2
     md:h-[100vw] md:w-[100vh]
