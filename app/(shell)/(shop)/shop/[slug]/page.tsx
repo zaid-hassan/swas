@@ -69,14 +69,13 @@ export default async function ProductDetail({
               </p>
 
               <h1
-                className="text-burgundy mt-5 text-[34px] leading-[1.15] md:text-[48px] font-light"
-                style={{ fontFamily: "var(--font-heading)" }}
+                className="text-burgundy mt-5 text-[34px] font-cg leading-[1.15] md:text-[48px] font-light"
               >
                 {product.name}
               </h1>
 
               <div className="mt-8">
-                <p className="text-burgundy text-3xl font-medium">
+                <p className="text-burgundy font-cg text-3xl font-medium">
                   ₹{product.price?.toLocaleString()}
                 </p>
               </div>
@@ -194,8 +193,7 @@ export default async function ProductDetail({
                 </p>
 
                 <h2
-                  className="text-burgundy mt-4 text-3xl font-light md:text-5xl"
-                  style={{ fontFamily: "var(--font-heading)" }}
+                  className="text-burgundy mt-4 text-3xl font-heading md:text-5xl"
                 >
                   You May Also Like
                 </h2>

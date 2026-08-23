@@ -224,8 +224,8 @@ export function CartDrawer() {
                 font-medium
                 uppercase
                 tracking-[0.08em]
+                font-heading
               "
-              style={{ fontFamily: "var(--font-heading)" }}
             >
               Your Cart
             </SheetTitle>

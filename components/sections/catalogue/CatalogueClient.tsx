@@ -38,12 +38,12 @@ function CatalogCard({ item }: { item: Product }) {
             {item.category}
           </p>
 
-          <h3 className="text-foreground/70 mt-1.5 min-h-[38px] text-[13px] font-extralight leading-3.5 md:mt-2 md:min-h-[42px] md:text-base">
+          <h3 className="text-foreground/70 mt-1.5 min-h-[38px] text-[13px] font-body leading-3.5 md:leading-5 md:mt-2 md:min-h-[42px] md:text-base">
             {item.name}
           </h3>
 
           <div className="mt-2.5 flex items-center justify-between md:mt-3">
-            <span className="text-foreground text-[15px] font-heading md:text-lg">
+            <span className="text-foreground text-[15px] font-cg md:text-lg">
               {item.price ? `₹${item.price}` : "Price on Request"}
             </span>
 

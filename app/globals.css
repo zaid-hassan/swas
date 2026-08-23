@@ -27,8 +27,11 @@
   --color-button: var(--button);
 
   /* Typography */
-  --font-sans: var(--font-body);
-  --font-heading: var(--font-heading);
+  --font-man: var(--font-man);
+  --font-cg: var(--font-cg);
+  --font-heading: var(--font-playfair);
+  --font-body: var(--font-body);
+  --font-art: var(--font-bodoni);
 
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
@@ -43,8 +46,13 @@
   --radius: 0.625rem;
 
   /* Fonts */
-  --font-heading: "Cormorant Garamond", serif;
-  --font-body: "Manrope", sans-serif;
+  --font-cg: "Cormorant Garamond", serif;
+  --font-man: "Manrope", sans-serif;
+  
+  --font-playfair: "Playfair Display", serif;
+  --font-body: "Instruments Sans", sans-serif;
+  --font-bodoni: "Bodoni Moda", serif;
+
 
   /* Light Theme (Default) */
   --background: #fdf8f0;
@@ -88,19 +96,19 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-body;
     font-feature-settings: "liga" 1, "kern" 1;
   }
 
-  h1,
+  /* h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: var(--font-heading);
+    font-family: var(--font-playfair);
     letter-spacing: 0.02em;
-  }
+  } */
 
   ::selection {
     background: #d8ae5e;

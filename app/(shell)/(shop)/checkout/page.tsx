@@ -227,8 +227,7 @@ export default function CheckoutPage() {
           </p>
 
           <h1
-            className="text-burgundy mt-3 text-4xl font-light md:text-5xl"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="text-burgundy mt-3 text-4xl font-heading md:text-5xl"
           >
             Complete Your Order
           </h1>

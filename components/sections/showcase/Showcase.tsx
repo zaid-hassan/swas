@@ -33,11 +33,10 @@ export default async function Showcase() {
 
             {/* Heading */}
             <h2
-              className="text-foreground text-[32px] font-light leading-none tracking-tight sm:text-[38px] md:text-[46px]"
-              style={{ fontFamily: "var(--font-heading)" }}
+              className="text-foreground text-[32px] font-art leading-none tracking-tight sm:text-[38px] md:text-[46px]"
             >
               <span className="italic">Shop by</span>{" "}
-              <span className="font-medium">Category</span>
+              <span className="">Category</span>
             </h2>
           </div>
 

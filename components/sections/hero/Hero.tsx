@@ -29,15 +29,15 @@ export default function Hero() {
               className="flex flex-col items-center leading-none"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              <span className="text-lg font-light tracking-[0.15em] sm:text-2xl md:text-3xl">
+              <span className="text-lg font-art tracking-[0.15em] sm:text-2xl md:text-3xl">
                 Heritage
               </span>
 
-              <span className="my-2 text-4xl font-semibold tracking-[0.08em] text-gold sm:text-5xl md:text-6xl">
+              <span className="my-2 text-4xl font-art tracking-[0.08em] text-gold sm:text-5xl md:text-6xl">
                 Timeless
               </span>
 
-              <span className="text-lg font-light tracking-[0.15em] sm:text-2xl md:text-3xl">
+              <span className="text-lg font-art tracking-[0.15em] sm:text-2xl md:text-3xl">
                 Elegance
               </span>
             </h1>

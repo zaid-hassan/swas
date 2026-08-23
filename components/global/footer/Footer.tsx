@@ -22,8 +22,7 @@ export default function Footer() {
           {/* BRAND */}
           <div className="space-y-5">
             <h2
-              className="text-gold text-4xl tracking-[0.08em]"
-              style={{ fontFamily: "var(--font-heading)" }}
+              className="text-gold font-art text-4xl tracking-[0.08em]"
             >
               SWAS
             </h2>

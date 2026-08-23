@@ -1,54 +1,40 @@
 import type { Metadata } from "next";
-// import { Playfair_Display, Inter } from "next/font/google";
-// import { Cormorant_Garamond, Manrope } from "next/font/google";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import {
+  Bodoni_Moda,
+  Playfair_Display,
+  Instrument_Sans,
+} from "next/font/google";
+
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 
-// const playfair = Playfair_Display({
-//   subsets: ["latin"],
-//   variable: "--font-heading",
-//   display: "swap",
-// });
-
-// const inter = Inter({
-//   subsets: ["latin"],
-//   variable: "--font-body",
-//   display: "swap",
-// });
-// const headingFont = Cormorant_Garamond({
-//   subsets: ["latin"],
-//   variable: "--font-heading",
-//   weight: ["400", "500", "600", "700"],
-//   display: "swap",
-// });
-
-// const bodyFont = Manrope({
-//   subsets: ["latin"],
-//   variable: "--font-body",
-//   weight: ["300", "400", "500", "600"],
-//   display: "swap",
-// });
-
-const cormorant = Cormorant_Garamond({
+const bodoni = Bodoni_Moda({
   subsets: ["latin"],
-  weight: ["300", "400", "600"],
+  variable: "--font-bodoni",
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
-  variable: "--font-cormorant",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-dm-sans",
+  variable: "--font-playfair",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const instrument = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "SWAS by Swastik",
-  description: "Fine handcrafted jewelry by SWAS",
+  description: "Fine handcrafted silver jewellery by SWAS",
 };
 
 export default function RootLayout({
@@ -57,10 +43,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
+    <html
+      lang="en"
+      className={`${bodoni.variable} ${playfair.variable} ${instrument.variable}`}
+    >
       <body className="antialiased">
         <AuthProvider>
           {children}
+
           <Toaster
             theme="light"
             richColors

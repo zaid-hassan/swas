@@ -164,7 +164,7 @@ export default function Navbar() {
                 <SheetHeader className="mb-10 text-left">
                   <SheetTitle
                     style={H}
-                    className="text-gold text-[34px] font-semibold tracking-[0.22em]"
+                    className="text-gold text-[34px] font-art tracking-[0.22em]"
                   >
                     SWAS
                   </SheetTitle>
@@ -247,9 +247,9 @@ export default function Navbar() {
             <Link
               href="/"
               style={H}
-              className="text-gold hover:text-gold-highlight text-[30px] font-semibold tracking-[0.22em] transition-colors md:text-[34px]"
+              className="text-gold font-art hover:text-gold-highlight text-[30px] tracking-[0.22em] transition-colors md:text-[34px]"
             >
-              SWAS
+              <h1 className="font-art">SWAS</h1>
             </Link>
 
             {/* DESKTOP MENU */}

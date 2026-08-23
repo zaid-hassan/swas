@@ -142,12 +142,7 @@ export default function ProductCard({
         {/* Name — Cormorant serif */}
         <Link href={`/shop/${product?.slug}`} className="block no-underline">
           <h3
-            className="text-ink hover:text-maroon transition-colors duration-150 mb-2 leading-[1.22]"
-            style={{
-              fontSize: "clamp(15px, 2vw, 17px)",
-              fontFamily: "var(--font-cormorant), Georgia, serif",
-              fontWeight: 400,
-            }}
+            className="text-ink font-cg hover:text-maroon transition-colors duration-150 mb-2 leading-[1.22]"
           >
             {product?.name}
           </h3>
@@ -155,7 +150,7 @@ export default function ProductCard({
 
         {/* Prices */}
         <div className="flex items-baseline gap-2">
-          <span className="text-[14.5px] font-medium text-maroon tracking-tight">
+          <span className="text-[14.5px] font-cg text-maroon tracking-tight">
             ₹{product?.price}
           </span>
           {oldPrice && (

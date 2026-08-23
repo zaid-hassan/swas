@@ -69,8 +69,7 @@ export default function CartPage() {
           </p>
 
           <h1
-            className="text-burgundy mt-3 text-4xl font-light md:text-5xl"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="text-burgundy mt-3 text-4xl font-heading md:text-5xl"
           >
             Your Selection
           </h1>
@@ -111,7 +110,7 @@ export default function CartPage() {
                           SWAS Jewellery
                         </p>
 
-                        <h3 className="text-burgundy mt-2 text-base leading-6 md:text-lg">
+                        <h3 className="text-burgundy mt-2 text-base font-cg leading-6 md:text-lg">
                           {item.name}
                         </h3>
                       </div>
@@ -123,7 +122,7 @@ export default function CartPage() {
 
                     <div className="mt-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-burgundy text-xl font-semibold">
+                        <p className="text-burgundy text-xl font-cg">
                           ₹{item.price.toLocaleString()}
                         </p>
 

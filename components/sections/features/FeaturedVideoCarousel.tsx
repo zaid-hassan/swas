@@ -51,8 +51,7 @@ export default function FeaturedVideoCarousel() {
           </p>
 
           <h2
-            className="text-burgundy mt-3 text-4xl md:text-5xl"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="text-burgundy mt-3 text-4xl md:text-5xl font-heading"
           >
             Crafted in Motion
           </h2>
@@ -124,14 +123,13 @@ export default function FeaturedVideoCarousel() {
 
                       <div className="border-t border-border p-4">
                         <h3
-                          className="text-burgundy text-lg md:text-xl"
-                          style={{ fontFamily: "var(--font-heading)" }}
+                          className="text-burgundy text-lg md:text-xl font-art"
                         >
                           {product.name}
                         </h3>
 
                         <div className="mt-3 flex items-center justify-between">
-                          <span className="text-burgundy text-base font-semibold md:text-lg">
+                          <span className="text-burgundy text-base font-cg md:text-lg">
                             ₹{product.price.toLocaleString()}
                           </span>
 
