@@ -42,7 +42,7 @@ export default function CollectionFilm({
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen w-full overflow-hidden"
+      className="relative h-[40vh] md:h-screen w-full overflow-hidden"
     >
       {/* Video */}
       <video
@@ -52,12 +52,11 @@ export default function CollectionFilm({
         playsInline
         preload="metadata"
         className="
-    absolute inset-h-full w-full object-cover
-
-    md:left-1/2 md:top-1/2
-    md:h-[100vw] md:w-[100vh]
-    md:-translate-x-1/2 md:-translate-y-1/2
-    md:-rotate-90
+    absolute left-1/2 top-1/2
+    h-[100vw] w-[100vh]
+    -translate-x-1/2 -translate-y-1/2
+    -rotate-90
+    object-cover
   "
       >
         <source src={video} type="video/mp4" />
@@ -72,7 +71,7 @@ export default function CollectionFilm({
           <h2
             className="
               text-cream leading-[0.9]
-              text-[3rem]
+              text-[2rem]
               sm:text-[4rem]
               md:text-[5.5rem]
               lg:text-[7rem]
