@@ -40,17 +40,28 @@ export default function CollectionFilm({
   }, [visible]);
 
   return (
-    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative h-screen w-full overflow-hidden"
+    >
       {/* Video */}
       <video
         ref={videoRef}
-        src={video}
         muted
         loop
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+        className="
+    absolute inset-0 h-full w-full object-cover
+
+    md:left-1/2 md:top-1/2
+    md:h-[100vw] md:w-[100vh]
+    md:-translate-x-1/2 md:-translate-y-1/2
+    md:-rotate-90
+  "
+      >
+        <source src={video} type="video/mp4" />
+      </video>
 
       {/* Luxury overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
