@@ -35,8 +35,8 @@ export default async function Showcase() {
             <h2
               className="text-foreground text-[32px] font-art leading-none tracking-tight sm:text-[38px] md:text-[46px]"
             >
-              <span className="font-man text-3xl md:text-5xl">Shop by</span>{" "}
-              <span className="font-man text-4xl md:text-6xl">Category</span>
+              <span className="font-mont text-3xl md:text-5xl">Shop by</span>{" "}
+              <span className="font-mont text-4xl md:text-6xl">Category</span>
             </h2>
           </div>
 

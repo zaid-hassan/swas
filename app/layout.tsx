@@ -3,6 +3,7 @@ import {
   Bodoni_Moda,
   Playfair_Display,
   Instrument_Sans,
+  Montserrat
 } from "next/font/google";
 
 import "./globals.css";
@@ -29,6 +30,13 @@ const instrument = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const monteserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-monteserrat",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 

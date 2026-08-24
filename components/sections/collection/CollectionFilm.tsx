@@ -105,7 +105,7 @@ export default function CollectionFilm({
             <h2
               className="
                 font-art
-                text-cream
+                text-gold
                 text-[2.5rem]
                 leading-[0.9]
                 transition-transform
@@ -120,7 +120,7 @@ export default function CollectionFilm({
               {title}
             </h2>
 
-            <p className="mt-3 text-[9px] uppercase tracking-[0.35em] text-gold transition-colors duration-300 group-hover:text-gold-highlight sm:text-[10px]">
+            <p className="mt-3 text-[9px] uppercase tracking-[0.35em] text-cream transition-colors duration-300 group-hover:text-gold-highlight sm:text-[10px]">
               Explore Collection →
             </p>
           </Link>
