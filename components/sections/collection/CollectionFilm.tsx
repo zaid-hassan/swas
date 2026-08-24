@@ -24,7 +24,9 @@ export default function CollectionFilm({
       { threshold: 0.3 }
     );
 
-    if (sectionRef.current) io.observe(sectionRef.current);
+    if (sectionRef.current) {
+      io.observe(sectionRef.current);
+    }
 
     return () => io.disconnect();
   }, []);
@@ -42,52 +44,87 @@ export default function CollectionFilm({
   return (
     <section
       ref={sectionRef}
-      className="relative h-[40vh] md:h-screen w-full overflow-hidden"
+      className="
+        relative
+        mt-4
+        w-full
+        overflow-hidden
+        bg-background
+        px-3
+        py-3
+        sm:px-5
+        sm:py-5
+        md:px-8
+        md:py-8
+      "
     >
-      {/* Video */}
-      <video
-        ref={videoRef}
-        muted
-        loop
-        playsInline
-        preload="metadata"
+      {/* Video frame */}
+      <div
         className="
-    absolute left-1/2 top-1/2
-    h-[100vw] w-[100vh]
-    -translate-x-1/2 -translate-y-1/2
-    -rotate-90
-    object-cover
-  "
+          relative
+          mx-auto
+          h-[40vh]
+          w-full
+          overflow-hidden
+          rounded-2xl
+          bg-burgundy
+          sm:h-[50vh]
+          sm:rounded-3xl
+          md:h-[70vh]
+          lg:h-[82vh]
+        "
       >
-        <source src={video} type="video/mp4" />
-      </video>
+        {/* Rotated video */}
+        <video
+          ref={videoRef}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="
+            absolute
+            left-1/2
+            top-1/2
+            h-[100vw]
+            w-[100vh]
+            -translate-x-1/2
+            -translate-y-1/2
+            -rotate-90
+            object-cover
+          "
+        >
+          <source src={video} type="video/mp4" />
+        </video>
 
-      {/* Luxury overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        {/* Cinematic overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-      {/* Bottom-left editorial text */}
-      <div className="absolute bottom-8 left-5 md:bottom-12 md:left-10 text-left">
-        <Link href={href} className="group inline-block">
-          <h2
-            className="
-              text-cream leading-[0.9]
-              text-[2rem]
-              sm:text-[4rem]
-              md:text-[5.5rem]
-              lg:text-[7rem]
-              xl:text-[8rem]
-              transition-transform duration-500 group-hover:-translate-y-1
-              font-art
-            "
-            // style={{ fontFamily: "var(--font-bodoni)" }}
-          >
-            {title}
-          </h2>
+        {/* Collection information */}
+        <div className="absolute bottom-6 left-6 text-left sm:bottom-8 sm:left-8 md:bottom-12 md:left-12">
+          <Link href={href} className="group inline-block">
+            <h2
+              className="
+                font-art
+                text-cream
+                text-[2.5rem]
+                leading-[0.9]
+                transition-transform
+                duration-500
+                group-hover:-translate-y-1
+                sm:text-[4rem]
+                md:text-[5.5rem]
+                lg:text-[7rem]
+                xl:text-[8rem]
+              "
+            >
+              {title}
+            </h2>
 
-          <p className="mt-3 text-[10px] uppercase tracking-[0.35em] text-gold transition-colors duration-300 group-hover:text-gold-highlight">
-            Explore Collection →
-          </p>
-        </Link>
+            <p className="mt-3 text-[9px] uppercase tracking-[0.35em] text-gold transition-colors duration-300 group-hover:text-gold-highlight sm:text-[10px]">
+              Explore Collection →
+            </p>
+          </Link>
+        </div>
       </div>
     </section>
   );
