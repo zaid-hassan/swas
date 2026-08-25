@@ -3,10 +3,12 @@ import {
   Bodoni_Moda,
   Playfair_Display,
   Instrument_Sans,
-  Montserrat
+  Montserrat,
+  GFS_Didot,
 } from "next/font/google";
 
 import "./globals.css";
+
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -26,6 +28,13 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+const didot = GFS_Didot({
+  subsets: ["latin"],
+  variable: "--font-didot",
+  weight: "400",
+  display: "swap",
+});
+
 const instrument = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-body",
@@ -33,9 +42,9 @@ const instrument = Instrument_Sans({
   display: "swap",
 });
 
-const monteserrat = Montserrat({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-monteserrat",
+  variable: "--font-montserrat",
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
@@ -53,7 +62,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bodoni.variable} ${playfair.variable} ${instrument.variable}`}
+      className={`
+        ${bodoni.variable}
+        ${playfair.variable}
+        ${didot.variable}
+        ${instrument.variable}
+        ${montserrat.variable}
+      `}
     >
       <body className="antialiased">
         <AuthProvider>
