@@ -50,5 +50,5 @@ export async function getCategories() {
     }
   }
 
-  return Array.from(map.values());
+  return Array.from(map.values()).slice(1);
 }

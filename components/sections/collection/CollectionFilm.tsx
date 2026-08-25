@@ -15,31 +15,92 @@ export default function CollectionFilm({
   video,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const [isVisible, setIsVisible] = useState(false);
+
+  /* ---------------------------------------------------------- */
+  /* Detect when video enters/leaves viewport                    */
+  /* ---------------------------------------------------------- */
 
   useEffect(() => {
-    const io = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.3 }
+    const section = sectionRef.current;
+
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.15,
+      }
     );
 
-    if (sectionRef.current) {
-      io.observe(sectionRef.current);
-    }
+    observer.observe(section);
 
-    return () => io.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
-  useEffect(() => {
-    if (!videoRef.current) return;
+  /* ---------------------------------------------------------- */
+  /* Play / pause                                                */
+  /* ---------------------------------------------------------- */
 
-    if (visible) {
-      videoRef.current.play().catch(() => {});
-    } else {
-      videoRef.current.pause();
+  useEffect(() => {
+    const videoElement = videoRef.current;
+
+    if (!videoElement) return;
+
+    // Required for mobile autoplay
+    videoElement.muted = true;
+    videoElement.playsInline = true;
+
+    if (!isVisible) {
+      videoElement.pause();
+      return;
     }
-  }, [visible]);
+
+    let cancelled = false;
+
+    const play = async () => {
+      if (cancelled) return;
+
+      try {
+        await videoElement.play();
+      } catch {
+        /*
+         * Autoplay can still be rejected by the browser.
+         * This is not a React/TypeScript error.
+         *
+         * The video remains muted and inline, so browsers
+         * that allow muted autoplay will start normally.
+         */
+      }
+    };
+
+    if (videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      void play();
+    } else {
+      const handleCanPlay = () => {
+        void play();
+      };
+
+      videoElement.addEventListener("canplay", handleCanPlay, {
+        once: true,
+      });
+
+      return () => {
+        cancelled = true;
+        videoElement.removeEventListener("canplay", handleCanPlay);
+      };
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isVisible]);
 
   return (
     <section
@@ -58,44 +119,39 @@ export default function CollectionFilm({
         md:py-8
       "
     >
-      {/* Video frame */}
       <div
         className="
-          relative
-          mx-auto
-          h-[40vh]
-          w-full
-          overflow-hidden
-          rounded-2xl
-          bg-burgundy
-          sm:h-[50vh]
-          sm:rounded-3xl
-          md:h-[70vh]
-          lg:h-[82vh]
-        "
+    relative
+    mx-auto
+    h-[40vh]
+    w-full
+    overflow-hidden
+    rounded-2xl
+    bg-burgundy
+    sm:h-[50vh]
+    sm:rounded-3xl
+    md:h-[70vh]
+    lg:h-[82vh]
+  "
       >
-        {/* Rotated video */}
         <video
           ref={videoRef}
+          src={video}
           muted
+          autoPlay
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           className="
-            absolute
-            left-1/2
-            top-1/2
-            h-[100vw]
-            w-[100vh]
-            -translate-x-1/2
-            -translate-y-1/2
-            -rotate-90
-            object-cover
-          "
-        >
-          <source src={video} type="video/mp4" />
-        </video>
+      absolute
+      inset-0
+      h-full
+      w-full
+      object-cover
+    "
+        />
 
+        {/* Overlay */}
         {/* Cinematic overlay */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
