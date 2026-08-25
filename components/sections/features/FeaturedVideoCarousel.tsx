@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 
 const VIDEO =
   "https://res.cloudinary.com/dndppvnjl/video/upload/v1787232893/0820_vhpjoo.mp4";
@@ -17,14 +16,23 @@ const products = [
 
 export default function FeaturedVideoCarousel() {
   const [active, setActive] = useState(2);
+
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  /* ------------------------------------------------------------ */
+  /* Video control                                                */
+  /* ------------------------------------------------------------ */
 
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
 
       if (index === active) {
-        video.play().catch(() => {});
+        video
+          .play()
+          .catch(() => {
+            // Browser may block autoplay.
+          });
       } else {
         video.pause();
         video.currentTime = 0;
@@ -32,39 +40,96 @@ export default function FeaturedVideoCarousel() {
     });
   }, [active]);
 
+  /* ------------------------------------------------------------ */
+  /* Navigation                                                   */
+  /* ------------------------------------------------------------ */
+
   const next = () => {
     setActive((prev) => (prev + 1) % products.length);
   };
 
   const prev = () => {
-    setActive((prev) => (prev - 1 + products.length) % products.length);
+    setActive(
+      (prev) => (prev - 1 + products.length) % products.length
+    );
+  };
+
+  /* ------------------------------------------------------------ */
+  /* Swipe handling                                               */
+  /* ------------------------------------------------------------ */
+
+  const handleSwipe = (
+    _: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    const swipeDistance = info.offset.x;
+    const swipeVelocity = info.velocity.x;
+
+    /*
+     * Require either:
+     * - a reasonably long swipe
+     * - or a fast flick
+     *
+     * This prevents accidental navigation when simply
+     * touching / dragging the card.
+     */
+
+    const distanceThreshold = 60;
+    const velocityThreshold = 400;
+
+    if (
+      swipeDistance < -distanceThreshold ||
+      swipeVelocity < -velocityThreshold
+    ) {
+      next();
+      return;
+    }
+
+    if (
+      swipeDistance > distanceThreshold ||
+      swipeVelocity > velocityThreshold
+    ) {
+      prev();
+    }
   };
 
   return (
     <section className="overflow-hidden bg-background py-20">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10">
-        {/* Header */}
+
+        {/* ------------------------------------------------------ */}
+        {/* Header                                                 */}
+        {/* ------------------------------------------------------ */}
 
         <div className="mb-14 text-center">
           <p className="text-gold text-[10px] font-semibold uppercase tracking-[0.35em]">
             Featured Collection
           </p>
 
-          <h2
-            className="text-burgundy mt-3 text-4xl md:text-5xl font-heading"
-          >
+          <h2 className="text-burgundy mt-3 text-4xl font-heading md:text-5xl">
             Crafted in Motion
           </h2>
 
-          <p className="text-burgundy/65 mt-4">
+          <p className="text-burgundy/65 mt-4 text-sm md:text-base">
             Discover our handcrafted silver pieces through moving stories.
           </p>
         </div>
 
-        {/* Carousel */}
+        {/* ------------------------------------------------------ */}
+        {/* Carousel                                               */}
+        {/* ------------------------------------------------------ */}
 
-        <div className="relative flex items-center justify-center ">
-          <div className="relative h-[500px] w-full md:h-[560px]">
+        <div className="relative flex items-center justify-center">
+          <div
+            className="
+              relative
+              h-[500px]
+              w-full
+              touch-pan-y
+              select-none
+              md:h-[560px]
+            "
+          >
             <AnimatePresence mode="popLayout">
               {products.map((product, index) => {
                 const offset = index - active;
@@ -73,16 +138,20 @@ export default function FeaturedVideoCarousel() {
                   offset === 0
                     ? 0
                     : offset === -1
-                    ? -220
-                    : offset === 1
-                    ? 220
-                    : offset < 0
-                    ? -420
-                    : 420;
+                      ? -220
+                      : offset === 1
+                        ? 220
+                        : offset < 0
+                          ? -420
+                          : 420;
 
                 const scale = offset === 0 ? 1 : 0.82;
-                const opacity = Math.abs(offset) > 1 ? 0 : 1;
-                const zIndex = offset === 0 ? 20 : 10;
+
+                const opacity =
+                  Math.abs(offset) > 1 ? 0 : 1;
+
+                const zIndex =
+                  offset === 0 ? 20 : 10;
 
                 return (
                   <motion.div
@@ -100,9 +169,36 @@ export default function FeaturedVideoCarousel() {
                       damping: 24,
                     }}
                     style={{ zIndex }}
-                    className="absolute left-1/2 top-0 w-[72vw] max-w-[360px] -translate-x-1/2"
+                    className="
+                      absolute
+                      left-1/2
+                      top-0
+                      w-[72vw]
+                      max-w-[360px]
+                      -translate-x-1/2
+                      cursor-grab
+                      active:cursor-grabbing
+                    "
+                    drag="x"
+                    dragConstraints={{
+                      left: 0,
+                      right: 0,
+                    }}
+                    dragElastic={0.18}
+                    onDragEnd={handleSwipe}
                   >
-                    <div className="overflow-hidden border border-border bg-card shadow-sm transition-shadow duration-300 hover:shadow-xl">
+                    <div
+                      className="
+                        overflow-hidden
+                        border
+                        border-border
+                        bg-card
+                        shadow-sm
+                        transition-shadow
+                        duration-300
+                        hover:shadow-xl
+                      "
+                    >
                       {/* Video */}
 
                       <div className="relative aspect-[4/5] bg-warm">
@@ -112,19 +208,52 @@ export default function FeaturedVideoCarousel() {
                           }}
                           src={VIDEO}
                           muted
+                          autoPlay={index === active}
                           loop
                           playsInline
-                          preload={index === active ? "metadata" : "none"}
-                          className="h-full w-full object-cover"
+                          preload={
+                            index === active
+                              ? "metadata"
+                              : "none"
+                          }
+                          draggable={false}
+                          className="
+                            pointer-events-none
+                            h-full
+                            w-full
+                            object-cover
+                          "
                         />
+
+                        {/* Center play indicator */}
+                        {index === active && (
+                          <div
+                            className="
+                              pointer-events-none
+                              absolute
+                              bottom-4
+                              right-4
+                              flex
+                              h-7
+                              w-7
+                              items-center
+                              justify-center
+                              rounded-full
+                              border
+                              border-white/40
+                              bg-black/20
+                              backdrop-blur-sm
+                            "
+                          >
+                            <span className="ml-[1px] h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-white" />
+                          </div>
+                        )}
                       </div>
 
-                      {/* Info */}
+                      {/* Product info */}
 
                       <div className="border-t border-border p-4">
-                        <h3
-                          className="text-burgundy text-lg md:text-xl font-art"
-                        >
+                        <h3 className="text-burgundy text-lg font-art md:text-xl">
                           {product.name}
                         </h3>
 
@@ -133,7 +262,18 @@ export default function FeaturedVideoCarousel() {
                             ₹{product.price.toLocaleString()}
                           </span>
 
-                          <button className="text-gold hover:text-burgundy text-[10px] font-semibold uppercase tracking-[0.22em] transition">
+                          <button
+                            type="button"
+                            className="
+                              text-gold
+                              text-[10px]
+                              font-semibold
+                              uppercase
+                              tracking-[0.22em]
+                              transition
+                              hover:text-burgundy
+                            "
+                          >
                             View →
                           </button>
                         </div>
@@ -146,37 +286,38 @@ export default function FeaturedVideoCarousel() {
           </div>
         </div>
 
-        {/* Controls */}
+        {/* ------------------------------------------------------ */}
+        {/* Swipe indicator                                        */}
+        {/* ------------------------------------------------------ */}
 
-        <div className="mt-1 flex items-center justify-center gap-6">
-          <button
-            onClick={prev}
-            className="flex h-11 w-11 items-center justify-center border border-gold/30 text-gold transition hover:bg-gold hover:text-burgundy"
-          >
-            <ChevronLeft size={20} />
-          </button>
-
-          <div className="flex gap-2">
-            {products.map((_, index) => (
+        <div className="mt-1 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            {products.map((product, index) => (
               <button
-                key={index}
+                key={product.id}
+                type="button"
+                aria-label={`Show ${product.name}`}
                 onClick={() => setActive(index)}
-                className={`transition-all duration-300 ${
-                  active === index
-                    ? "h-[3px] w-8 bg-gold"
-                    : "h-[3px] w-3 bg-gold/30 hover:bg-gold/60"
-                }`}
+                className={`
+                  h-[3px]
+                  transition-all
+                  duration-300
+                  ${
+                    active === index
+                      ? "w-8 bg-gold"
+                      : "w-3 bg-gold/30 hover:bg-gold/60"
+                  }
+                `}
               />
             ))}
           </div>
-
-          <button
-            onClick={next}
-            className="flex h-11 w-11 items-center justify-center border border-gold/30 text-gold transition hover:bg-gold hover:text-burgundy"
-          >
-            <ChevronRight size={20} />
-          </button>
         </div>
+
+        {/* Mobile swipe hint */}
+
+        <p className="mt-5 text-center text-[9px] uppercase tracking-[0.3em] text-burgundy/40 md:hidden">
+          Swipe to explore
+        </p>
       </div>
     </section>
   );
