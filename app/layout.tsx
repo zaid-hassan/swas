@@ -11,6 +11,7 @@ import "./globals.css";
 
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { WhatsappButton } from "@/components/WhatsappButton";
 
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
@@ -86,6 +87,8 @@ export default function RootLayout({
             }}
           />
         </AuthProvider>
+
+        <WhatsappButton />
       </body>
     </html>
   );
