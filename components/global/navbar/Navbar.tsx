@@ -183,7 +183,7 @@ export default function Navbar() {
                     >
                       <AccordionTrigger
                         style={H}
-                        className="text-cream hover:text-gold py-4 text-[24px] font-normal italic hover:no-underline"
+                        className="text-cream hover:text-gold py-4 text-[24px] font-mont hover:no-underline"
                       >
                         {title}
                       </AccordionTrigger>
