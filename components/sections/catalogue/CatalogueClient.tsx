@@ -64,23 +64,30 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
     const categories = Array.from(
       new Set(
         products
+          .filter(
+            (p) => !p.category?.trim().toLowerCase().includes("mangalsutra")
+          )
           .map((p) => p.category?.trim())
           .filter(
-            (category): category is string =>
-              Boolean(category) &&
-              category.toLowerCase() !== "mangalsutra"
+            (category): category is string => Boolean(category)
           )
       )
     );
 
-    return ["All", ...categories].slice(0, 6); // Limit to 5 categories + "All"
+    return ["All", ...categories].slice(0, 6);
   }, [products]);
 
   const visibleProducts = useMemo(() => {
+    const nonMangalsutraProducts = products.filter(
+      (p) => !p.category?.trim().toLowerCase().includes("mangalsutra")
+    );
+
     const filtered =
       activeFilter === "All"
-        ? products
-        : products.filter((p) => p.category === activeFilter);
+        ? nonMangalsutraProducts
+        : nonMangalsutraProducts.filter(
+          (p) => p.category?.trim() === activeFilter
+        );
 
     return filtered.filter((p) => p.image?.trim());
   }, [products, activeFilter]);
@@ -120,8 +127,8 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
               key={filter}
               onClick={() => setActiveFilter(filter)}
               className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 md:px-5 ${activeFilter === filter
-                  ? "border-button bg-button text-white"
-                  : "border-border text-foreground hover:border-gold hover:text-gold"
+                ? "border-button bg-button text-white"
+                : "border-border text-foreground hover:border-gold hover:text-gold"
                 }`}
             >
               {filter}
