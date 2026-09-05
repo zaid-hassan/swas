@@ -11,7 +11,7 @@ import "./globals.css";
 
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { WhatsAppButton  } from "@/components/WhatsappButton";
+import WhatsAppButton from "@/components/WhatsappButton";
 
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
