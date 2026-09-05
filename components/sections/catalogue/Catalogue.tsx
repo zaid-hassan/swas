@@ -6,5 +6,5 @@ import CatalogueClient from "./CatalogueClient";
 export default async function Catalogue() {
   const products = await getProducts();
   console.log(products.map((p) => p.category));
-  return <CatalogueClient products={products.slice(0, 11)} />;
+  return <CatalogueClient products={products} />;
 }

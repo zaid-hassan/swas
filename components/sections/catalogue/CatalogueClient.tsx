@@ -61,8 +61,19 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filters = useMemo(() => {
-    const categories = Array.from(new Set(products.map((p) => p.category)));
-    return ["All", ...categories];
+    const categories = Array.from(
+      new Set(
+        products
+          .map((p) => p.category?.trim())
+          .filter(
+            (category): category is string =>
+              Boolean(category) &&
+              category.toLowerCase() !== "mangalsutra"
+          )
+      )
+    );
+
+    return ["All", ...categories].slice(0, 6); // Limit to 5 categories + "All"
   }, [products]);
 
   const visibleProducts = useMemo(() => {
@@ -108,11 +119,10 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 md:px-5 ${
-                activeFilter === filter
+              className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 md:px-5 ${activeFilter === filter
                   ? "border-button bg-button text-white"
                   : "border-border text-foreground hover:border-gold hover:text-gold"
-              }`}
+                }`}
             >
               {filter}
             </button>
