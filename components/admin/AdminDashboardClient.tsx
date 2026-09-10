@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { CircleDollarSign, Package, Truck, CircleCheck } from "lucide-react";
 
@@ -62,6 +63,123 @@ export default function AdminDashboardClient() {
 
   const [productsLoading, setProductsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // ---- Dashboard v1: Firestore products sync + inline edit ----
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState("");
+  const [syncErrors, setSyncErrors] = useState<{ row: number; error: string }[]>([]);
+  const [editingSerial, setEditingSerial] = useState<number | null>(null);
+  const [editPrice, setEditPrice] = useState("");
+  const [editName, setEditName] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  async function reloadProducts() {
+    const productRes = await fetch("/api/admin/products");
+    const productData = await productRes.json();
+    if (productData.success) setProducts(productData.products);
+  }
+
+  async function pushRows(rows: any[]) {
+    setSyncing(true);
+    setSyncMsg("");
+    setSyncErrors([]);
+    try {
+      const res = await fetch("/api/admin/products/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-email": auth.currentUser?.email || "",
+        },
+        body: JSON.stringify({ source: "rows", rows }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Sync failed");
+      setSyncMsg(
+        `Synced: ${data.inserted} new, ${data.updated} updated, ${data.skipped} unchanged of ${data.total}.`
+      );
+      setSyncErrors(data.errors || []);
+      await reloadProducts();
+      // NOTE: storefront keeps serving cached Sheets data until
+      // USE_FIRESTORE_PRODUCTS=true is set + redeploy.
+    } catch (err: any) {
+      setSyncMsg(err?.message || "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleSheetsSync() {
+    setSyncing(true);
+    setSyncMsg("");
+    setSyncErrors([]);
+    try {
+      const res = await fetch("/api/admin/products/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-email": auth.currentUser?.email || "",
+        },
+        body: JSON.stringify({ source: "sheets" }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Sync failed");
+      setSyncMsg(
+        `Sheets synced: ${data.inserted} new, ${data.updated} updated, ${data.skipped} unchanged of ${data.total}.`
+      );
+      setSyncErrors(data.errors || []);
+      await reloadProducts();
+    } catch (err: any) {
+      setSyncMsg(err?.message || "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleFile(file: File) {
+    const XLSX = await import("xlsx");
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+    await pushRows(rows);
+  }
+
+  async function saveEdit(serial: number) {
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/admin/products/p-${serial}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-email": auth.currentUser?.email || "",
+        },
+        body: JSON.stringify({
+          ...(editName ? { name: editName } : {}),
+          ...(editPrice !== "" ? { mrp: Number(editPrice) } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Update failed");
+      setEditingSerial(null);
+      // Optimistic update: this tab still lists Sheets data, while the edit
+      // is stored in Firestore (future storefront source after cutover).
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.serial === serial
+          ? {
+              ...p,
+              name: editName || p.name,
+              mrp: editPrice !== "" ? Number(editPrice) : p.mrp,
+            }
+          : p
+        )
+      );
+    } catch (err: any) {
+      setSyncMsg(err?.message || "Update failed");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -165,6 +283,49 @@ export default function AdminDashboardClient() {
       {activeTab === "products" && (
         <Card>
           <CardContent className="p-6 space-y-6">
+            {/* v1: bulk upload (XLSX primary, Sheets URL fallback). Writes go
+                to Firestore `products`; storefront still reads Sheets until
+                USE_FIRESTORE_PRODUCTS=true, so the site can't break. */}
+            <div className="space-y-3 border-b pb-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="text-sm font-medium">
+                  Upload XLSX
+                  <Input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    className="mt-1 max-w-xs"
+                    disabled={syncing}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <Button
+                  variant="outline"
+                  disabled={syncing}
+                  onClick={handleSheetsSync}
+                >
+                  {syncing ? "Syncing..." : "Sync from Sheets URL"}
+                </Button>
+              </div>
+              {syncMsg && <p className="text-sm">{syncMsg}</p>}
+              {syncErrors.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium">
+                    {syncErrors.length} rows need attention (showing first 10):
+                  </p>
+                  <ul className="list-disc pl-5">
+                    {syncErrors.slice(0, 10).map((e, i) => (
+                      <li key={i}>
+                        Row {e.row}: {e.error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             {productsLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
@@ -213,6 +374,51 @@ export default function AdminDashboardClient() {
                         </p>
 
                         <p className="font-semibold mt-1">₹{product?.mrp}</p>
+
+                        {editingSerial === product?.serial ? (
+                          <div className="space-y-2 pt-1">
+                            <Input
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              placeholder="Product name"
+                            />
+                            <Input
+                              value={editPrice}
+                              onChange={(e) => setEditPrice(e.target.value)}
+                              placeholder="MRP"
+                              inputMode="numeric"
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                disabled={savingEdit}
+                                onClick={() => saveEdit(product.serial)}
+                              >
+                                {savingEdit ? "Saving..." : "Save"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingSerial(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="mt-1"
+                            onClick={() => {
+                              setEditingSerial(product.serial);
+                              setEditPrice(String(product.mrp ?? ""));
+                              setEditName(product.name ?? "");
+                            }}
+                          >
+                            Edit price/name
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
