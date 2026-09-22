@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-import { adminDb } from "@/lib/firebase-admin";
 import { generateInvoice } from "@/lib/invoice/generate-invoice";
 import { sendOrderEmails } from "@/lib/email/send-order-email";
 
@@ -41,6 +40,10 @@ export async function POST(req: Request) {
     // --------------------------------------------------------------------------
     // Create Firestore Order
     // --------------------------------------------------------------------------
+
+    // Lazy-load firebase-admin so `next build` doesn't evaluate service
+    // account credentials at build time (runtime has real env).
+    const { adminDb } = await import("@/lib/firebase-admin");
 
     const orderRef = adminDb.collection("orders").doc();
 
