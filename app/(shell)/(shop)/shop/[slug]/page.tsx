@@ -5,6 +5,8 @@ import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { AddToCartButton } from "@/components/cart/CartControls";
 import { ShieldCheck, Sparkles, Truck, Award } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductDetail({
   params,
 }: {

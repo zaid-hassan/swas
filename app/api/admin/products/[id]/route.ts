@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
 import { productHash, slugify } from "@/lib/product-rows";
-
-function isAdmin(req: Request) {
-  const required = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!required) return true;
-  return req.headers.get("x-admin-email") === required;
-}
+import { requireAdmin } from "@/lib/admin-auth";
 
 // PATCH /api/admin/products/:id  (id = docId, e.g. p-42)
 // Body: partial fields { name?, category?, description?, material?,
 // design?, finish?, idealFor?, mrp?, image?, image1?, image2?, image3?,
 // dateOfAdd?, isVisible? } — only changed fields are written.
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) {
+  if (!requireAdmin(req)) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

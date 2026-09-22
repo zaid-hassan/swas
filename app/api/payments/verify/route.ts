@@ -77,9 +77,7 @@ export async function POST(req: Request) {
         ownerEmail: "pending",
       },
 
-      googleSheet: {
-        synced: false,
-      },
+      fulfillment: {},
 
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -88,82 +86,6 @@ export async function POST(req: Request) {
     await orderRef.set(orderData);
 
     console.log("✅ Firestore order created:", orderRef.id);
-
-    // --------------------------------------------------------------------------
-    // Google Sheet Sync
-    // --------------------------------------------------------------------------
-
-    const webhook = process.env.GOOGLE_SHEET_WEBHOOK;
-
-    if (!webhook) {
-      throw new Error("GOOGLE_SHEET_WEBHOOK missing from .env");
-    }
-
-    const payload = {
-      orderId: orderRef.id,
-      orderNumber,
-      invoiceNumber,
-
-      date: new Date().toLocaleString("en-IN"),
-
-      customer: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-
-      address:
-        `${address.addressLine1 || ""}, ${address.addressLine2 || ""}, ` +
-        `${address.city || ""}, ${address.state || ""} - ${address.pincode || ""}`,
-
-      productIds: cart.map((i: any) => i.id).join(", "),
-
-      items: cart.map((i: any) => `${i.name} × ${i.quantity}`).join(" | "),
-
-      amount: totals.total,
-
-      status: "Paid",
-    };
-
-    console.log("📤 Sending to Google Sheet...");
-
-    try {
-      const controller = new AbortController();
-
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
-      const sheetRes = await fetch(webhook, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeout);
-
-      const responseText = await sheetRes.text();
-
-      console.log("📥 Google Sheet:", sheetRes.status);
-
-      await orderRef.update({
-        googleSheet: {
-          synced: sheetRes.ok,
-          status: sheetRes.status,
-          response: responseText,
-          syncedAt: Date.now(),
-        },
-      });
-    } catch (sheetError) {
-      console.error("❌ Google Sheet failed:", sheetError);
-
-      await orderRef.update({
-        googleSheet: {
-          synced: false,
-          error: String(sheetError),
-          syncedAt: Date.now(),
-        },
-      });
-    }
 
     // --------------------------------------------------------------------------
     // Generate Invoice + Send Emails

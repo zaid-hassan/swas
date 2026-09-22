@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, RotateCcw } from "lucide-react";
+import { auth } from "@/lib/firebase";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ export default function RefundDialog({
         },
         body: JSON.stringify({
           orderId,
+          userId: auth.currentUser?.uid ?? null,
           customer,
           email,
           amount,

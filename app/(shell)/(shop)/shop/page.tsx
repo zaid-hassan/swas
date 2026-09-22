@@ -3,6 +3,8 @@ import { getProducts } from "@/lib/products";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default async function AllProducts({
   searchParams,
 }: {

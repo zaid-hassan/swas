@@ -77,30 +77,12 @@ export default function AccountPage() {
   }, [loading, user, router]);
 
   useEffect(() => {
-    async function syncWallet() {
+    async function loadWallet() {
       if (!user) return;
 
       try {
-        const res = await fetch("/api/wallet/sync", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            uid: user.uid,
-            email: user.email,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-          setCoins(data.wallet || 0);
-
-          if (data.addedCoins > 0) {
-            toast.success(`${data.addedCoins} coins added.`);
-          }
-        }
+        const snap = await getDoc(doc(db, "users", user.uid));
+        setCoins(snap.data()?.wallet?.coins || 0);
       } catch (err) {
         console.error(err);
       } finally {
@@ -108,7 +90,7 @@ export default function AccountPage() {
       }
     }
 
-    syncWallet();
+    loadWallet();
   }, [user]);
 
   async function handleLogout() {

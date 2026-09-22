@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+// GET /api/tracking/:orderId — reads fulfillment straight off the order doc.
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ orderId: string }> }
@@ -7,34 +8,30 @@ export async function GET(
   try {
     const { orderId } = await params;
 
-    const webhook = process.env.GOOGLE_SHEET_WEBHOOK!;
-
-    const url = `${webhook}?action=tracking&orderId=${orderId}`;
-
-    const res = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    const text = await res.text();
-
-    try {
-      const json = JSON.parse(text);
-      return NextResponse.json(json);
-    } catch {
-      console.error("Tracking API returned HTML:", text.slice(0, 300));
-
-      return NextResponse.json(
-        { found: false, error: "Invalid response from tracking service." },
-        { status: 500 }
-      );
+    if (!orderId) {
+      return NextResponse.json({ found: false, error: "Missing order id" }, { status: 400 });
     }
-  } catch (err) {
-    console.error(err);
 
+    const { adminDb } = await import("@/lib/firebase-admin");
+    const snap = await adminDb.collection("orders").doc(orderId).get();
+
+    if (!snap.exists) {
+      return NextResponse.json({ found: false }, { status: 404 });
+    }
+
+    const data = snap.data() as any;
+    const fulfillment = data.fulfillment ?? {};
+
+    return NextResponse.json({
+      found: true,
+      orderNumber: data.orderNumber ?? "",
+      status: data.status ?? "confirmed",
+      courier: fulfillment.courier ?? "",
+      awb: fulfillment.awb ?? "",
+      trackingUrl: fulfillment.trackingUrl ?? "",
+    });
+  } catch (err) {
+    console.error("tracking lookup failed:", err);
     return NextResponse.json(
       { found: false, error: "Tracking lookup failed." },
       { status: 500 }

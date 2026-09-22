@@ -12,3 +12,7 @@ export type Product = {
   finish: string;
   idealFor: string;
 };
+
+export type AdminProduct = Product & {
+  isVisible: boolean;
+};

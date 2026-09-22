@@ -1,25 +1,32 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-auth";
+import { getCachedOrders, setCachedOrders } from "@/lib/admin-cache";
 
-export async function GET() {
+// GET /api/admin/orders — Firestore-backed order list for the dashboard.
+export async function GET(req: Request) {
+  if (!requireAdmin(req)) {
+    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+  }
+
   try {
-    const webhook = process.env.GOOGLE_SHEET_WEBHOOK!;
+    const cached = getCachedOrders();
+    if (cached) {
+      return NextResponse.json({ success: true, orders: cached });
+    }
 
-    const res = await fetch(`${webhook}?action=orders`, {
-      redirect: "follow",
-      cache: "no-store",
-    });
+    const { adminDb } = await import("@/lib/firebase-admin");
+    const snap = await adminDb
+      .collection("orders")
+      .orderBy("createdAt", "desc")
+      .limit(200)
+      .get();
 
-    const text = await res.text();
+    const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    setCachedOrders(orders);
 
-    const data = JSON.parse(text);
-
-    return NextResponse.json(data);
+    return NextResponse.json({ success: true, orders });
   } catch (err) {
-    console.error(err);
-
-    return NextResponse.json(
-      { success: false },
-      { status: 500 }
-    );
+    console.error("admin orders list failed:", err);
+    return NextResponse.json({ success: false, error: "Failed to load orders" }, { status: 500 });
   }
 }

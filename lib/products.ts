@@ -1,119 +1,80 @@
-import { fetchSheetProducts } from "./fetchsheet";
-import { docToProduct, normalizeProductRow } from "./product-rows";
-import { Product } from "@/types/products";
-
-// Flip to true once Firestore `products` collection is populated via
-// /api/admin/products/sync. Sheets CSV stays as automatic fallback.
-const USE_FIRESTORE_PRODUCTS =
-  process.env.USE_FIRESTORE_PRODUCTS === "true" ||
-  process.env.NEXT_PUBLIC_USE_FIRESTORE_PRODUCTS === "true";
+import { docToProduct } from "./product-rows";
+import type { NormalizedProductDoc } from "./product-rows";
+import { Product, AdminProduct } from "@/types/products";
 
 // In-memory cache: 88 docs × per-request reads would get expensive.
-// All 7 read paths (shop, category, search, catalogue, [slug],
-// validate-cart, /api/products) funnel through getProducts(), so one
-// 5-minute cache here caps Firestore reads at ~12 × 88/day worst case.
+// All storefront read paths funnel through getProducts(), so one 5-minute
+// cache here caps Firestore reads regardless of visitor traffic.
 let cache: { at: number; products: Product[] } | null = null;
+// Admin needs hidden products too; separate short-lived cache.
+let adminCache: { at: number; products: AdminProduct[] } | null = null;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
-function fromSheetRow(row: any): Product {
-  const { doc } = normalizeProductRow(row);
-  if (!doc) {
-    // Preserve old lenient behavior for rows that fail strict validation
-    const images = [row["Image"], row["Image1"], row["Image2"], row["Image3"]].filter(
-      (img): img is string => typeof img === "string" && img.trim() !== ""
-    );
-    return {
-      id: String(row["S No"] ?? ""),
-      category: row["Category"] ?? "",
-      name: row["Product Name"] ?? "",
-      description: row["Description"] ?? "",
-      material: row["Material"] ?? "",
-      design: row["Design"] ?? "",
-      finish: row["Finish"] ?? "",
-      idealFor: row["IdealFor"] ?? "",
-      price: Number(row["MRP"] ?? row["MRP1"] ?? 0) || 0,
-      image: row["Image"] ?? "",
-      images: Array.from(new Set(images)),
-      slug: String(row["Product Name"] ?? "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
-    };
-  }
-  return docToProduct(doc);
+function toNormalized(docId: string, data: any): NormalizedProductDoc {
+  return {
+    sNo: Number(data.sNo),
+    docId,
+    category: data.category ?? "",
+    name: data.name ?? "",
+    description: data.description ?? "",
+    material: data.material ?? "",
+    design: data.design ?? "",
+    finish: data.finish ?? "",
+    idealFor: data.idealFor ?? "",
+    mrp: Number(data.mrp ?? 0),
+    image: data.image ?? "",
+    image1: data.image1 ?? "",
+    image2: data.image2 ?? "",
+    image3: data.image3 ?? "",
+    dateOfAdd: data.dateOfAdd ?? "",
+    slug: data.slug ?? "",
+    isVisible: data.isVisible ?? true,
+    hash: data.hash ?? "",
+    updatedAt: data.updatedAt ?? 0,
+  };
 }
 
-async function getSheetProducts(): Promise<Product[]> {
-  const data = await fetchSheetProducts();
-  return (data as any[]).map(fromSheetRow);
-}
-
-async function getFirestoreProducts(): Promise<Product[]> {
+async function readAllNormalized(): Promise<NormalizedProductDoc[]> {
   // Server-only: dynamic import so client bundles never pull firebase-admin.
   const { adminDb } = await import("./firebase-admin");
   const snap = await adminDb.collection("products").get();
-  const products: Product[] = [];
-  snap.forEach((d) => {
-    const data = d.data() as any;
-    // Only serve visible products to the storefront; dashboard reads
-    // the collection directly so drafts stay editable.
-    if (data.isVisible === false) return;
-    products.push(
-      docToProduct({
-        sNo: Number(data.sNo),
-        docId: d.id,
-        category: data.category ?? "",
-        name: data.name ?? "",
-        description: data.description ?? "",
-        material: data.material ?? "",
-        design: data.design ?? "",
-        finish: data.finish ?? "",
-        idealFor: data.idealFor ?? "",
-        mrp: Number(data.mrp ?? 0),
-        image: data.image ?? "",
-        image1: data.image1 ?? "",
-        image2: data.image2 ?? "",
-        image3: data.image3 ?? "",
-        dateOfAdd: data.dateOfAdd ?? "",
-        slug: data.slug ?? "",
-        isVisible: data.isVisible ?? true,
-        hash: data.hash ?? "",
-        updatedAt: data.updatedAt ?? 0,
-      })
-    );
-  });
-  // Keep storefront order stable (S No ascending)
-  products.sort((a, b) => Number(a.id) - Number(b.id));
-  return products;
+  const out: NormalizedProductDoc[] = [];
+  snap.forEach((d) => out.push(toNormalized(d.id, d.data())));
+  // Keep storefront/admin order stable (S No ascending)
+  out.sort((a, b) => a.sNo - b.sNo);
+  return out;
 }
 
 export async function getProducts(): Promise<Product[]> {
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) return cache.products;
 
-  // Default: Sheets (unchanged behavior until you flip the flag)
-  if (!USE_FIRESTORE_PRODUCTS) {
-    const products = await getSheetProducts();
-    cache = { at: Date.now(), products };
-    return products;
+  const all = await readAllNormalized();
+  const products = all
+    .filter((p) => p.isVisible !== false)
+    .map(docToProduct);
+
+  cache = { at: Date.now(), products };
+  return products;
+}
+
+export async function getAllProducts(): Promise<AdminProduct[]> {
+  if (adminCache && Date.now() - adminCache.at < CACHE_TTL_MS) {
+    return adminCache.products;
   }
 
-  try {
-    const products = await getFirestoreProducts();
-    // Empty collection (not yet synced) → fall back to Sheets rather
-    // than showing an empty shop.
-    if (!products.length) throw new Error("Firestore products empty");
-    cache = { at: Date.now(), products };
-    return products;
-  } catch (err) {
-    console.error("Firestore products failed, falling back to Sheets:", err);
-    const products = await getSheetProducts();
-    cache = { at: Date.now(), products };
-    return products;
-  }
+  const all = await readAllNormalized();
+  const products: AdminProduct[] = all.map((p) => ({
+    ...docToProduct(p),
+    isVisible: p.isVisible !== false,
+  }));
+
+  adminCache = { at: Date.now(), products };
+  return products;
 }
 
 export function clearProductsCache() {
   cache = null;
+  adminCache = null;
 }
 
 export async function getCategories() {

@@ -7,6 +7,10 @@ import HeroFeatures from "@/components/sections/features/HeroFeatures";
 import FeaturedVideoCarousel from "@/components/sections/features/FeaturedVideoCarousel";
 import CollectionFilm from "@/components/sections/collection/CollectionFilm";
 
+// Catalog is read from Firestore at request time (cached in lib/products),
+// so the page must not be prerendered with a build-time Firestore read.
+export const dynamic = "force-dynamic";
+
 function page() {
   return (
     <div>

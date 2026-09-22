@@ -1,10 +1,19 @@
 import type { CartItem } from "@/lib/store/cart-store";
 
-export type OrderStatus =
-  | "pending"
-  | "paid"
-  | "failed"
-  | "cancelled";
+export const ORDER_STATUSES = [
+  "pending",
+  "paid",
+  "failed",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+export function isOrderStatus(value: unknown): value is OrderStatus {
+  return typeof value === "string" && (ORDER_STATUSES as readonly string[]).includes(value);
+}
 
 export type OrderAddress = {
   id?: string;
@@ -46,8 +55,12 @@ export type OrderNotifications = {
   ownerEmail: "pending" | "sent" | "failed";
 };
 
-export type OrderGoogleSheet = {
-  synced: boolean;
+export type Fulfillment = {
+  courier?: string;
+  awb?: string;
+  trackingUrl?: string;
+  shippedAt?: number;
+  deliveredAt?: number;
 };
 
 export type Order = {
@@ -84,7 +97,7 @@ export type Order = {
 
   notifications: OrderNotifications;
 
-  googleSheet: OrderGoogleSheet;
+  fulfillment: Fulfillment;
 
   createdAt: number;
 

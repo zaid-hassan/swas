@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { Coins } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -9,29 +10,19 @@ export default function WalletCard() {
   const [coins, setCoins] = useState(0);
 
   useEffect(() => {
-    async function syncWallet() {
+    async function loadWallet() {
       const user = auth.currentUser;
       if (!user) return;
 
-      const res = await fetch("/api/wallet/sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setCoins(data.wallet);
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        setCoins(snap.data()?.wallet?.coins || 0);
+      } catch (err) {
+        console.error(err);
       }
     }
 
-    syncWallet();
+    loadWallet();
   }, []);
 
   return (

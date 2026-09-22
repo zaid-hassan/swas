@@ -1,24 +1,37 @@
 import { NextResponse } from "next/server";
 
+// POST /api/refunds/create — stores a refund request in Firestore.
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
+    const { orderId, userId, customer, email, amount, reason } = body ?? {};
 
-  const webhook = process.env.GOOGLE_SHEET_WEBHOOK!;
+    if (!orderId || !email || !reason || !Number.isFinite(Number(amount))) {
+      return NextResponse.json(
+        { success: false, error: "Missing refund fields" },
+        { status: 400 }
+      );
+    }
 
-  await fetch(webhook,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      type:"refund",
-      refundId:`RF-${Date.now()}`,
-      ...body,
-      date:new Date().toLocaleString("en-IN")
-    })
-  });
+    const { adminDb } = await import("@/lib/firebase-admin");
+    const ref = adminDb.collection("refunds").doc();
 
-  return NextResponse.json({
-    success:true
-  });
+    await ref.set({
+      orderId,
+      userId: userId ?? null,
+      customer: customer ?? "",
+      email,
+      amount: Number(amount),
+      reason: String(reason).trim(),
+      status: "pending",
+      coinsAdded: false,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    return NextResponse.json({ success: true, refundId: ref.id });
+  } catch (err) {
+    console.error("refund create failed:", err);
+    return NextResponse.json({ success: false, error: "Failed to submit refund" }, { status: 500 });
+  }
 }

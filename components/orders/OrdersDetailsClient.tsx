@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import {
@@ -12,6 +12,7 @@ import {
   Circle,
   MapPin,
   Package,
+  RefreshCw,
   ShieldCheck,
   Truck,
   RotateCcw,
@@ -57,28 +58,30 @@ export default function OrderDetailsClient({ orderId }: Props) {
   const [tracking, setTracking] = useState<Tracking | null>(null);
   const [trackingLoading, setTrackingLoading] = useState(true);
 
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "orders", orderId), (snap) => {
-      setOrder(snap.data());
-    });
-
-    return unsub;
+  const loadOrder = useCallback(async () => {
+    const snap = await getDoc(doc(db, "orders", orderId));
+    setOrder(snap.exists() ? snap.data() : null);
   }, [orderId]);
 
-  useEffect(() => {
-    async function loadTracking() {
-      try {
-        const res = await fetch(`/api/tracking/${orderId}`);
-        setTracking(await res.json());
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setTrackingLoading(false);
-      }
+  const loadTracking = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/tracking/${orderId}`);
+      setTracking(await res.json());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTrackingLoading(false);
     }
-
-    loadTracking();
   }, [orderId]);
+
+  const refresh = useCallback(async () => {
+    setTrackingLoading(true);
+    await Promise.all([loadOrder(), loadTracking()]);
+  }, [loadOrder, loadTracking]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   if (!order) {
     return (
@@ -131,21 +134,31 @@ export default function OrderDetailsClient({ orderId }: Props) {
       <div className="mx-auto max-w-[1120px] px-5 py-10 md:px-8 md:py-14">
         {/* Header */}
 
-        <div className="mb-10">
-          <p className="text-gold text-[10px] font-semibold uppercase tracking-[0.35em]">
-            Order Details
-          </p>
+        <div className="mb-10 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-gold text-[10px] font-semibold uppercase tracking-[0.35em]">
+              Order Details
+            </p>
 
-          <h1
-            className="text-burgundy mt-3 text-4xl md:text-5xl"
-            style={{ fontFamily: "var(--font-heading)" }}
+            <h1
+              className="text-burgundy mt-3 text-4xl md:text-5xl"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {order.orderNumber}
+            </h1>
+
+            <p className="text-burgundy/65 mt-3 text-sm">
+              Placed on {new Date(order.createdAt).toLocaleDateString("en-IN")}
+            </p>
+          </div>
+
+          <button
+            onClick={refresh}
+            className="border border-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-burgundy transition hover:bg-warm"
           >
-            {order.orderNumber}
-          </h1>
-
-          <p className="text-burgundy/65 mt-3 text-sm">
-            Placed on {new Date(order.createdAt).toLocaleDateString("en-IN")}
-          </p>
+            <RefreshCw size={14} className="mr-2 inline" />
+            Refresh
+          </button>
         </div>
 
         {/* Main Card */}

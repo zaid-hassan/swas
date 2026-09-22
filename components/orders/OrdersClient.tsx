@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import {
@@ -8,10 +8,10 @@ import {
   query,
   where,
   orderBy,
-  onSnapshot,
+  getDocs,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { Package } from "lucide-react";
+import { Package, RefreshCw } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,38 +31,51 @@ export default function OrdersClient() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let unsubscribeOrders: (() => void) | undefined;
+  const loadOrders = useCallback(async () => {
+    const user = auth.currentUser;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        setOrders([]);
-        setLoading(false);
-        return;
-      }
+    if (!user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
 
+    setLoading(true);
+
+    try {
       const q = query(
         collection(db, "orders"),
         where("userId", "==", user.uid),
         orderBy("createdAt", "desc")
       );
 
-      unsubscribeOrders = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
+      const snapshot = await getDocs(q);
+
+      setOrders(
+        snapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<Order, "id">),
-        }));
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to load orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-        setOrders(data);
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setOrders([]);
         setLoading(false);
-      });
+        return;
+      }
+      loadOrders();
     });
 
-    return () => {
-      unsubscribeAuth();
-      unsubscribeOrders?.();
-    };
-  }, []);
+    return unsubscribeAuth;
+  }, [loadOrders]);
 
   if (loading) {
     return (
@@ -90,7 +103,12 @@ export default function OrdersClient() {
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-semibold mb-8">My Orders</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-semibold">My Orders</h1>
+        <Button variant="outline" size="sm" disabled={loading} onClick={loadOrders}>
+          <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+        </Button>
+      </div>
 
       <div className="space-y-5">
         {orders.map((order) => (

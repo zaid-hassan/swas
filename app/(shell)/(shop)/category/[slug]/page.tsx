@@ -2,6 +2,8 @@ import { getProducts } from "@/lib/products";
 import ProductCard from "@/components/product/ProductCard";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   params: Promise<{ slug: string }>;
 };

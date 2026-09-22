@@ -146,7 +146,7 @@ export default async function Showcase() {
           "
                 >
                   <Image
-                    src={cat.image || "/placeholder-category.jpg"}
+                    src={cat.image || "/heroposter.webp"}
                     alt={cat.title}
                     fill
                     sizes="

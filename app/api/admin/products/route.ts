@@ -1,44 +1,20 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-auth";
+import { getAllProducts } from "@/lib/products";
 
-export async function GET() {
+// GET /api/admin/products — Firestore-backed list including hidden products.
+export async function GET(req: Request) {
+  if (!requireAdmin(req)) {
+    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+  }
+
   try {
-    const webhook = process.env.GOOGLE_SHEET_WEBHOOK!;
-
-    const url = `${webhook}?action=products`;
-
-    const res = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
-      cache: "no-store",
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    const text = await res.text();
-
-    try {
-      const json = JSON.parse(text);
-      return NextResponse.json(json);
-    } catch {
-      console.error("Products API returned HTML:", text.slice(0, 300));
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid response from Google Apps Script",
-        },
-        { status: 500 }
-      );
-    }
+    const products = await getAllProducts();
+    return NextResponse.json({ success: true, products });
   } catch (err) {
-    console.error(err);
-
+    console.error("admin/products failed:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to load products",
-      },
+      { success: false, error: "Failed to load products" },
       { status: 500 }
     );
   }

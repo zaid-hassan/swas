@@ -1,6 +1,8 @@
 import { getProducts } from "@/lib/products";
 import ProductCard from "@/components/product/ProductCard";
 
+export const dynamic = "force-dynamic";
+
 export default async function SearchPage({
   searchParams,
 }: {
