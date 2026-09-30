@@ -11,6 +11,7 @@ import { buildSyncPlan } from "../lib/product-sync";
 import { isAdminEmail, requireAdmin } from "../lib/admin-auth";
 import { buildRefundReview } from "../lib/refunds";
 import { buildFulfillmentPatch } from "../lib/orders";
+import { validateManualInput } from "../lib/product-create";
 
 let passed = 0;
 let failed = 0;
@@ -325,6 +326,16 @@ test("excel row reusing a manual S No wins and flips source", () => {
   const plan = buildSyncPlan([{ "S No": 9, "Product Name": "A", Category: "C", MRP: 100, Image: "https://x/i.jpg" }], existing as any);
   assert.equal(plan.writes.length, 1);
   assert.equal(plan.writes[0].action, "update");
+});
+
+console.log("\nmanual create validation");
+
+test("validateManualInput rejects zero-media submit", () => {
+  assert.equal(validateManualInput({ name: "A", mrp: 100, images: [], videos: [] }).ok, false);
+});
+
+test("validateManualInput accepts Cloudinary URL with query params", () => {
+  assert.equal(validateManualInput({ name: "A", mrp: 100, images: [], videos: ["https://res.cloudinary.com/x/v.mp4?tx=crop"] }).ok, true);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);
