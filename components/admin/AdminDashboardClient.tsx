@@ -27,12 +27,13 @@ import {
 import type { AdminProduct } from "@/types/products";
 import type { OrderStatus } from "@/lib/orders";
 import type { Refund, RefundStatus } from "@/types/refunds";
+import SingleProductForm from "@/components/admin/SingleProductForm";
 
 const PRODUCTS_PER_PAGE = 12;
 
 const ORDER_STATUS_OPTIONS: OrderStatus[] = ["paid", "shipped", "delivered", "cancelled"];
 
-function adminHeaders(extra?: Record<string, string>) {
+export function adminHeaders(extra?: Record<string, string>) {
   return {
     "x-admin-email": auth.currentUser?.email || "",
     ...(extra || {}),
@@ -222,12 +223,14 @@ function ProductsTab() {
   }, [products, currentPage]);
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-6">
-        <div className="space-y-3 border-b pb-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="text-sm font-medium">
-              Upload XLSX (full catalog replace)
+    <>
+      <SingleProductForm onCreated={load} />
+      <Card>
+        <CardContent className="p-6 space-y-6">
+          <div className="space-y-3 border-b pb-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="text-sm font-medium">
+                Upload XLSX (full catalog replace)
               <Input
                 type="file"
                 accept=".xlsx,.xls,.csv"
@@ -379,10 +382,11 @@ function ProductsTab() {
                 </Button>
               </div>
             )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }
 

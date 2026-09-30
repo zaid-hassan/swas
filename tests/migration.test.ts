@@ -12,6 +12,7 @@ import { isAdminEmail, requireAdmin } from "../lib/admin-auth";
 import { buildRefundReview } from "../lib/refunds";
 import { buildFulfillmentPatch } from "../lib/orders";
 import { validateManualInput } from "../lib/product-create";
+import { isMediaAllowed } from "../lib/media-upload";
 
 let passed = 0;
 let failed = 0;
@@ -336,6 +337,14 @@ test("validateManualInput rejects zero-media submit", () => {
 
 test("validateManualInput accepts Cloudinary URL with query params", () => {
   assert.equal(validateManualInput({ name: "A", mrp: 100, images: [], videos: ["https://res.cloudinary.com/x/v.mp4?tx=crop"] }).ok, true);
+});
+
+console.log("\nmedia upload guards");
+
+test("isMediaAllowed rejects wrong type and oversize video", () => {
+  assert.equal(isMediaAllowed({ name: "a.exe", size: 10 }), false);
+  assert.equal(isMediaAllowed({ name: "v.mp4", size: 200 * 1024 * 1024 }), false);
+  assert.equal(isMediaAllowed({ name: "p.webp", size: 1000 }), true);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);
