@@ -17,6 +17,10 @@ export type NormalizedProductDoc = {
   image1: string;
   image2: string;
   image3: string;
+  video: string;
+  video1: string;
+  video2: string;
+  source: 'excel' | 'manual';
   dateOfAdd: string;
   slug: string;
   isVisible: boolean;
@@ -66,6 +70,9 @@ export function productHash(d: Omit<NormalizedProductDoc, "hash" | "updatedAt">)
     d.image1,
     d.image2,
     d.image3,
+    d.video,
+    d.video1,
+    d.video2,
     d.dateOfAdd,
     d.slug,
     d.isVisible,
@@ -100,6 +107,9 @@ export function normalizeProductRow(row: RawProductRow): {
   const image1 = String(pick(row, "Image1", "image1") || "").trim();
   const image2 = String(pick(row, "Image2", "image2") || "").trim();
   const image3 = String(pick(row, "Image3", "image3") || "").trim();
+  const video = String(pick(row, "Video", "video") || "").trim();
+  const video1 = String(pick(row, "Video1", "video1") || "").trim();
+  const video2 = String(pick(row, "Video2", "video2") || "").trim();
   const dateOfAdd = String(pick(row, "DATE OF ADD", "Date of Add", "dateOfAdd") || "").trim();
 
   const baseSlug = slugify(name);
@@ -124,6 +134,10 @@ export function normalizeProductRow(row: RawProductRow): {
     image1,
     image2,
     image3,
+    video,
+    video1,
+    video2,
+    source: 'excel' as const,
     dateOfAdd,
     slug,
     isVisible,
@@ -140,6 +154,9 @@ export function docToProduct(doc: NormalizedProductDoc): Product {
   );
   // Dedupe identical Cloudinary URLs (your sheet repeats Image 4x)
   const deduped = Array.from(new Set(images));
+  const videos = [doc.video, doc.video1, doc.video2].filter(
+    (v): v is string => typeof v === "string" && v.trim() !== ""
+  );
   return {
     id: String(doc.sNo),
     category: doc.category,
@@ -152,6 +169,7 @@ export function docToProduct(doc: NormalizedProductDoc): Product {
     price: doc.mrp,
     image: doc.image || deduped[0] || "",
     images: deduped,
+    videos: Array.from(new Set(videos)),
     slug: doc.slug,
   };
 }

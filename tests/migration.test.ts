@@ -289,5 +289,28 @@ test("invalid status ignored", () => {
   assert.equal(patch.status, undefined);
 });
 
+console.log("\nproduct videos + source");
+
+test("normalize picks video fields, defaults source excel", () => {
+  const { doc } = normalizeProductRow({ ...sheetRow, Video: "https://res.cloudinary.com/x/v.mp4" });
+  assert.equal(doc!.video, "https://res.cloudinary.com/x/v.mp4");
+  assert.equal(doc!.source, "excel");
+});
+
+test("hash changes when video changes", () => {
+  const a = normalizeProductRow(sheetRow).doc!;
+  const b = normalizeProductRow({ ...sheetRow, Video: "https://res.cloudinary.com/x/v.mp4" }).doc!;
+  assert.notEqual(a.hash, b.hash);
+});
+
+test("docToProduct exposes videos, images unchanged", () => {
+  const p = docToProduct(normalizeProductRow({ ...sheetRow, Video: "https://res.cloudinary.com/x/v.mp4" }).doc!);
+  assert.deepEqual(p.videos, ["https://res.cloudinary.com/x/v.mp4"]);
+  assert.deepEqual(p.images, [
+    "https://res.cloudinary.com/x/a.jpg",
+    "https://res.cloudinary.com/x/b.jpg",
+  ]);
+});
+
 console.log(`\n${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);
