@@ -4,45 +4,82 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+type MediaItem = { kind: "image" | "video"; src: string };
+
 type Props = {
   images: string[];
+  videos?: string[];
   name: string;
 };
 
-export default function ProductImageGallery({ images, name }: Props) {
+export function interleaveMedia(images: string[], videos: string[] = []): MediaItem[] {
+  const [image, image1, image2, image3] = images;
+  const [video, video1, video2] = videos;
+  const slots: Array<[string | undefined, "image" | "video"]> = [
+    [image, "image"],
+    [video, "video"],
+    [image1, "image"],
+    [video1, "video"],
+    [image2, "image"],
+    [video2, "video"],
+    [image3, "image"],
+  ];
+  return slots.flatMap(([src, kind]): MediaItem[] =>
+    src?.trim() ? [{ kind, src }] : []
+  );
+}
+
+export default function ProductImageGallery({ images, videos = [], name }: Props) {
   const [active, setActive] = useState(0);
 
-  const hasMultiple = images.length > 1;
+  const media = interleaveMedia(images, videos);
+  const hasMultiple = media.length > 1;
 
   const next = () => {
-    setActive((prev) => (prev + 1) % images.length);
+    setActive((prev) => (prev + 1) % media.length);
   };
 
   const prev = () => {
-    setActive((prev) => (prev - 1 + images.length) % images.length);
+    setActive((prev) => (prev - 1 + media.length) % media.length);
   };
+
+  const current = media[active];
 
   return (
     <div className="space-y-5">
       {/* Main Image */}
 
       <div className="group relative aspect-[4/5] overflow-hidden border border-gold/20 bg-white">
-        <Image
-          key={images[active]}
-          src={images[active]}
-          alt={name}
-          fill
-          priority={active === 0}
-          sizes="(max-width:768px) 100vw, 55vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-        />
+        {current?.kind === "video" ? (
+          <video
+            key={current.src}
+            src={current.src}
+            controls
+            muted
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          current && (
+            <Image
+              key={current.src}
+              src={current.src}
+              alt={name}
+              fill
+              priority={active === 0}
+              sizes="(max-width:768px) 100vw, 55vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            />
+          )
+        )}
 
-        {/* Image Counter */}
+        {/* Media Counter */}
 
         {hasMultiple && (
           <div className="absolute right-4 top-4 bg-burgundy/80 border border-gold/30 px-3 py-1 backdrop-blur-sm">
             <span className="text-gold text-[11px] font-medium tracking-[0.18em]">
-              {active + 1} / {images.length}
+              {active + 1} / {media.length}
             </span>
           </div>
         )}
@@ -73,7 +110,7 @@ export default function ProductImageGallery({ images, name }: Props) {
       {hasMultiple && (
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex gap-3 pb-2">
-            {images.map((img, index) => (
+            {media.map((item, index) => (
               <button
                 key={index}
                 type="button"
@@ -88,14 +125,24 @@ export default function ProductImageGallery({ images, name }: Props) {
                   }
                 `}
               >
-                <Image
-                  src={img}
-                  alt={`${name} ${index + 1}`}
-                  fill
-                  loading={index === 0 ? "eager" : "lazy"}
-                  sizes="88px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                {item.kind === "video" ? (
+                  <video
+                    src={item.src}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={item.src}
+                    alt={`${name} ${index + 1}`}
+                    fill
+                    loading={index === 0 ? "eager" : "lazy"}
+                    sizes="88px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
 
                 {/* Active Overlay */}
 
@@ -123,7 +170,7 @@ export default function ProductImageGallery({ images, name }: Props) {
           </button>
 
           <div className="flex gap-1.5">
-            {images.map((_, index) => (
+            {media.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setActive(index)}

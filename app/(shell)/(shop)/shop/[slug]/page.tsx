@@ -59,6 +59,7 @@ export default async function ProductDetail({
                     ? [product.image]
                     : []
                 }
+                videos={product.videos ?? []}
                 name={product.name}
               />
             </div>
