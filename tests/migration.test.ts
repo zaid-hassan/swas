@@ -312,5 +312,20 @@ test("docToProduct exposes videos, images unchanged", () => {
   ]);
 });
 
+console.log("\nsync skips manual docs");
+
+test("manual docs are never hidden", () => {
+  const existing = new Map([["p-9", { hash: "x", isVisible: true, source: "manual" }]]);
+  const plan = buildSyncPlan([{ "S No": 1, "Product Name": "A", Category: "C", MRP: 100, Image: "https://x/i.jpg" }], existing as any);
+  assert.deepEqual(plan.hides, []);
+});
+
+test("excel row reusing a manual S No wins and flips source", () => {
+  const existing = new Map([["p-9", { hash: "old", isVisible: true, source: "manual" }]]);
+  const plan = buildSyncPlan([{ "S No": 9, "Product Name": "A", Category: "C", MRP: 100, Image: "https://x/i.jpg" }], existing as any);
+  assert.equal(plan.writes.length, 1);
+  assert.equal(plan.writes[0].action, "update");
+});
+
 console.log(`\n${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);

@@ -59,7 +59,7 @@ export class UnsafeSyncError extends Error {
  */
 export function buildSyncPlan(
   rows: any[],
-  existing: Map<string, { hash?: string; isVisible?: boolean }>
+  existing: Map<string, { hash?: string; isVisible?: boolean; source?: string }>
 ): SyncPlan {
   const valid = new Map<string, NormalizedProductDoc>();
   const errors: SyncError[] = [];
@@ -97,6 +97,7 @@ export function buildSyncPlan(
     for (const [docId, prev] of existing) {
       if (incomingIds.has(docId)) continue;
       if (prev.isVisible === false) continue;
+      if (prev.source === 'manual') continue;
       hides.push(docId);
     }
   }
@@ -112,10 +113,10 @@ export async function syncProducts(rows: any[]): Promise<SyncSummary> {
   const { adminDb } = await import("./firebase-admin");
 
   const snap = await adminDb.collection("products").get();
-  const existing = new Map<string, { hash?: string; isVisible?: boolean }>();
+  const existing = new Map<string, { hash?: string; isVisible?: boolean; source?: string }>();
   snap.forEach((d) => {
     const data = d.data() as any;
-    existing.set(d.id, { hash: data.hash, isVisible: data.isVisible });
+    existing.set(d.id, { hash: data.hash, isVisible: data.isVisible, source: data.source });
   });
 
   const plan = buildSyncPlan(rows, existing);
