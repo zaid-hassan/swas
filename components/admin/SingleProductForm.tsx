@@ -72,6 +72,7 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
 
   const configError = assertConfigured();
   const uploading = [...images, ...videos].some((s) => s.file && !s.url && !s.error);
+  const hasFailedSlot = [...images, ...videos].some((s) => !!s.error);
 
   function setSlot(
     setList: React.Dispatch<React.SetStateAction<Slot[]>>,
@@ -229,7 +230,10 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
         </div>
         {renderSlots("image", images, setImages)}
         {renderSlots("video", videos, setVideos)}
-        <Button disabled={submitting || uploading} onClick={submit}>
+        <Button
+          disabled={submitting || uploading || hasFailedSlot || !!configError}
+          onClick={submit}
+        >
           {submitting ? "Creating…" : "Create product"}
         </Button>
       </CardContent>

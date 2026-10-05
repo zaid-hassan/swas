@@ -4,30 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-type MediaItem = { kind: "image" | "video"; src: string };
+import { interleaveMedia } from "@/lib/media-upload";
 
 type Props = {
   images: string[];
   videos?: string[];
   name: string;
 };
-
-export function interleaveMedia(images: string[], videos: string[] = []): MediaItem[] {
-  const [image, image1, image2, image3] = images;
-  const [video, video1, video2] = videos;
-  const slots: Array<[string | undefined, "image" | "video"]> = [
-    [image, "image"],
-    [video, "video"],
-    [image1, "image"],
-    [video1, "video"],
-    [image2, "image"],
-    [video2, "video"],
-    [image3, "image"],
-  ];
-  return slots.flatMap(([src, kind]): MediaItem[] =>
-    src?.trim() ? [{ kind, src }] : []
-  );
-}
 
 export default function ProductImageGallery({ images, videos = [], name }: Props) {
   const [active, setActive] = useState(0);

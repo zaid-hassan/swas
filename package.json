@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed-products.ts",
-    "test:migration": "tsx tests/migration.test.ts"
+    "test": "tsx tests/migration.test.ts",
+    "test:migration": "tsx tests/migration.test.ts",
+    "test:emulator": "tsx scripts/emulator-test.ts tests/manual-create.emulator.ts",
+    "test:emulator:integration": "tsx scripts/emulator-test.ts tests/integration.emulator.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
