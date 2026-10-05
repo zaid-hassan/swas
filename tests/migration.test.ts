@@ -8,11 +8,21 @@ import {
   productDocId,
 } from "../lib/product-rows";
 import { buildSyncPlan } from "../lib/product-sync";
-import { isAdminEmail, requireAdmin } from "../lib/admin-auth";
+import { isAdminEmail, isSuperAdminEmail, requireAdmin, requireSuperAdmin } from "../lib/admin-auth";
 import { buildRefundReview } from "../lib/refunds";
 import { buildFulfillmentPatch } from "../lib/orders";
 import { validateManualInput } from "../lib/product-create";
-import { isMediaAllowed, interleaveMedia } from "../lib/media-upload";
+import { isMediaAllowed, isVideoUrl, interleaveMedia } from "../lib/media-upload";
+import {
+  CAROUSEL_DEFAULT_COUNT,
+  CAROUSEL_MAX,
+  DEFAULT_HOME_VIDEOS,
+  HOME_VIDEO_KEYS,
+  SINGLE_HOME_VIDEO_SLOTS,
+  carouselSlides,
+  normalizeHomeVideos,
+  validateHomeVideoInput,
+} from "../lib/home-videos";
 
 let passed = 0;
 let failed = 0;
@@ -228,6 +238,95 @@ test("requireAdmin reads x-admin-email header", () => {
   else delete process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 });
 
+console.log("\nadmin roles (admin vs super admin)");
+
+const ADMIN_ENV_KEYS = [
+  "NEXT_PUBLIC_ADMIN_EMAIL",
+  "NEXT_PUBLIC_ADMIN_EMAILS",
+  "NEXT_PUBLIC_SUPER_ADMIN_EMAILS",
+];
+
+/** Run `fn` with only the given admin env set, then restore. */
+function withAdminEnv(vars: Record<string, string>, fn: () => void) {
+  const saved = ADMIN_ENV_KEYS.map((key) => [key, process.env[key]] as const);
+  for (const key of ADMIN_ENV_KEYS) delete process.env[key];
+  for (const [key, value] of Object.entries(vars)) process.env[key] = value;
+  try {
+    fn();
+  } finally {
+    for (const [key, value] of saved) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
+test("super admin list is trimmed and case-insensitive", () => {
+  withAdminEnv(
+    {
+      NEXT_PUBLIC_ADMIN_EMAILS: " one@x.com , two@x.com ",
+      NEXT_PUBLIC_SUPER_ADMIN_EMAILS: " Boss@X.com ",
+    },
+    () => {
+      assert.equal(isAdminEmail("one@x.com"), true);
+      assert.equal(isAdminEmail("two@x.com"), true);
+      assert.equal(isSuperAdminEmail("BOSS@x.com"), true);
+      assert.equal(isAdminEmail("boss@x.com"), true);
+      assert.equal(isSuperAdminEmail("one@x.com"), false);
+      assert.equal(isAdminEmail("nobody@x.com"), false);
+      assert.equal(isSuperAdminEmail("nobody@x.com"), false);
+    }
+  );
+});
+
+test("legacy single admin keeps the bulk upload when no super list is set", () => {
+  withAdminEnv({ NEXT_PUBLIC_ADMIN_EMAIL: "owner@x.com" }, () => {
+    assert.equal(isAdminEmail("owner@x.com"), true);
+    assert.equal(isSuperAdminEmail("owner@x.com"), true);
+  });
+});
+
+test("an explicit super list overrides the legacy fallback", () => {
+  withAdminEnv(
+    {
+      NEXT_PUBLIC_ADMIN_EMAIL: "owner@x.com",
+      NEXT_PUBLIC_SUPER_ADMIN_EMAILS: "boss@x.com",
+    },
+    () => {
+      assert.equal(isAdminEmail("owner@x.com"), true);
+      assert.equal(isSuperAdminEmail("owner@x.com"), false);
+      assert.equal(isSuperAdminEmail("boss@x.com"), true);
+    }
+  );
+});
+
+test("fail-closed: nothing configured denies admin and super admin", () => {
+  withAdminEnv({}, () => {
+    const headers = { "x-admin-email": "owner@x.com" };
+    assert.equal(isAdminEmail("owner@x.com"), false);
+    assert.equal(isSuperAdminEmail("owner@x.com"), false);
+    assert.equal(requireAdmin(new Request("http://x", { headers })), false);
+    assert.equal(requireSuperAdmin(new Request("http://x", { headers })), false);
+  });
+});
+
+test("requireSuperAdmin turns plain admins away at the header", () => {
+  withAdminEnv(
+    {
+      NEXT_PUBLIC_ADMIN_EMAIL: "owner@x.com",
+      NEXT_PUBLIC_ADMIN_EMAILS: "plain@x.com",
+    },
+    () => {
+      const plain = new Request("http://x", { headers: { "x-admin-email": "plain@x.com" } });
+      const owner = new Request("http://x", { headers: { "x-admin-email": "owner@x.com" } });
+      assert.equal(requireAdmin(plain), true);
+      assert.equal(requireSuperAdmin(plain), false);
+      assert.equal(requireSuperAdmin(owner), true);
+      assert.equal(requireSuperAdmin(new Request("http://x")), false);
+    }
+  );
+});
+
 console.log("\nrefunds (review + coin credit)");
 
 test("approve with user credits once", () => {
@@ -400,6 +499,138 @@ test("three images + three videos yield six alternating slots", () => {
 
 test("empty/whitespace slots are dropped", () => {
   assert.deepEqual(interleaveMedia(["", "  "], ["  "]), []);
+});
+
+console.log("\nhome page videos");
+
+test("shipped defaults pass the validator", () => {
+  assert.equal(DEFAULT_HOME_VIDEOS.carousel.length, CAROUSEL_DEFAULT_COUNT);
+  assert.equal(validateHomeVideoInput({ ...DEFAULT_HOME_VIDEOS }).ok, true);
+});
+
+test("missing or empty settings fall back to the shipped defaults", () => {
+  assert.deepEqual(normalizeHomeVideos(null), DEFAULT_HOME_VIDEOS);
+  assert.deepEqual(normalizeHomeVideos({}), DEFAULT_HOME_VIDEOS);
+});
+
+test("stored override wins, untouched slots keep the default", () => {
+  const hero = "https://res.cloudinary.com/demo/video/upload/v1/new-hero.mp4";
+  const videos = normalizeHomeVideos({ hero });
+  assert.equal(videos.hero, hero);
+  assert.equal(videos.collectionFilm, DEFAULT_HOME_VIDEOS.collectionFilm);
+  assert.deepEqual(videos.carousel, DEFAULT_HOME_VIDEOS.carousel);
+});
+
+test("blank or non-video stored values fall back to the default", () => {
+  assert.deepEqual(
+    normalizeHomeVideos({ carousel: "   " }).carousel,
+    DEFAULT_HOME_VIDEOS.carousel
+  );
+  assert.deepEqual(
+    normalizeHomeVideos({ carousel: ["https://x/poster.jpg"] }).carousel,
+    DEFAULT_HOME_VIDEOS.carousel
+  );
+});
+
+test("carousel keeps several distinct clips, in order", () => {
+  const a = "https://res.cloudinary.com/demo/video/upload/v1/card-a.mp4";
+  const b = "https://res.cloudinary.com/demo/video/upload/v1/card-b.webm";
+  assert.deepEqual(normalizeHomeVideos({ carousel: [a, b] }).carousel, [a, b]);
+});
+
+test("carousel accepts a legacy single string and drops invalid entries", () => {
+  const a = "https://res.cloudinary.com/demo/video/upload/v1/card-a.mp4";
+  assert.deepEqual(normalizeHomeVideos({ carousel: a }).carousel, [a]);
+  assert.deepEqual(
+    normalizeHomeVideos({ carousel: [a, "not a url", "", "https://x/pic.png"] }).carousel,
+    [a]
+  );
+});
+
+test("carousel is capped at CAROUSEL_MAX clips", () => {
+  const many = Array.from(
+    { length: CAROUSEL_MAX + 4 },
+    (_, i) => `https://res.cloudinary.com/demo/video/upload/v1/c${i}.mp4`
+  );
+  assert.equal(normalizeHomeVideos({ carousel: many }).carousel.length, CAROUSEL_MAX);
+});
+
+test("validateHomeVideoInput accepts a partial https video patch", () => {
+  const url = "https://res.cloudinary.com/demo/video/upload/v1/clip.mp4?tx=crop";
+  const result = validateHomeVideoInput({ hero: url });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.ok ? result.patch : null, { hero: url });
+});
+
+test("validateHomeVideoInput accepts a carousel list", () => {
+  const urls = [
+    "https://res.cloudinary.com/demo/video/upload/v1/card-a.mp4",
+    "https://res.cloudinary.com/demo/video/upload/v1/card-b.webm?tx=1",
+  ];
+  const result = validateHomeVideoInput({ carousel: urls });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.ok ? result.patch : null, { carousel: urls });
+});
+
+test("validateHomeVideoInput rejects bad carousel payloads", () => {
+  const url = "https://res.cloudinary.com/demo/video/upload/v1/card.mp4";
+  assert.equal(validateHomeVideoInput({ carousel: url }).ok, false, "bare string");
+  assert.equal(validateHomeVideoInput({ carousel: [] }).ok, false, "empty");
+  assert.equal(
+    validateHomeVideoInput({ carousel: Array.from({ length: CAROUSEL_MAX + 1 }, () => url) }).ok,
+    false,
+    "over the cap"
+  );
+  assert.equal(validateHomeVideoInput({ carousel: [url, "https://x/pic.png"] }).ok, false, "image");
+  assert.equal(validateHomeVideoInput({ carousel: [url, "http://x/a.mp4"] }).ok, false, "http");
+});
+
+test("validateHomeVideoInput rejects unknown slots, images, http and blanks", () => {
+  assert.equal(validateHomeVideoInput(null).ok, false);
+  assert.equal(validateHomeVideoInput({}).ok, false);
+  assert.equal(validateHomeVideoInput({ banner: "https://x/a.mp4" }).ok, false);
+  assert.equal(validateHomeVideoInput({ hero: "https://x/a.jpg" }).ok, false);
+  assert.equal(validateHomeVideoInput({ hero: "http://x/a.mp4" }).ok, false);
+  assert.equal(validateHomeVideoInput({ hero: "   " }).ok, false);
+});
+
+test("slot metadata covers exactly the video keys", () => {
+  assert.deepEqual(
+    [...SINGLE_HOME_VIDEO_SLOTS.map((s) => s.key), "carousel"].sort(),
+    [...HOME_VIDEO_KEYS].sort()
+  );
+});
+
+test("carouselSlides pairs a clip per card and cycles captions", () => {
+  const captions = [{ id: 1 }, { id: 2 }];
+  assert.deepEqual(carouselSlides(["a", "b"], captions), [
+    { video: "a", caption: { id: 1 } },
+    { video: "b", caption: { id: 2 } },
+  ]);
+
+  // More clips than captions: captions cycle.
+  assert.deepEqual(
+    carouselSlides(["a", "b", "c"], captions).map((s) => s.caption),
+    [{ id: 1 }, { id: 2 }, { id: 1 }]
+  );
+
+  // No captions at all: clips still render.
+  assert.deepEqual(carouselSlides(["a"], []), [{ video: "a", caption: undefined }]);
+  assert.deepEqual(carouselSlides([], captions), []);
+});
+
+test("isVideoUrl reads the last path segment and ignores query strings", () => {
+  assert.equal(
+    isVideoUrl("https://res.cloudinary.com/demo/video/upload/f_mp4,q_auto,w_1200/clip.mp4"),
+    true
+  );
+  assert.equal(
+    isVideoUrl("https://res.cloudinary.com/demo/video/upload/v1/clip.webm?tx=crop"),
+    true
+  );
+  assert.equal(isVideoUrl("https://res.cloudinary.com/demo/image/upload/v1/a.mp4.jpg"), false);
+  assert.equal(isVideoUrl(""), false);
+  assert.equal(isVideoUrl(null), false);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

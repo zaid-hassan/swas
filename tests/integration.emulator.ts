@@ -15,6 +15,13 @@ import { adminDb } from "../lib/firebase-admin";
 import { syncProducts, UnsafeSyncError } from "../lib/product-sync";
 import { getProducts, getAllProducts, clearProductsCache } from "../lib/products";
 import { PATCH as patchOrder } from "../app/api/admin/orders/[id]/route";
+import { POST as postSync } from "../app/api/admin/products/sync/route";
+import {
+  GET as getHomeVideosRoute,
+  PUT as putHomeVideos,
+} from "../app/api/admin/home-videos/route";
+import { getHomeVideos } from "../lib/site-settings";
+import { CAROUSEL_MAX } from "../lib/home-videos";
 import { PATCH as patchRefund } from "../app/api/admin/refunds/[id]/route";
 import { GET as getTracking } from "../app/api/tracking/[orderId]/route";
 
@@ -40,7 +47,7 @@ function row(sNo: number, name: string, mrp = 100, image = "https://x/i.jpg") {
 }
 
 async function clearAll() {
-  for (const col of ["products", "orders", "refunds", "users"]) {
+  for (const col of ["products", "orders", "refunds", "users", "settings"]) {
     const snap = await adminDb.collection(col).get();
     const batch = adminDb.batch();
     snap.forEach((d) => batch.delete(d.ref));
@@ -235,6 +242,163 @@ async function main() {
 
     const wallet = (await adminDb.collection("users").doc("u1").get()).data()!;
     assert.equal(wallet.wallet.coins, 300);
+  });
+
+  console.log("\nbulk upload (super admin only)");
+
+  await test("bulk sync route rejects admins without the super role", async () => {
+    const saved = {
+      legacy: process.env.NEXT_PUBLIC_ADMIN_EMAIL,
+      admins: process.env.NEXT_PUBLIC_ADMIN_EMAILS,
+      supers: process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS,
+    };
+
+    // ADMIN (the legacy single admin) is the super admin; plain-admin@x.com is
+    // an admin without the bulk upload.
+    process.env.NEXT_PUBLIC_ADMIN_EMAILS = "plain-admin@x.com";
+    delete process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS;
+
+    try {
+      const call = async (email?: string) => {
+        const res = await postSync(
+          new Request("http://x/api/admin/products/sync", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(email ? { "x-admin-email": email } : {}),
+            },
+            // Empty rows on purpose: the role gate must reject before the
+            // route's own 400 "No rows provided" (and nothing gets written).
+            body: JSON.stringify({ rows: [] }),
+          })
+        );
+        return res.status;
+      };
+
+      assert.equal(await call(), 403, "anonymous request");
+      assert.equal(await call("plain-admin@x.com"), 403, "plain admin");
+      assert.equal(await call(ADMIN), 400, "super admin passes the gate");
+    } finally {
+      if (saved.legacy === undefined) delete process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+      else process.env.NEXT_PUBLIC_ADMIN_EMAIL = saved.legacy;
+      if (saved.admins === undefined) delete process.env.NEXT_PUBLIC_ADMIN_EMAILS;
+      else process.env.NEXT_PUBLIC_ADMIN_EMAILS = saved.admins;
+      if (saved.supers === undefined) delete process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS;
+      else process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS = saved.supers;
+    }
+  });
+
+  console.log("\nhome page videos (admin editable)");
+
+  await test("home videos default, save, and reach the public read path", async () => {
+    const anonymous = await getHomeVideosRoute(
+      new Request("http://x/api/admin/home-videos")
+    );
+    assert.equal(anonymous.status, 403);
+
+    const before = await getHomeVideosRoute(
+      new Request("http://x/api/admin/home-videos", { headers: H })
+    );
+    assert.equal(before.status, 200);
+    const beforeBody = await before.json();
+    assert.deepEqual(beforeBody.videos, beforeBody.defaults, "nothing stored yet");
+
+    const newHero = "https://res.cloudinary.com/demo/video/upload/v1/hero-v2.mp4";
+    const saved = await putHomeVideos(
+      new Request("http://x/api/admin/home-videos", {
+        method: "PUT",
+        headers: H,
+        body: JSON.stringify({ hero: newHero }),
+      })
+    );
+    assert.equal(saved.status, 200);
+    const savedBody = await saved.json();
+    assert.equal(savedBody.videos.hero, newHero);
+    assert.deepEqual(
+      savedBody.videos.carousel,
+      beforeBody.defaults.carousel,
+      "untouched slot keeps its default"
+    );
+
+    // Public read path used by the home page component.
+    assert.equal((await getHomeVideos()).hero, newHero);
+
+    // A plain admin (no super role) can edit the home videos.
+    const savedAdmins = process.env.NEXT_PUBLIC_ADMIN_EMAILS;
+    process.env.NEXT_PUBLIC_ADMIN_EMAILS = "plain-admin@x.com";
+    try {
+      const asPlainAdmin = await getHomeVideosRoute(
+        new Request("http://x/api/admin/home-videos", {
+          headers: { "x-admin-email": "plain-admin@x.com" },
+        })
+      );
+      assert.equal(asPlainAdmin.status, 200, "plain admins may edit home videos");
+    } finally {
+      if (savedAdmins === undefined) delete process.env.NEXT_PUBLIC_ADMIN_EMAILS;
+      else process.env.NEXT_PUBLIC_ADMIN_EMAILS = savedAdmins;
+    }
+
+    // Non-video urls are rejected.
+    const bad = await putHomeVideos(
+      new Request("http://x/api/admin/home-videos", {
+        method: "PUT",
+        headers: H,
+        body: JSON.stringify({ hero: "https://x/poster.jpg" }),
+      })
+    );
+    assert.equal(bad.status, 400);
+    assert.equal((await getHomeVideos()).hero, newHero, "rejected write changed nothing");
+  });
+
+  await test("carousel holds several clips, rejects bad lists", async () => {
+    const a = "https://res.cloudinary.com/demo/video/upload/v1/card-a.mp4";
+    const b = "https://res.cloudinary.com/demo/video/upload/v1/card-b.mp4";
+
+    const saved = await putHomeVideos(
+      new Request("http://x/api/admin/home-videos", {
+        method: "PUT",
+        headers: H,
+        body: JSON.stringify({ carousel: [a, b] }),
+      })
+    );
+    assert.equal(saved.status, 200);
+    assert.deepEqual((await saved.json()).videos.carousel, [a, b]);
+
+    // Public read path used by the home page component.
+    assert.deepEqual((await getHomeVideos()).carousel, [a, b]);
+
+    // Single slots are untouched by a carousel-only patch.
+    assert.match((await getHomeVideos()).hero, /^https:\/\//);
+
+    const rejected: unknown[] = [
+      { carousel: [] },
+      { carousel: a },
+      { carousel: [a, "https://x/pic.png"] },
+      { carousel: [a, "http://x/a.mp4"] },
+      {
+        carousel: Array.from(
+          { length: CAROUSEL_MAX + 1 },
+          (_, i) => `https://res.cloudinary.com/demo/video/upload/v1/c${i}.mp4`
+        ),
+      },
+    ];
+
+    for (const body of rejected) {
+      const res = await putHomeVideos(
+        new Request("http://x/api/admin/home-videos", {
+          method: "PUT",
+          headers: H,
+          body: JSON.stringify(body),
+        })
+      );
+      assert.equal(res.status, 400, JSON.stringify(body));
+    }
+
+    assert.deepEqual(
+      (await getHomeVideos()).carousel,
+      [a, b],
+      "rejected writes changed nothing"
+    );
   });
 
   console.log(`\n${passed} passed, ${failed} failed\n`);

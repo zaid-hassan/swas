@@ -7,22 +7,27 @@ import HeroFeatures from "@/components/sections/features/HeroFeatures";
 import FeaturedVideoCarousel from "@/components/sections/features/FeaturedVideoCarousel";
 import CollectionFilm from "@/components/sections/collection/CollectionFilm";
 
+import { getHomeVideos } from "@/lib/site-settings";
+
 // Catalog is read from Firestore at request time (cached in lib/products),
 // so the page must not be prerendered with a build-time Firestore read.
+// The home videos are read the same way (see lib/site-settings).
 export const dynamic = "force-dynamic";
 
-function page() {
+async function page() {
+  const videos = await getHomeVideos();
+
   return (
     <div>
-      <Hero />
+      <Hero video={videos.hero} />
       <CollectionFilm
         title="Taruni Collection"
         href="/collection/taruni"
-        video="https://res.cloudinary.com/dndppvnjl/video/upload/f_mp4,vc_h264,q_auto,w_1200/0825_zphufl.mp4"
+        video={videos.collectionFilm}
       />
       <Showcase />
       <Catalogue />
-      <FeaturedVideoCarousel />
+      <FeaturedVideoCarousel videos={videos.carousel} />
       <HeroFeatures />
     </div>
   );

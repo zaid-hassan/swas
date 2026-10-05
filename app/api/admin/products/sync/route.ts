@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireSuperAdmin } from "@/lib/admin-auth";
 import { syncProducts, UnsafeSyncError } from "@/lib/product-sync";
 
 // POST /api/admin/products/sync
 // Body: { rows: RawProductRow[] } parsed from an XLSX upload.
 // Full-replace semantics: rows in the file are upserted (hash-diff), rows
 // absent from the file are soft-hidden (isVisible=false), never deleted.
+// Super admin only: this rewrites the whole catalog in one shot, so it is not
+// available to plain admins (see lib/admin-auth.ts).
 export async function POST(req: Request) {
-  if (!requireAdmin(req)) {
-    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+  if (!requireSuperAdmin(req)) {
+    return NextResponse.json(
+      { success: false, error: "Forbidden: bulk upload is restricted to the super admin" },
+      { status: 403 }
+    );
   }
 
   try {

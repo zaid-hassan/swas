@@ -10,8 +10,8 @@ import { Upload } from "lucide-react";
 
 import {
   assertConfigured,
-  cloudinaryUploadUrl,
   isMediaAllowed,
+  uploadToCloudinary,
 } from "@/lib/media-upload";
 import { adminHeaders } from "@/components/admin/AdminDashboardClient";
 
@@ -23,35 +23,6 @@ type Slot = {
 };
 
 const emptySlot = (): Slot => ({ file: null, url: "", progress: 0, error: "" });
-
-function uploadToCloudinary(file: File, onProgress: (pct: number) => void): Promise<string> {
-  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", cloudinaryUploadUrl(cloud));
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
-    };
-    xhr.onload = () => {
-      try {
-        const data = JSON.parse(xhr.responseText);
-        if (xhr.status >= 200 && xhr.status < 300 && data.secure_url) {
-          resolve(data.secure_url as string);
-        } else {
-          reject(new Error(data?.error?.message || "Upload failed"));
-        }
-      } catch {
-        reject(new Error("Upload failed"));
-      }
-    };
-    xhr.onerror = () => reject(new Error("Upload failed"));
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("upload_preset", preset);
-    xhr.send(fd);
-  });
-}
 
 const FIELD_LABELS: Array<[string, string]> = [
   ["category", "Category"],

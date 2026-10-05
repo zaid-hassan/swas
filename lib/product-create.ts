@@ -1,5 +1,6 @@
 import { normalizeProductRow, productDocId } from "./product-rows";
 import type { NormalizedProductDoc } from "./product-rows";
+import { isImageUrl, isVideoUrl } from "./media-upload";
 import type { Firestore } from "firebase-admin/firestore";
 
 export type ManualProductInput = {
@@ -15,8 +16,6 @@ export type ManualProductInput = {
   videos: string[];
 };
 
-const IMAGE_EXT = /\.(jpg|jpeg|png|webp)(\?|#|$)/i;
-const VIDEO_EXT = /\.(mp4|webm)(\?|#|$)/i;
 const MAX_ALLOCATION_ATTEMPTS = 10;
 
 function cleanUrl(u: unknown): string {
@@ -39,10 +38,10 @@ export function validateManualInput(
     return { ok: false, error: "At least one image or video required" };
   }
   for (const u of images) {
-    if (!IMAGE_EXT.test(u)) return { ok: false, error: `Invalid image URL: ${u}` };
+    if (!isImageUrl(u)) return { ok: false, error: `Invalid image URL: ${u}` };
   }
   for (const u of videos) {
-    if (!VIDEO_EXT.test(u)) return { ok: false, error: `Invalid video URL: ${u}` };
+    if (!isVideoUrl(u)) return { ok: false, error: `Invalid video URL: ${u}` };
   }
   return { ok: true };
 }

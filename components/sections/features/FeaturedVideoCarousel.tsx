@@ -3,10 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 
-const VIDEO =
-  "https://res.cloudinary.com/dndppvnjl/video/upload/v1787232893/0820_vhpjoo.mp4";
+import { DEFAULT_HOME_VIDEOS, carouselSlides } from "@/lib/home-videos";
 
-const products = [
+/**
+ * Decorative captions paired with the clips by position. The clips themselves
+ * are admin-editable (`settings/home` → carousel[]): one clip per card, so the
+ * carousel can show several different videos instead of the same one on every
+ * card. More clips than captions cycles the captions; fewer clips means fewer
+ * cards.
+ */
+const CARDS = [
   { id: 1, name: "Minimal Silver Ring", price: 1499 },
   { id: 2, name: "Heritage Mangalsutra", price: 3899 },
   { id: 3, name: "Classic Chain", price: 2199 },
@@ -14,10 +20,28 @@ const products = [
   { id: 5, name: "Elegant Earrings", price: 1699 },
 ];
 
-export default function FeaturedVideoCarousel() {
-  const [active, setActive] = useState(2);
+export default function FeaturedVideoCarousel({
+  videos = DEFAULT_HOME_VIDEOS.carousel,
+}: {
+  videos?: string[];
+}) {
+  const slides = carouselSlides(videos, CARDS);
+  const hasMultiple = slides.length > 1;
+
+  // Start on the middle card (the design's hero card), clamped to the list.
+  const [active, setActive] = useState(() =>
+    Math.max(0, Math.min(2, slides.length - 1))
+  );
 
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  /* ------------------------------------------------------------ */
+  /* Keep the active index valid when the clip list changes        */
+  /* ------------------------------------------------------------ */
+
+  useEffect(() => {
+    setActive((prev) => (prev > slides.length - 1 ? Math.max(0, slides.length - 1) : prev));
+  }, [slides.length]);
 
   /* ------------------------------------------------------------ */
   /* Video control                                                */
@@ -38,20 +62,20 @@ export default function FeaturedVideoCarousel() {
         video.currentTime = 0;
       }
     });
-  }, [active]);
+  }, [active, slides.length]);
 
   /* ------------------------------------------------------------ */
   /* Navigation                                                   */
   /* ------------------------------------------------------------ */
 
   const next = () => {
-    setActive((prev) => (prev + 1) % products.length);
+    if (!hasMultiple) return;
+    setActive((prev) => (prev + 1) % slides.length);
   };
 
   const prev = () => {
-    setActive(
-      (prev) => (prev - 1 + products.length) % products.length
-    );
+    if (!hasMultiple) return;
+    setActive((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   /* ------------------------------------------------------------ */
@@ -131,7 +155,7 @@ export default function FeaturedVideoCarousel() {
             "
           >
             <AnimatePresence mode="popLayout">
-              {products.map((product, index) => {
+              {slides.map((slide, index) => {
                 const offset = index - active;
 
                 const x =
@@ -155,7 +179,7 @@ export default function FeaturedVideoCarousel() {
 
                 return (
                   <motion.div
-                    key={product.id}
+                    key={index}
                     initial={false}
                     animate={{
                       x,
@@ -206,7 +230,7 @@ export default function FeaturedVideoCarousel() {
                           ref={(el) => {
                             videoRefs.current[index] = el;
                           }}
-                          src={VIDEO}
+                          src={slide.video}
                           muted
                           autoPlay={index === active}
                           loop
@@ -252,32 +276,34 @@ export default function FeaturedVideoCarousel() {
 
                       {/* Product info */}
 
-                      <div className="border-t border-border p-4">
-                        <h3 className="text-burgundy text-lg font-art md:text-xl">
-                          {product.name}
-                        </h3>
+                      {slide.caption && (
+                        <div className="border-t border-border p-4">
+                          <h3 className="text-burgundy text-lg font-art md:text-xl">
+                            {slide.caption.name}
+                          </h3>
 
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="text-burgundy text-base font-cg md:text-lg">
-                            ₹{product.price.toLocaleString()}
-                          </span>
+                          <div className="mt-3 flex items-center justify-between">
+                            <span className="text-burgundy text-base font-cg md:text-lg">
+                              ₹{slide.caption.price.toLocaleString()}
+                            </span>
 
-                          <button
-                            type="button"
-                            className="
-                              text-gold
-                              text-[10px]
-                              font-semibold
-                              uppercase
-                              tracking-[0.22em]
-                              transition
-                              hover:text-burgundy
-                            "
-                          >
-                            View →
-                          </button>
+                            <button
+                              type="button"
+                              className="
+                                text-gold
+                                text-[10px]
+                                font-semibold
+                                uppercase
+                                tracking-[0.22em]
+                                transition
+                                hover:text-burgundy
+                              "
+                            >
+                              View →
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -290,34 +316,40 @@ export default function FeaturedVideoCarousel() {
         {/* Swipe indicator                                        */}
         {/* ------------------------------------------------------ */}
 
-        <div className="mt-1 flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            {products.map((product, index) => (
-              <button
-                key={product.id}
-                type="button"
-                aria-label={`Show ${product.name}`}
-                onClick={() => setActive(index)}
-                className={`
-                  h-[3px]
-                  transition-all
-                  duration-300
-                  ${
-                    active === index
-                      ? "w-8 bg-gold"
-                      : "w-3 bg-gold/30 hover:bg-gold/60"
+        {hasMultiple && (
+          <div className="mt-1 flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              {slides.map((slide, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={
+                    slide.caption ? `Show ${slide.caption.name}` : `Show video ${index + 1}`
                   }
-                `}
-              />
-            ))}
+                  onClick={() => setActive(index)}
+                  className={`
+                    h-[3px]
+                    transition-all
+                    duration-300
+                    ${
+                      active === index
+                        ? "w-8 bg-gold"
+                        : "w-3 bg-gold/30 hover:bg-gold/60"
+                    }
+                  `}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Mobile swipe hint */}
 
-        <p className="mt-5 text-center text-[9px] uppercase tracking-[0.3em] text-burgundy/40 md:hidden">
-          Swipe to explore
-        </p>
+        {hasMultiple && (
+          <p className="mt-5 text-center text-[9px] uppercase tracking-[0.3em] text-burgundy/40 md:hidden">
+            Swipe to explore
+          </p>
+        )}
       </div>
     </section>
   );

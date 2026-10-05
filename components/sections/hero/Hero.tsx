@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 
-export default function Hero() {
+import { DEFAULT_HOME_VIDEOS } from "@/lib/home-videos";
+
+export default function Hero({
+  video = DEFAULT_HOME_VIDEOS.hero,
+}: {
+  video?: string;
+}) {
   return (
     <section className="relative w-full overflow-hidden bg-background">
       {/* Video */}
@@ -16,10 +22,7 @@ export default function Hero() {
           preload="auto"
           poster="/hero-poster.webp"
         >
-          <source
-            src="https://res.cloudinary.com/dndppvnjl/video/upload/f_mp4,vc_h264,q_auto,w_1200/0820_vhpjoo.mp4"
-            type="video/mp4"
-          />
+          <source src={video} type="video/mp4" />
         </video>
 
         {/* Luxury Overlay */}

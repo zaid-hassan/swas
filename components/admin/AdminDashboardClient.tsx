@@ -25,9 +25,11 @@ import {
 } from "lucide-react";
 
 import type { AdminProduct } from "@/types/products";
+import { isAdminEmail, isSuperAdminEmail } from "@/lib/admin-auth";
 import type { OrderStatus } from "@/lib/orders";
 import type { Refund, RefundStatus } from "@/types/refunds";
 import SingleProductForm from "@/components/admin/SingleProductForm";
+import HomeVideosPanel from "@/components/admin/HomeVideosPanel";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -44,14 +46,16 @@ export default function AdminDashboardClient() {
   const router = useRouter();
 
   const [authChecked, setAuthChecked] = useState(false);
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "refunds">("orders");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "refunds" | "home">("orders");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+      if (!user || !isAdminEmail(user.email)) {
         router.replace("/");
         return;
       }
+      setUserEmail(user.email);
       setAuthChecked(true);
     });
 
@@ -90,12 +94,21 @@ export default function AdminDashboardClient() {
           >
             Refunds
           </Button>
+          <Button
+            variant={activeTab === "home" ? "default" : "outline"}
+            onClick={() => setActiveTab("home")}
+          >
+            Home page
+          </Button>
         </div>
       </div>
 
-      {activeTab === "products" && <ProductsTab />}
+      {activeTab === "products" && (
+        <ProductsTab canBulkUpload={isSuperAdminEmail(userEmail)} />
+      )}
       {activeTab === "orders" && <OrdersTab />}
       {activeTab === "refunds" && <RefundsTab />}
+      {activeTab === "home" && <HomeVideosPanel />}
     </section>
   );
 }
@@ -104,7 +117,7 @@ export default function AdminDashboardClient() {
 /* PRODUCTS                                                                    */
 /* -------------------------------------------------------------------------- */
 
-function ProductsTab() {
+function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -229,29 +242,37 @@ function ProductsTab() {
         <CardContent className="p-6 space-y-6">
           <div className="space-y-3 border-b pb-5">
             <div className="flex flex-wrap items-center gap-3">
-              <label className="text-sm font-medium">
-                Upload XLSX (full catalog replace)
-              <Input
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="mt-1 max-w-xs"
-                disabled={syncing}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleFile(f);
-                  e.target.value = "";
-                }}
-              />
-            </label>
-            <Button variant="outline" disabled={loading} onClick={load}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Refresh
-            </Button>
+              {canBulkUpload ? (
+                <label className="text-sm font-medium">
+                  Upload XLSX (full catalog replace)
+                  <Input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    className="mt-1 max-w-xs"
+                    disabled={syncing}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Bulk catalog upload is restricted to the super admin.
+                </p>
+              )}
+              <Button variant="outline" disabled={loading} onClick={load}>
+                <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+              </Button>
+            </div>
+            {canBulkUpload && (
+              <p className="text-sm text-muted-foreground">
+                Products in the file are added/updated. Products missing from the file are hidden
+                (not deleted). Invalid uploads are rejected without changing anything.
+              </p>
+            )}
           </div>
-          <p className="text-sm text-muted-foreground">
-            Products in the file are added/updated. Products missing from the file are hidden
-            (not deleted). Invalid uploads are rejected without changing anything.
-          </p>
-        </div>
 
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
