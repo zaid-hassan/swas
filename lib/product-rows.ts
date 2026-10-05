@@ -115,9 +115,14 @@ export function normalizeProductRow(row: RawProductRow): {
   const baseSlug = slugify(name);
   const slug = `${baseSlug}-${sNo}`;
 
-  // Visible only when it has a name, a price > 0 and at least one image.
+  // Visible only when it has a name, a price > 0 and at least one media slot
+  // (image or video). Videos count: the manual form accepts video-only
+  // products, and hiding those would publish silently-nothing.
   // Dashboard can override isVisible manually afterwards.
-  const isVisible = mrp > 0 && (image || image1 || image2 || image3 ? true : false);
+  const hasMedia = [image, image1, image2, image3, video, video1, video2].some(
+    (v) => v !== ""
+  );
+  const isVisible = mrp > 0 && hasMedia;
 
   const partial = {
     sNo,

@@ -12,7 +12,7 @@ import { isAdminEmail, requireAdmin } from "../lib/admin-auth";
 import { buildRefundReview } from "../lib/refunds";
 import { buildFulfillmentPatch } from "../lib/orders";
 import { validateManualInput } from "../lib/product-create";
-import { isMediaAllowed } from "../lib/media-upload";
+import { isMediaAllowed, interleaveMedia } from "../lib/media-upload";
 
 let passed = 0;
 let failed = 0;
@@ -314,6 +314,27 @@ test("docToProduct exposes videos, images unchanged", () => {
   ]);
 });
 
+test("video-only product is still visible", () => {
+  const { doc } = normalizeProductRow({
+    ...sheetRow,
+    Image: "",
+    Image1: "",
+    Image2: "",
+    Video: "https://res.cloudinary.com/x/v.mp4",
+  });
+  assert.equal(doc!.isVisible, true);
+});
+
+test("no media at all stays hidden", () => {
+  const { doc } = normalizeProductRow({
+    ...sheetRow,
+    Image: "",
+    Image1: "",
+    Image2: "",
+  });
+  assert.equal(doc!.isVisible, false);
+});
+
 console.log("\nsync skips manual docs");
 
 test("manual docs are never hidden", () => {
@@ -345,6 +366,40 @@ test("isMediaAllowed rejects wrong type and oversize video", () => {
   assert.equal(isMediaAllowed({ name: "a.exe", size: 10 }), false);
   assert.equal(isMediaAllowed({ name: "v.mp4", size: 200 * 1024 * 1024 }), false);
   assert.equal(isMediaAllowed({ name: "p.webp", size: 1000 }), true);
+});
+
+console.log("\ngallery media order");
+
+test("interleaves image/video in fixed slots", () => {
+  const media = interleaveMedia(["i0", "i1", "i2", "i3"], ["v0", "v1", "v2"]);
+  assert.deepEqual(media, [
+    { kind: "image", src: "i0" },
+    { kind: "video", src: "v0" },
+    { kind: "image", src: "i1" },
+    { kind: "video", src: "v1" },
+    { kind: "image", src: "i2" },
+    { kind: "video", src: "v2" },
+    { kind: "image", src: "i3" },
+  ]);
+});
+
+test("excel products (no videos) keep image-only order", () => {
+  assert.deepEqual(interleaveMedia(["a.jpg", "b.jpg"]), [
+    { kind: "image", src: "a.jpg" },
+    { kind: "image", src: "b.jpg" },
+  ]);
+});
+
+test("three images + three videos yield six alternating slots", () => {
+  const media = interleaveMedia(["m1", "m2", "m3"], ["v1", "v2", "v3"]);
+  assert.deepEqual(
+    media.map((m) => m.kind),
+    ["image", "video", "image", "video", "image", "video"]
+  );
+});
+
+test("empty/whitespace slots are dropped", () => {
+  assert.deepEqual(interleaveMedia(["", "  "], ["  "]), []);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);
