@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendOrderEmails({
   order,
   invoicePdf,
@@ -9,6 +7,10 @@ export async function sendOrderEmails({
   order: any;
   invoicePdf: Uint8Array;
 }) {
+  // Constructed per call, not at module scope: a module-scope client makes
+  // `next build` fail while collecting page data when RESEND_API_KEY is absent.
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
   const attachment = {
     filename: `${order.invoice.invoiceNumber}.pdf`,
     content: Buffer.from(invoicePdf),
