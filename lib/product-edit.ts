@@ -13,6 +13,7 @@ export type ProductEditInput = Pick<
   | "design"
   | "finish"
   | "idealFor"
+  | "collectionId"
   | "isVisible"
 >;
 
@@ -29,6 +30,7 @@ export function buildProductEditPatch(input: ProductEditInput) {
     design: input.design,
     finish: input.finish,
     idealFor: input.idealFor,
+    collectionId: input.collectionId ?? "",
     image: images[0] ?? "",
     image1: images[1] ?? "",
     image2: images[2] ?? "",

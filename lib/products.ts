@@ -30,6 +30,7 @@ function toNormalized(docId: string, data: any): NormalizedProductDoc {
     video1: data.video1 ?? "",
     video2: data.video2 ?? "",
     source: data.source ?? 'excel',
+    ...(typeof data.collectionId === "string" && data.collectionId ? { collectionId: data.collectionId } : {}),
     dateOfAdd: data.dateOfAdd ?? "",
     slug: data.slug ?? "",
     isVisible: data.isVisible ?? true,

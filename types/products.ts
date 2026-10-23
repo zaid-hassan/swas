@@ -12,6 +12,7 @@ export type Product = {
   design: string;
   finish: string;
   idealFor: string;
+  collectionId?: string;
 };
 
 export type AdminProduct = Product & {

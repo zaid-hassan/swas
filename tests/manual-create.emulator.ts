@@ -12,6 +12,7 @@ import { adminDb } from "../lib/firebase-admin";
 import { syncProducts } from "../lib/product-sync";
 import { createManualProduct } from "../lib/product-create";
 import { getProducts, getAllProducts, clearProductsCache } from "../lib/products";
+import { createCollection, listCollections } from "../lib/collections";
 
 let passed = 0;
 let failed = 0;
@@ -32,7 +33,7 @@ function row(sNo: number, name: string, mrp = 100, image = "https://x/i.jpg") {
 }
 
 async function clearAll() {
-  for (const col of ["products", "orders", "refunds", "users", "counters"]) {
+  for (const col of ["products", "orders", "refunds", "users", "counters", "collections", "collectionNames"]) {
     const snap = await adminDb.collection(col).get();
     const batch = adminDb.batch();
     snap.forEach((d) => batch.delete(d.ref));
@@ -58,16 +59,49 @@ async function main() {
   console.log(`\nEmulator host: ${process.env.FIRESTORE_EMULATOR_HOST}`);
   await clearAll();
 
+  console.log("\ncollections and product assignment");
+  let collectionId = "";
+
+  await test("creates a Firebase collection with a generated ID", async () => {
+    const collection = await createCollection(adminDb, {
+      name: "Taruni Integration",
+      bannerUrl: "https://res.cloudinary.com/x/taruni-integration.jpg",
+    });
+    collectionId = collection.id;
+    assert.ok(collectionId);
+    const stored = (await adminDb.collection("collections").doc(collectionId).get()).data()!;
+    assert.equal(stored.id, collectionId);
+    assert.equal(stored.name, "Taruni Integration");
+    assert.equal(stored.bannerUrl, "https://res.cloudinary.com/x/taruni-integration.jpg");
+  });
+
+  await test("rejects duplicate collection names", async () => {
+    await assert.rejects(
+      createCollection(adminDb, { name: "taruni integration", bannerUrl: "https://res.cloudinary.com/x/another.jpg" }),
+      /already exists/
+    );
+  });
+
+  await test("only one concurrent create can claim the same collection name", async () => {
+    const attempts = await Promise.allSettled([
+      createCollection(adminDb, { name: "Concurrent Collection", bannerUrl: "https://res.cloudinary.com/x/one.jpg" }),
+      createCollection(adminDb, { name: "Concurrent Collection", bannerUrl: "https://res.cloudinary.com/x/two.jpg" }),
+    ]);
+    assert.equal(attempts.filter((result) => result.status === "fulfilled").length, 1);
+    assert.equal(attempts.filter((result) => result.status === "rejected").length, 1);
+  });
+
   console.log("\nmanual create (transactional S No)");
 
   await test("first create seeds counter from max S No", async () => {
     await syncProducts([row(4, "D"), row(7, "G")]);
-    const doc = await createManualProduct(adminDb, manual);
+    const doc = await createManualProduct(adminDb, { ...manual, collectionId });
     assert.equal(doc.sNo, 8);
     assert.equal(doc.docId, "p-8");
     assert.equal(doc.source, "manual");
     assert.equal(doc.slug, "manual-ring-8");
     assert.equal(doc.isVisible, true);
+    assert.equal(doc.collectionId, collectionId);
     assert.deepEqual([doc.video, doc.video1, doc.video2].filter(Boolean), [
       "https://res.cloudinary.com/x/mv1.mp4",
     ]);
@@ -77,7 +111,7 @@ async function main() {
   });
 
   await test("second create bumps the counter", async () => {
-    const doc = await createManualProduct(adminDb, { ...manual, name: "Manual Two" });
+    const doc = await createManualProduct(adminDb, { ...manual, name: "Manual Two", collectionId });
     assert.equal(doc.sNo, 9);
   });
 
@@ -87,6 +121,7 @@ async function main() {
     const found = storefront.find((p) => p.id === "8");
     assert.ok(found);
     assert.deepEqual(found!.videos, ["https://res.cloudinary.com/x/mv1.mp4"]);
+    assert.equal(found!.collectionId, collectionId);
   });
 
   console.log("\nmanual vs bulk sync");
@@ -99,12 +134,15 @@ async function main() {
     const all = await getAllProducts();
     assert.equal(all.find((p) => p.id === "8")!.isVisible, true);
     assert.equal(all.find((p) => p.id === "9")!.isVisible, true);
+    const collections = await listCollections(adminDb);
+    assert.equal(collections.find((collection) => collection.id === collectionId)?.productCount, 2);
   });
 
   await test("excel row reusing a manual S No flips source to excel", async () => {
     await syncProducts([row(4, "D"), row(7, "G"), row(8, "Manual Ring", 450, "https://x/i.jpg")]);
     const raw = (await adminDb.collection("products").doc("p-8").get()).data()!;
     assert.equal(raw.source, "excel");
+    assert.equal(raw.collectionId, collectionId);
   });
 
   console.log(`\n${passed} passed, ${failed} failed\n`);

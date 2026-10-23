@@ -25,11 +25,13 @@ import {
 } from "lucide-react";
 
 import type { AdminProduct } from "@/types/products";
+import type { AdminCollection } from "@/lib/collections";
 import { isAdminEmail, isSuperAdminEmail } from "@/lib/admin-auth";
 import type { OrderStatus } from "@/lib/orders";
 import type { Refund, RefundStatus } from "@/types/refunds";
 import SingleProductForm from "@/components/admin/SingleProductForm";
 import ProductEditor from "@/components/admin/ProductEditor";
+import CollectionManager from "@/components/admin/CollectionManager";
 import HomeVideosPanel from "@/components/admin/HomeVideosPanel";
 
 const PRODUCTS_PER_PAGE = 12;
@@ -130,6 +132,7 @@ export default function AdminDashboardClient() {
 
 function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [collections, setCollections] = useState<AdminCollection[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -143,8 +146,8 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/products", { headers: adminHeaders() });
-      const data = await res.json();
+      const response = await fetch("/api/admin/products", { headers: adminHeaders() });
+      const data = await response.json();
       if (data.success) setProducts(data.products);
       else toast.error(data.error || "Failed to load products");
     } catch {
@@ -154,9 +157,21 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
     }
   }, []);
 
+  const loadCollections = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/collections", { headers: adminHeaders() });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || "Failed to load collections");
+      setCollections(data.collections);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to load collections");
+    }
+  }, []);
+
   useEffect(() => {
     load();
-  }, [load]);
+    loadCollections();
+  }, [load, loadCollections]);
 
   async function handleFile(file: File) {
     setSyncing(true);
@@ -250,7 +265,8 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
 
   return (
     <>
-      <SingleProductForm onCreated={load} />
+      <CollectionManager collections={collections} onCreated={() => { void loadCollections(); }} />
+      <SingleProductForm collections={collections} onCreated={() => { void load(); void loadCollections(); }} />
       <Card className="overflow-hidden border-gold/30 bg-white shadow-sm">
         <CardContent className="space-y-4 p-5">
           <div className="border-l-2 border-gold pl-3">
@@ -336,9 +352,11 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
                   {editingId === product.id ? (
                     <ProductEditor
                       product={product}
+                      collections={collections}
                       onSaved={() => {
                         setEditingId(null);
                         void load();
+                        void loadCollections();
                       }}
                       onCancel={() => setEditingId(null)}
                     />

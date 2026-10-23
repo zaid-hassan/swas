@@ -59,7 +59,7 @@ export class UnsafeSyncError extends Error {
  */
 export function buildSyncPlan(
   rows: any[],
-  existing: Map<string, { hash?: string; isVisible?: boolean; source?: string }>
+  existing: Map<string, { hash?: string; isVisible?: boolean; source?: string; collectionId?: string }>
 ): SyncPlan {
   const valid = new Map<string, NormalizedProductDoc>();
   const errors: SyncError[] = [];
@@ -91,7 +91,8 @@ export function buildSyncPlan(
         continue;
       }
 
-      writes.push({ docId: doc.docId, doc, action: prev ? "update" : "insert" });
+      const writeDoc = prev?.collectionId ? { ...doc, collectionId: prev.collectionId } : doc;
+      writes.push({ docId: doc.docId, doc: writeDoc, action: prev ? "update" : "insert" });
     }
 
     for (const [docId, prev] of existing) {
@@ -113,10 +114,15 @@ export async function syncProducts(rows: any[]): Promise<SyncSummary> {
   const { adminDb } = await import("./firebase-admin");
 
   const snap = await adminDb.collection("products").get();
-  const existing = new Map<string, { hash?: string; isVisible?: boolean; source?: string }>();
+  const existing = new Map<string, { hash?: string; isVisible?: boolean; source?: string; collectionId?: string }>();
   snap.forEach((d) => {
     const data = d.data() as any;
-    existing.set(d.id, { hash: data.hash, isVisible: data.isVisible, source: data.source });
+    existing.set(d.id, {
+      hash: data.hash,
+      isVisible: data.isVisible,
+      source: data.source,
+      ...(typeof data.collectionId === "string" ? { collectionId: data.collectionId } : {}),
+    });
   });
 
   const plan = buildSyncPlan(rows, existing);

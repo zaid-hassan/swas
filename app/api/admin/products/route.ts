@@ -42,7 +42,11 @@ export async function POST(req: Request) {
       mrp: body.mrp,
       images: body.images ?? [],
       videos: body.videos ?? [],
+      collectionId: typeof body.collectionId === "string" ? body.collectionId : undefined,
     };
+    if (body.collectionId != null && typeof body.collectionId !== "string") {
+      return NextResponse.json({ success: false, error: "Invalid collection id" }, { status: 400 });
+    }
 
     const { validateManualInput, createManualProduct } = await import(
       "@/lib/product-create"
@@ -58,6 +62,12 @@ export async function POST(req: Request) {
       import("@/lib/firebase-admin"),
       import("@/lib/products"),
     ]);
+    if (input.collectionId) {
+      const collection = await adminDb.collection("collections").doc(input.collectionId).get();
+      if (!collection.exists) {
+        return NextResponse.json({ success: false, error: "Selected collection does not exist" }, { status: 400 });
+      }
+    }
 
     const doc = await createManualProduct(adminDb, input);
     clearProductsCache();

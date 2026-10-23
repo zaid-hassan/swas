@@ -14,6 +14,7 @@ export type ManualProductInput = {
   mrp: number;
   images: string[];
   videos: string[];
+  collectionId?: string | null;
 };
 
 const MAX_ALLOCATION_ATTEMPTS = 10;
@@ -27,6 +28,9 @@ export function validateManualInput(
 ): { ok: true } | { ok: false; error: string } {
   if (!input || typeof input.name !== "string" || !input.name.trim()) {
     return { ok: false, error: "Product name required" };
+  }
+  if (input.collectionId != null && (typeof input.collectionId !== "string" || !input.collectionId.trim())) {
+    return { ok: false, error: "Collection id must be a non-empty string" };
   }
   const mrp = Number(input.mrp);
   if (!Number.isFinite(mrp) || mrp <= 0) {
@@ -58,6 +62,11 @@ export async function createManualProduct(
 ): Promise<NormalizedProductDoc> {
   const check = validateManualInput(input);
   if (!check.ok) throw new Error(check.error);
+
+  if (input.collectionId) {
+    const collection = await db.collection("collections").doc(input.collectionId).get();
+    if (!collection.exists) throw new Error("Selected collection does not exist");
+  }
 
   const images = input.images.map(cleanUrl).filter(Boolean).slice(0, 3);
   const videos = input.videos.map(cleanUrl).filter(Boolean).slice(0, 3);
@@ -110,6 +119,7 @@ export async function createManualProduct(
     const { doc, error } = normalizeProductRow(row);
     if (!doc) throw new Error(error || "Invalid product");
     doc.source = "manual";
+    if (input.collectionId) doc.collectionId = input.collectionId;
 
     tx.set(db.collection("products").doc(doc.docId), { ...doc });
     tx.set(counterRef, { lastSNo: sNo }, { merge: true });

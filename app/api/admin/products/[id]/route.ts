@@ -28,6 +28,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const cur = snap.data() as any;
 
     const next = { ...cur };
+    if (patch.collectionId !== undefined) {
+      if (typeof patch.collectionId !== "string") {
+        return NextResponse.json({ success: false, error: "Invalid collection id" }, { status: 400 });
+      }
+      const collectionId = patch.collectionId.trim();
+      if (collectionId) {
+        const collection = await adminDb.collection("collections").doc(collectionId).get();
+        if (!collection.exists) {
+          return NextResponse.json({ success: false, error: "Selected collection does not exist" }, { status: 400 });
+        }
+        next.collectionId = collectionId;
+      } else {
+        delete next.collectionId;
+      }
+    }
     const allowed = [
       "category",
       "name",
@@ -64,7 +79,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     next.updatedAt = Date.now();
 
     // Skip write entirely when nothing changed (cost control)
-    if (next.hash === cur.hash) {
+    if (next.hash === cur.hash && next.collectionId === cur.collectionId) {
       return NextResponse.json({ success: true, skipped: true });
     }
 

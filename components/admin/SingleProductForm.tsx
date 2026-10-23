@@ -14,6 +14,7 @@ import {
   uploadToCloudinary,
 } from "@/lib/media-upload";
 import { adminHeaders } from "@/components/admin/AdminDashboardClient";
+import type { AdminCollection } from "@/lib/collections";
 
 type Slot = {
   file: File | null;
@@ -33,10 +34,11 @@ const FIELD_LABELS: Array<[string, string]> = [
   ["idealFor", "Ideal for"],
 ];
 
-export default function SingleProductForm({ onCreated }: { onCreated: () => void }) {
+export default function SingleProductForm({ onCreated, collections }: { onCreated: () => void; collections: AdminCollection[] }) {
   const [name, setName] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
   const [mrp, setMrp] = useState("");
+  const [collectionId, setCollectionId] = useState("");
   const [images, setImages] = useState<Slot[]>([emptySlot(), emptySlot(), emptySlot()]);
   const [videos, setVideos] = useState<Slot[]>([emptySlot(), emptySlot(), emptySlot()]);
   const [submitting, setSubmitting] = useState(false);
@@ -103,6 +105,7 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
           mrp: Number(mrp),
           images: images.map((s) => s.url).filter(Boolean),
           videos: videos.map((s) => s.url).filter(Boolean),
+          collectionId: collectionId || undefined,
         }),
       });
       const data = await res.json();
@@ -111,6 +114,7 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
       setName("");
       setFields({});
       setMrp("");
+      setCollectionId("");
       setImages([emptySlot(), emptySlot(), emptySlot()]);
       setVideos([emptySlot(), emptySlot(), emptySlot()]);
       onCreated();
@@ -201,6 +205,15 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
               />
             </label>
           ))}
+          <label className="text-xs font-medium text-burgundy">
+            Collection
+            <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={collectionId} onChange={(event) => setCollectionId(event.target.value)}>
+              <option value="">No collection</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>{collection.name} · {collection.productCount} products</option>
+              ))}
+            </select>
+          </label>
         </div>
         {renderSlots("image", images, setImages)}
         {renderSlots("video", videos, setVideos)}

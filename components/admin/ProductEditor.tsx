@@ -8,8 +8,9 @@ import { adminHeaders } from "@/components/admin/AdminDashboardClient";
 import { assertConfigured, isMediaAllowed, uploadToCloudinary } from "@/lib/media-upload";
 import { buildProductEditPatch } from "@/lib/product-edit";
 import type { AdminProduct } from "@/types/products";
+import type { AdminCollection } from "@/lib/collections";
 
-type Props = { product: AdminProduct; onSaved: () => void; onCancel: () => void };
+type Props = { product: AdminProduct; collections: AdminCollection[]; onSaved: () => void; onCancel: () => void };
 const textFields = [
   ["category", "Category"],
   ["description", "Description"],
@@ -19,7 +20,7 @@ const textFields = [
   ["idealFor", "Ideal for"],
 ] as const;
 
-export default function ProductEditor({ product, onSaved, onCancel }: Props) {
+export default function ProductEditor({ product, collections, onSaved, onCancel }: Props) {
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState(String(product.price));
   const [fields, setFields] = useState<Record<string, string>>({
@@ -33,6 +34,7 @@ export default function ProductEditor({ product, onSaved, onCancel }: Props) {
   const [images, setImages] = useState(() => product.images.slice(0, 4));
   const [videos, setVideos] = useState(() => product.videos.slice(0, 3));
   const [visible, setVisible] = useState(product.isVisible);
+  const [collectionId, setCollectionId] = useState(product.collectionId ?? "");
   const [uploading, setUploading] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -80,6 +82,7 @@ export default function ProductEditor({ product, onSaved, onCancel }: Props) {
         design: fields.design ?? "",
         finish: fields.finish ?? "",
         idealFor: fields.idealFor ?? "",
+        collectionId,
         isVisible: visible,
       });
       const response = await fetch(`/api/admin/products/p-${product.id}`, {
@@ -140,6 +143,18 @@ export default function ProductEditor({ product, onSaved, onCancel }: Props) {
             )}
           </label>
         ))}
+        <label className="text-xs font-medium text-burgundy">
+          Collection
+          <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={collectionId} onChange={(event) => setCollectionId(event.target.value)}>
+            <option value="">No collection</option>
+            {product.collectionId && !collections.some((collection) => collection.id === product.collectionId) && (
+              <option value={product.collectionId}>Current collection ({product.collectionId})</option>
+            )}
+            {collections.map((collection) => (
+              <option key={collection.id} value={collection.id}>{collection.name} · {collection.productCount} products</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <fieldset className="space-y-2 border-t border-gold/20 pt-3">

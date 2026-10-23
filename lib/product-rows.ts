@@ -21,6 +21,7 @@ export type NormalizedProductDoc = {
   video1: string;
   video2: string;
   source: 'excel' | 'manual';
+  collectionId?: string;
   dateOfAdd: string;
   slug: string;
   isVisible: boolean;
@@ -176,5 +177,6 @@ export function docToProduct(doc: NormalizedProductDoc): Product {
     images: deduped,
     videos: Array.from(new Set(videos)),
     slug: doc.slug,
+    ...(doc.collectionId ? { collectionId: doc.collectionId } : {}),
   };
 }

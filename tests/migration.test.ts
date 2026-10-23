@@ -14,6 +14,7 @@ import { buildFulfillmentPatch } from "../lib/orders";
 import { validateManualInput } from "../lib/product-create";
 import { buildProductEditPatch } from "../lib/product-edit";
 import { calculateBulkPrice } from "../lib/bulk-price";
+import { countProductsByCollectionId, validateCollectionInput } from "../lib/collections";
 import { isMediaAllowed, isVideoUrl, interleaveMedia } from "../lib/media-upload";
 import {
   CAROUSEL_DEFAULT_COUNT,
@@ -59,6 +60,23 @@ const sheetRow = {
 
 console.log("\nproduct-rows");
 
+test("collection validation requires a name and image banner URL", () => {
+  assert.equal(validateCollectionInput({ name: "Taruni", bannerUrl: "https://res.cloudinary.com/x/banner.webp" }).ok, true);
+  assert.equal(validateCollectionInput({ name: "  ", bannerUrl: "https://res.cloudinary.com/x/banner.webp" }).ok, false);
+  assert.equal(validateCollectionInput({ name: "Taruni", bannerUrl: "https://example.com/banner.pdf" }).ok, false);
+  assert.equal(validateCollectionInput({ name: "Taruni", bannerUrl: "http://res.cloudinary.com/x/banner.jpg" }).ok, false);
+  assert.equal(validateCollectionInput({ name: "Taruni", bannerUrl: "https://example.com/banner.jpg" }).ok, false);
+});
+
+test("collection product count counts only products assigned to that collection", () => {
+  assert.equal(countProductsByCollectionId("c-1", [
+    { collectionId: "c-1" },
+    { collectionId: "c-1" },
+    { collectionId: "c-2" },
+    {},
+  ]), 2);
+});
+
 test("bulk price applies increase percentage to the category base price", () => {
   assert.equal(calculateBulkPrice(1000, 15, "increase"), 1150);
 });
@@ -79,6 +97,7 @@ test("full product edit maps all fields and media to Firestore slots", () => {
     videos: ["one.mp4", "two.mp4", "three.mp4", "ignored.mp4"],
     category: "Rings", description: "New description", material: "Silver",
     design: "Floral", finish: "Polished", idealFor: "Daily wear", isVisible: false,
+    collectionId: "collection-1",
   });
   assert.equal(patch.name, "Edited ring");
   assert.equal(patch.mrp, 250);
@@ -87,6 +106,7 @@ test("full product edit maps all fields and media to Firestore slots", () => {
   assert.equal(patch.video2, "three.mp4");
   assert.equal(patch.description, "New description");
   assert.equal(patch.isVisible, false);
+  assert.equal(patch.collectionId, "collection-1");
 });
 
 test("slugify", () => {
@@ -156,6 +176,7 @@ test("docToProduct dedupes images", () => {
     "https://res.cloudinary.com/x/a.jpg",
     "https://res.cloudinary.com/x/b.jpg",
   ]);
+  assert.equal(docToProduct({ ...doc!, collectionId: "collection-a" }).collectionId, "collection-a");
 });
 
 test("productHash deterministic", () => {
@@ -210,6 +231,13 @@ test("updates changed products", () => {
   const plan = buildSyncPlan([row(1, "A", 999)], existing);
   assert.equal(plan.writes.length, 1);
   assert.equal(plan.writes[0].action, "update");
+});
+
+test("preserves a product's collection when an XLSX row updates it", () => {
+  const doc = normalizeProductRow(row(1, "A")).doc!;
+  const existing = new Map([[doc.docId, { hash: doc.hash, isVisible: doc.isVisible, collectionId: "collection-a" }]]);
+  const plan = buildSyncPlan([row(1, "Updated A")], existing);
+  assert.equal(plan.writes[0].doc.collectionId, "collection-a");
 });
 
 test("soft-hides products missing from the file", () => {
@@ -482,6 +510,28 @@ test("excel row reusing a manual S No wins and flips source", () => {
 });
 
 console.log("\nmanual create validation");
+
+test("validateManualInput accepts a collection assignment", () => {
+  const result = validateManualInput({
+    name: "A",
+    mrp: 100,
+    images: ["https://res.cloudinary.com/x/a.jpg"],
+    videos: [],
+    collectionId: "collection-1",
+  });
+  assert.equal(result.ok, true);
+});
+
+test("validateManualInput rejects an explicitly empty collection id", () => {
+  const result = validateManualInput({
+    name: "A",
+    mrp: 100,
+    images: ["https://res.cloudinary.com/x/a.jpg"],
+    videos: [],
+    collectionId: "   ",
+  });
+  assert.equal(result.ok, false);
+});
 
 test("validateManualInput rejects zero-media submit", () => {
   assert.equal(validateManualInput({ name: "A", mrp: 100, images: [], videos: [] }).ok, false);
