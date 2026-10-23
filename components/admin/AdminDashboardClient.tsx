@@ -29,6 +29,7 @@ import { isAdminEmail, isSuperAdminEmail } from "@/lib/admin-auth";
 import type { OrderStatus } from "@/lib/orders";
 import type { Refund, RefundStatus } from "@/types/refunds";
 import SingleProductForm from "@/components/admin/SingleProductForm";
+import ProductEditor from "@/components/admin/ProductEditor";
 import HomeVideosPanel from "@/components/admin/HomeVideosPanel";
 
 const PRODUCTS_PER_PAGE = 12;
@@ -71,31 +72,41 @@ export default function AdminDashboardClient() {
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-10 space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-3xl font-semibold">Admin Dashboard</h1>
+    <section className="admin-dashboard mx-auto max-w-7xl space-y-8 px-4 py-10 [&_[data-slot=card]]:border-gold/25 [&_[data-slot=card]]:shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
+      <div className="space-y-4 border-b border-gold/25 pb-4">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-soft">SWAS · Management</p>
+            <h1 className="mt-1 font-heading text-3xl font-medium text-burgundy md:text-4xl">Admin Dashboard</h1>
+          </div>
+          <span className="hidden border border-gold/30 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-burgundy sm:inline-flex">Control centre</span>
+        </div>
 
-        <div className="flex gap-2 border-b pb-3">
+        <div className="flex flex-wrap gap-2 border-b border-gold/20 pb-3">
           <Button
             variant={activeTab === "products" ? "default" : "outline"}
+            className={activeTab === "products" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
             onClick={() => setActiveTab("products")}
           >
             All Products
           </Button>
           <Button
             variant={activeTab === "orders" ? "default" : "outline"}
+            className={activeTab === "orders" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
             onClick={() => setActiveTab("orders")}
           >
             Orders
           </Button>
           <Button
             variant={activeTab === "refunds" ? "default" : "outline"}
+            className={activeTab === "refunds" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
             onClick={() => setActiveTab("refunds")}
           >
             Refunds
           </Button>
           <Button
             variant={activeTab === "home" ? "default" : "outline"}
+            className={activeTab === "home" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
             onClick={() => setActiveTab("home")}
           >
             Home page
@@ -123,9 +134,11 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
   const [syncing, setSyncing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editPrice, setEditPrice] = useState("");
-  const [savingEdit, setSavingEdit] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState("");
+  const [basePrice, setBasePrice] = useState("");
+  const [percentage, setPercentage] = useState("");
+  const [priceDirection, setPriceDirection] = useState<"increase" | "decrease">("increase");
+  const [updatingPrices, setUpdatingPrices] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -196,36 +209,36 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
     );
   }
 
-  async function saveEdit(id: string) {
-    setSavingEdit(true);
-    try {
-      const res = await fetch(`/api/admin/products/p-${id}`, {
-        method: "PATCH",
-        headers: adminHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({
-          ...(editName ? { name: editName } : {}),
-          ...(editPrice !== "" ? { mrp: Number(editPrice) } : {}),
-        }),
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Update failed");
 
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                name: editName || p.name,
-                price: editPrice !== "" ? Number(editPrice) : p.price,
-              }
-            : p
-        )
-      );
-      setEditingId(null);
-    } catch (err: any) {
-      toast.error(err?.message || "Update failed");
+  async function updateCategoryPrices() {
+    const base = Number(basePrice);
+    const percent = Number(percentage);
+    if (!bulkCategory || !Number.isFinite(base) || base <= 0 || !Number.isFinite(percent) || percent < 0) {
+      toast.error("Choose a category and enter a valid base price and percentage");
+      return;
+    }
+    if (priceDirection === "decrease" && percent > 100) {
+      toast.error("A price decrease cannot exceed 100%");
+      return;
+    }
+    const newPrice = Math.round(base * (priceDirection === "increase" ? 1 + percent / 100 : 1 - percent / 100));
+    if (!window.confirm(`Set every product in “${bulkCategory}” to ₹${newPrice} (${priceDirection} ${percent}% from ₹${base})?`)) return;
+
+    setUpdatingPrices(true);
+    try {
+      const response = await fetch("/api/admin/products/bulk-price", {
+        method: "POST",
+        headers: adminHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ category: bulkCategory, basePrice: base, percentage: percent, direction: priceDirection }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || "Bulk price update failed");
+      toast.success(`Updated ${data.updated} products in ${data.category} to ₹${data.price}.`);
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Bulk price update failed");
     } finally {
-      setSavingEdit(false);
+      setUpdatingPrices(false);
     }
   }
 
@@ -238,7 +251,33 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
   return (
     <>
       <SingleProductForm onCreated={load} />
-      <Card>
+      <Card className="overflow-hidden border-gold/30 bg-white shadow-sm">
+        <CardContent className="space-y-4 p-5">
+          <div className="border-l-2 border-gold pl-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-soft">Pricing tools</p>
+            <h3 className="font-heading text-xl text-burgundy">Bulk price update by category</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Sets every product in the selected category to the base price adjusted by the percentage.</p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            <label className="text-sm">Category
+              <select className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={bulkCategory} onChange={(event) => setBulkCategory(event.target.value)}>
+                <option value="">Select category</option>
+                {Array.from(new Set(products.map((product) => product.category.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b)).map((category) => <option key={category} value={category}>{category}</option>)}
+              </select>
+            </label>
+            <label className="text-sm">Base price (₹)<Input className="mt-1" type="number" min="1" value={basePrice} onChange={(event) => setBasePrice(event.target.value)} /></label>
+            <label className="text-sm">Percentage (%)<Input className="mt-1" type="number" min="0" max={priceDirection === "decrease" ? 100 : undefined} step="0.01" value={percentage} onChange={(event) => setPercentage(event.target.value)} /></label>
+            <div className="flex items-end gap-2">
+              <Button type="button" variant={priceDirection === "increase" ? "default" : "outline"} onClick={() => setPriceDirection("increase")}>Increase</Button>
+              <Button type="button" variant={priceDirection === "decrease" ? "default" : "outline"} onClick={() => setPriceDirection("decrease")}>Decrease</Button>
+            </div>
+          </div>
+          <Button disabled={updatingPrices || loading || !products.length} onClick={updateCategoryPrices}>
+            {updatingPrices ? "Updating prices…" : "Apply to category"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card className="border-gold/25 shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
         <CardContent className="p-6 space-y-6">
           <div className="space-y-3 border-b pb-5">
             <div className="flex flex-wrap items-center gap-3">
@@ -288,94 +327,54 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {paginated.map((product) => (
-                <div key={product.id} className="space-y-3">
-                  <div className="relative aspect-square rounded-xl overflow-hidden border bg-muted">
-                    {product.image ? (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        loading="lazy"
-                        sizes="(max-width:768px) 50vw, 25vw"
-                        className={`object-cover ${product.isVisible ? "" : "opacity-40"}`}
-                      />
-                    ) : null}
-                    {!product.isVisible && (
-                      <span className="absolute left-2 top-2 rounded bg-black/70 px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
-                        Hidden
-                      </span>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      #{product.id} • {product.category}
-                    </p>
-                    <h3 className="font-medium line-clamp-2">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.material}</p>
-                    <p className="font-semibold mt-1">₹{product.price}</p>
-
-                    {editingId === product.id ? (
-                      <div className="space-y-2 pt-1">
-                        <Input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          placeholder="Product name"
-                        />
-                        <Input
-                          value={editPrice}
-                          onChange={(e) => setEditPrice(e.target.value)}
-                          placeholder="MRP"
-                          inputMode="numeric"
-                        />
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            disabled={savingEdit}
-                            onClick={() => saveEdit(product.id)}
-                          >
-                            {savingEdit ? "Saving..." : "Save"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingId(null)}
-                          >
-                            Cancel
+                <div
+                  key={product.id}
+                  className={editingId === product.id
+                    ? "col-span-full"
+                    : "space-y-3 rounded-sm border border-gold/20 bg-white p-3 shadow-[0_3px_12px_rgba(41,7,7,0.035)] transition duration-200 hover:-translate-y-0.5 hover:border-gold/50 hover:shadow-[0_10px_24px_rgba(41,7,7,0.08)]"}
+                >
+                  {editingId === product.id ? (
+                    <ProductEditor
+                      product={product}
+                      onSaved={() => {
+                        setEditingId(null);
+                        void load();
+                      }}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  ) : (
+                    <>
+                      <div className="relative aspect-square overflow-hidden rounded-sm border border-gold/20 bg-warm">
+                        {product.image ? (
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            loading="lazy"
+                            sizes="(max-width:768px) 50vw, 25vw"
+                            className={`object-cover ${product.isVisible ? "" : "opacity-40"}`}
+                          />
+                        ) : null}
+                        {!product.isVisible && (
+                          <span className="absolute left-2 top-2 rounded bg-burgundy px-2 py-0.5 text-[10px] font-semibold uppercase text-gold">
+                            Hidden
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs text-gold-soft">#{product.id} · {product.category}</p>
+                        <h3 className="line-clamp-2 font-medium text-burgundy">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground">{product.material}</p>
+                        <p className="mt-1 font-semibold text-burgundy">₹{product.price}</p>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button size="sm" variant="outline" className="border-gold/35 text-burgundy hover:bg-gold/10" onClick={() => setEditingId(product.id)}>Edit</Button>
+                          <Button size="sm" variant="outline" className="border-gold/35 text-burgundy hover:bg-gold/10" onClick={() => toggleVisible(product)}>
+                            {product.isVisible ? <><EyeOff className="mr-1 h-3.5 w-3.5" /> Hide</> : <><Eye className="mr-1 h-3.5 w-3.5" /> Show</>}
                           </Button>
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingId(product.id);
-                            setEditName(product.name ?? "");
-                            setEditPrice(String(product.price ?? ""));
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => toggleVisible(product)}
-                        >
-                          {product.isVisible ? (
-                            <>
-                              <EyeOff className="mr-1 h-3.5 w-3.5" /> Hide
-                            </>
-                          ) : (
-                            <>
-                              <Eye className="mr-1 h-3.5 w-3.5" /> Show
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -467,7 +466,7 @@ function OrdersTab() {
         <StatCard icon={CircleCheck} value={String(stats.shipped)} label="Shipped" />
       </div>
 
-      <Card>
+      <Card className="border-gold/25 shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
         <CardContent className="p-0 overflow-auto">
           <div className="flex items-center justify-between border-b p-4">
             <p className="text-sm font-medium">Recent Orders</p>
@@ -482,7 +481,7 @@ function OrdersTab() {
             <div className="p-8 text-center text-muted-foreground">No orders yet.</div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b bg-muted/40">
+              <thead className="border-b border-gold/25 bg-cream text-burgundy">
                 <tr className="text-left">
                   <th className="p-4">Order</th>
                   <th className="p-4">Customer</th>
@@ -626,11 +625,11 @@ function StatCard({
   label: string;
 }) {
   return (
-    <Card>
+    <Card className="border-gold/25 shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
       <CardContent className="p-6">
-        <Icon className="mb-3 text-muted-foreground" />
-        <p className="text-2xl font-bold">{value}</p>
-        <p className="text-sm text-muted-foreground">{label}</p>
+        <Icon className="mb-3 rounded-sm bg-gold/15 p-2 text-burgundy" />
+        <p className="text-2xl font-bold text-burgundy">{value}</p>
+        <p className="text-sm uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
       </CardContent>
     </Card>
   );
@@ -704,7 +703,7 @@ function RefundsTab() {
         />
       </div>
 
-      <Card>
+      <Card className="border-gold/25 shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
         <CardContent className="p-0 overflow-auto">
           <div className="flex items-center justify-between border-b p-4">
             <p className="text-sm font-medium">Refund Requests</p>
@@ -719,7 +718,7 @@ function RefundsTab() {
             <div className="p-8 text-center text-muted-foreground">No refund requests yet.</div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b bg-muted/40">
+              <thead className="border-b border-gold/25 bg-cream text-burgundy">
                 <tr className="text-left">
                   <th className="p-4">Refund</th>
                   <th className="p-4">Customer</th>

@@ -71,28 +71,6 @@ const megaMenu = {
     ],
   },
 
-  Wedding: {
-    columns: [
-      {
-        heading: "Wedding Jewellery",
-        items: ["Mangalsutra", "Jewellery Sets", "Pola Bangles"],
-      },
-      {
-        heading: "Ritual Essentials",
-        items: ["Sindoor Box", "Paan Patta Supari"],
-      },
-    ],
-  },
-
-  Men: {
-    columns: [
-      {
-        heading: "Men's Collection",
-        items: ["Rings", "Bracelets", "Chains"],
-      },
-    ],
-  },
-
   Custom: {
     columns: [
       {

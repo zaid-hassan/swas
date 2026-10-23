@@ -12,6 +12,8 @@ import { isAdminEmail, isSuperAdminEmail, requireAdmin, requireSuperAdmin } from
 import { buildRefundReview } from "../lib/refunds";
 import { buildFulfillmentPatch } from "../lib/orders";
 import { validateManualInput } from "../lib/product-create";
+import { buildProductEditPatch } from "../lib/product-edit";
+import { calculateBulkPrice } from "../lib/bulk-price";
 import { isMediaAllowed, isVideoUrl, interleaveMedia } from "../lib/media-upload";
 import {
   CAROUSEL_DEFAULT_COUNT,
@@ -56,6 +58,36 @@ const sheetRow = {
 };
 
 console.log("\nproduct-rows");
+
+test("bulk price applies increase percentage to the category base price", () => {
+  assert.equal(calculateBulkPrice(1000, 15, "increase"), 1150);
+});
+
+test("bulk price applies decrease percentage to the category base price", () => {
+  assert.equal(calculateBulkPrice(1000, 15, "decrease"), 850);
+});
+
+test("bulk price rejects invalid values and discounts over 100 percent", () => {
+  assert.throws(() => calculateBulkPrice(0, 10, "increase"));
+  assert.throws(() => calculateBulkPrice(1000, 101, "decrease"));
+});
+
+test("full product edit maps all fields and media to Firestore slots", () => {
+  const patch = buildProductEditPatch({
+    name: "Edited ring", price: 250, image: "cover.jpg",
+    images: ["cover.jpg", "side.jpg", "detail.jpg", "back.jpg", "ignored.jpg"],
+    videos: ["one.mp4", "two.mp4", "three.mp4", "ignored.mp4"],
+    category: "Rings", description: "New description", material: "Silver",
+    design: "Floral", finish: "Polished", idealFor: "Daily wear", isVisible: false,
+  });
+  assert.equal(patch.name, "Edited ring");
+  assert.equal(patch.mrp, 250);
+  assert.equal(patch.image, "cover.jpg");
+  assert.equal(patch.image3, "back.jpg");
+  assert.equal(patch.video2, "three.mp4");
+  assert.equal(patch.description, "New description");
+  assert.equal(patch.isVisible, false);
+});
 
 test("slugify", () => {
   assert.equal(slugify("Gold Plated Necklace!"), "gold-plated-necklace");

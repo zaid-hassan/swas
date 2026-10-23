@@ -40,6 +40,7 @@ export default function CheckoutPage() {
   const [shipping, setShipping] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
@@ -150,6 +151,7 @@ export default function CheckoutPage() {
         },
 
         handler: async function (response: any) {
+          setVerifyingPayment(true);
           try {
             const verify = await fetch("/api/payments/verify", {
               method: "POST",
@@ -182,17 +184,22 @@ export default function CheckoutPage() {
             const data = await verify.json();
 
             if (!data.success) {
+              setVerifyingPayment(false);
               alert("Payment verification failed.");
-              `return`;
+              return;
             }
 
             useCartStore.getState().clearCart();
 
             router.push("/checkout/success");
           } catch (err) {
+            setVerifyingPayment(false);
             console.error(err);
             alert("Verification failed.");
           }
+        },
+        modal: {
+          ondismiss: () => setLoading(false),
         },
       });
 
@@ -217,6 +224,21 @@ export default function CheckoutPage() {
   }, [cart]);
 
   return (
+    verifyingPayment ? (
+      <section
+        className="flex min-h-[70vh] flex-col items-center justify-center px-5 text-center"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="mb-6 h-10 w-10 animate-spin rounded-full border-2 border-gold/25 border-t-gold" />
+        <h1 className="text-burgundy text-2xl font-heading md:text-3xl">
+          Confirming your payment
+        </h1>
+        <p className="text-burgundy/65 mt-3 max-w-md text-sm">
+          Please wait while we verify your payment and prepare your order. Do not close this page.
+        </p>
+      </section>
+    ) : (
     <section className="bg-background py-10 md:py-16">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10">
         {/* Header */}
@@ -358,5 +380,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </section>
+    )
   );
 }

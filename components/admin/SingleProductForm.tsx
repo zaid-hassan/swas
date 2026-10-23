@@ -129,7 +129,7 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
     return (
       <div className="grid gap-3 md:grid-cols-3">
         {list.map((slot, i) => (
-          <label key={i} className="space-y-2 rounded border p-3 text-sm">
+          <label key={i} className="space-y-2 rounded-sm border border-gold/20 bg-white p-3 text-xs">
             <span className="font-medium">
               {kind === "image" ? `Image ${i + 1}` : `Video ${i + 1}`}
             </span>
@@ -167,32 +167,35 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
   }
 
   return (
-    <Card>
-      <CardContent className="space-y-4 p-6">
-        <div className="flex items-center gap-2">
-          <Upload className="h-4 w-4" />
-          <h3 className="font-semibold">Add single product</h3>
+    <Card className="overflow-hidden border-gold/30 shadow-sm">
+      <CardContent className="space-y-3 p-4 sm:p-5">
+        <div className="flex items-center gap-3 border-b border-gold/20 pb-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-sm bg-burgundy text-gold"><Upload className="h-4 w-4" /></span>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-soft">Catalog management</p>
+            <h3 className="font-heading text-lg text-burgundy">Add a product</h3>
+          </div>
         </div>
         {configError && <p className="text-sm text-red-600">{configError}</p>}
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="text-sm">
+        <div className="grid gap-3 md:grid-cols-3">
+          <label key="name" className="text-xs font-medium text-burgundy">
             Product name *
-            <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input className="mt-1 h-9 bg-white" value={name} onChange={(e) => setName(e.target.value)} />
           </label>
-          <label className="text-sm">
+          <label key="mrp" className="text-xs font-medium text-burgundy">
             MRP (₹) *
             <Input
-              className="mt-1"
+              className="mt-1 h-9 bg-white"
               value={mrp}
               onChange={(e) => setMrp(e.target.value)}
               inputMode="numeric"
             />
           </label>
           {FIELD_LABELS.map(([key, label]) => (
-            <label key={key} className="text-sm">
+            <label key={key} className="text-xs font-medium text-burgundy">
               {label}
               <Input
-                className="mt-1"
+                className="mt-1 h-9 bg-white"
                 value={fields[key] ?? ""}
                 onChange={(e) => setFields((f) => ({ ...f, [key]: e.target.value }))}
               />
@@ -202,6 +205,7 @@ export default function SingleProductForm({ onCreated }: { onCreated: () => void
         {renderSlots("image", images, setImages)}
         {renderSlots("video", videos, setVideos)}
         <Button
+          className="bg-burgundy text-gold hover:bg-burgundy-rich"
           disabled={submitting || uploading || hasFailedSlot || !!configError}
           onClick={submit}
         >
