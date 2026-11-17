@@ -2,10 +2,13 @@ import { normalizeProductRow, productDocId } from "./product-rows";
 import type { NormalizedProductDoc } from "./product-rows";
 import { isImageUrl, isVideoUrl } from "./media-upload";
 import type { Firestore } from "firebase-admin/firestore";
+import { isCatalogRecordAvailable } from "./categories";
+import { collectionHasCategory } from "./catalog-schema";
 
 export type ManualProductInput = {
   name: string;
-  category?: string;
+  categoryId: string;
+  collectionId: string;
   description?: string;
   material?: string;
   design?: string;
@@ -14,7 +17,6 @@ export type ManualProductInput = {
   mrp: number;
   images: string[];
   videos: string[];
-  collectionId?: string | null;
 };
 
 const MAX_ALLOCATION_ATTEMPTS = 10;
@@ -29,8 +31,11 @@ export function validateManualInput(
   if (!input || typeof input.name !== "string" || !input.name.trim()) {
     return { ok: false, error: "Product name required" };
   }
-  if (input.collectionId != null && (typeof input.collectionId !== "string" || !input.collectionId.trim())) {
-    return { ok: false, error: "Collection id must be a non-empty string" };
+  if (typeof input.categoryId !== "string" || !input.categoryId.trim()) {
+    return { ok: false, error: "Select a category" };
+  }
+  if (typeof input.collectionId !== "string" || !input.collectionId.trim()) {
+    return { ok: false, error: "Select a collection" };
   }
   const mrp = Number(input.mrp);
   if (!Number.isFinite(mrp) || mrp <= 0) {
@@ -63,21 +68,39 @@ export async function createManualProduct(
   const check = validateManualInput(input);
   if (!check.ok) throw new Error(check.error);
 
-  if (input.collectionId) {
-    const collection = await db.collection("collections").doc(input.collectionId).get();
-    if (!collection.exists) throw new Error("Selected collection does not exist");
-  }
-
   const images = input.images.map(cleanUrl).filter(Boolean).slice(0, 3);
   const videos = input.videos.map(cleanUrl).filter(Boolean).slice(0, 3);
 
   return db.runTransaction(async (tx) => {
     const counterRef = db.collection("counters").doc("products");
     const counterSnap = await tx.get(counterRef);
+    const categoryRef = db.collection("categories").doc(input.categoryId.trim());
+    const categorySnap = await tx.get(categoryRef);
+    if (!categorySnap.exists) throw new Error("Selected category does not exist");
+    const category = (categorySnap.data() ?? {}) as Record<string, unknown>;
+    const collectionRef = db.collection("collections").doc(input.collectionId.trim());
+    const collectionSnap = await tx.get(collectionRef);
+    if (!collectionSnap.exists) throw new Error("Category collection does not exist");
+    const collection = (collectionSnap.data() ?? {}) as Record<string, unknown>;
+    if (!collectionHasCategory({ id: collectionRef.id, categoryIds: collection.categoryIds }, categoryRef.id)) {
+      throw new Error("Selected collection does not include this category");
+    }
+    const now = Date.now();
+    if (!isCatalogRecordAvailable(category, now)) {
+      throw new Error("Selected category is expired or deleted");
+    }
+    if (!isCatalogRecordAvailable(collection, now)) {
+      throw new Error("Selected collection is expired or deleted");
+    }
+
+    const assignedProducts = await tx.get(
+      db.collection("products").where("collectionId", "==", collectionRef.id)
+    );
+    const currentProductCount = assignedProducts.size;
 
     let sNo: number;
     if (counterSnap.exists) {
-      sNo = Number((counterSnap.data() as any).lastSNo || 0) + 1;
+      sNo = Number(counterSnap.data()?.lastSNo || 0) + 1;
     } else {
       const topSnap = await tx.get(
         db.collection("products").orderBy("sNo", "desc").limit(1)
@@ -100,7 +123,7 @@ export async function createManualProduct(
     const row = {
       "S No": sNo,
       "Product Name": input.name.trim(),
-      Category: input.category ?? "",
+      Category: typeof category.name === "string" ? category.name : "",
       Description: input.description ?? "",
       Material: input.material ?? "",
       Design: input.design ?? "",
@@ -119,10 +142,13 @@ export async function createManualProduct(
     const { doc, error } = normalizeProductRow(row);
     if (!doc) throw new Error(error || "Invalid product");
     doc.source = "manual";
-    if (input.collectionId) doc.collectionId = input.collectionId;
+    doc.categoryId = categoryRef.id;
+    doc.collectionId = collectionRef.id;
+    doc.stockStatus = "in_stock";
 
     tx.set(db.collection("products").doc(doc.docId), { ...doc });
     tx.set(counterRef, { lastSNo: sNo }, { merge: true });
+    tx.set(collectionRef, { productCount: currentProductCount + 1, updatedAt: now }, { merge: true });
     return doc;
   });
 }

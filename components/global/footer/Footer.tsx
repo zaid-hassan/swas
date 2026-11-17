@@ -13,7 +13,10 @@ import {
   MapPin,
 } from "lucide-react";
 
-export default function Footer() {
+export type FooterCategory = { id: string; title: string; slug: string };
+
+export default function Footer({ categories = [] }: { categories?: FooterCategory[] }) {
+  const shopCategories = categories.slice(0, 4);
   return (
     <footer className="mt-20 border-t border-gold/20 bg-burgundy text-cream">
       <div className="mx-auto max-w-[1280px] px-5 py-14 md:px-10">
@@ -63,32 +66,16 @@ export default function Footer() {
                 </Link>
               </li>
 
-              <li>
-                <Link
-                  href="/category/mangalsutra"
-                  className="hover:text-gold transition"
-                >
-                  Mangalsutra
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/category/earrings"
-                  className="hover:text-gold transition"
-                >
-                  Earrings
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/category/ring"
-                  className="hover:text-gold transition"
-                >
-                  Rings
-                </Link>
-              </li>
+              {shopCategories.map((category) => (
+                <li key={category.id}>
+                  <Link
+                    href={`/category/${encodeURIComponent(category.slug || category.id)}`}
+                    className="hover:text-gold transition"
+                  >
+                    {category.title}
+                  </Link>
+                </li>
+              ))}
 
               <li>
                 <Link

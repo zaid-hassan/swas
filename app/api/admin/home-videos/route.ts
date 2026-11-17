@@ -33,7 +33,7 @@ export async function GET(req: Request) {
 }
 
 // PUT /api/admin/home-videos
-// Body: partial { hero?, collectionFilm?, carousel? } of https video URLs.
+// Body: partial { hero?, carousel? } of https video URLs.
 export async function PUT(req: Request) {
   if (!requireAdmin(req)) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });

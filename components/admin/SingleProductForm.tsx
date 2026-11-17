@@ -14,7 +14,7 @@ import {
   uploadToCloudinary,
 } from "@/lib/media-upload";
 import { adminHeaders } from "@/components/admin/AdminDashboardClient";
-import type { AdminCollection } from "@/lib/collections";
+import type { AdminCategory } from "@/lib/categories";
 
 type Slot = {
   file: File | null;
@@ -26,7 +26,6 @@ type Slot = {
 const emptySlot = (): Slot => ({ file: null, url: "", progress: 0, error: "" });
 
 const FIELD_LABELS: Array<[string, string]> = [
-  ["category", "Category"],
   ["description", "Description"],
   ["material", "Material"],
   ["design", "Design"],
@@ -34,16 +33,21 @@ const FIELD_LABELS: Array<[string, string]> = [
   ["idealFor", "Ideal for"],
 ];
 
-export default function SingleProductForm({ onCreated, collections }: { onCreated: () => void; collections: AdminCollection[] }) {
+export default function SingleProductForm({ onCreated, categories }: { onCreated: () => void; categories: AdminCategory[] }) {
   const [name, setName] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
   const [mrp, setMrp] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [collectionId, setCollectionId] = useState("");
   const [images, setImages] = useState<Slot[]>([emptySlot(), emptySlot(), emptySlot()]);
   const [videos, setVideos] = useState<Slot[]>([emptySlot(), emptySlot(), emptySlot()]);
   const [submitting, setSubmitting] = useState(false);
 
   const configError = assertConfigured();
+  const linkedCollections = Array.from(new Map(categories.flatMap((category) =>
+    category.assignedCollectionIds.map((id, index) => [id, { id, name: category.collectionNames[index] ?? id }] as const)
+  )).values());
+  const availableCategories = categories.filter((category) => !category.expired && category.assignedCollectionIds.includes(collectionId));
   const uploading = [...images, ...videos].some((s) => s.file && !s.url && !s.error);
   const hasFailedSlot = [...images, ...videos].some((s) => !!s.error);
 
@@ -77,9 +81,9 @@ export default function SingleProductForm({ onCreated, collections }: { onCreate
         setSlot(setList, index, { progress })
       );
       setSlot(setList, index, { url, progress: 100 });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSlot(setList, index, {
-        error: err?.message || "Upload failed",
+        error: err instanceof Error ? err.message : "Upload failed",
       });
     }
   }
@@ -96,7 +100,8 @@ export default function SingleProductForm({ onCreated, collections }: { onCreate
         headers: adminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           name,
-          category: fields.category ?? "",
+          categoryId,
+          collectionId,
           description: fields.description ?? "",
           material: fields.material ?? "",
           design: fields.design ?? "",
@@ -105,7 +110,6 @@ export default function SingleProductForm({ onCreated, collections }: { onCreate
           mrp: Number(mrp),
           images: images.map((s) => s.url).filter(Boolean),
           videos: videos.map((s) => s.url).filter(Boolean),
-          collectionId: collectionId || undefined,
         }),
       });
       const data = await res.json();
@@ -114,12 +118,13 @@ export default function SingleProductForm({ onCreated, collections }: { onCreate
       setName("");
       setFields({});
       setMrp("");
+      setCategoryId("");
       setCollectionId("");
       setImages([emptySlot(), emptySlot(), emptySlot()]);
       setVideos([emptySlot(), emptySlot(), emptySlot()]);
       onCreated();
-    } catch (err: any) {
-      toast.error(err?.message || "Create failed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Create failed");
     } finally {
       setSubmitting(false);
     }
@@ -206,12 +211,17 @@ export default function SingleProductForm({ onCreated, collections }: { onCreate
             </label>
           ))}
           <label className="text-xs font-medium text-burgundy">
-            Collection
-            <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={collectionId} onChange={(event) => setCollectionId(event.target.value)}>
-              <option value="">No collection</option>
-              {collections.map((collection) => (
-                <option key={collection.id} value={collection.id}>{collection.name} · {collection.productCount} products</option>
-              ))}
+            Collection *
+            <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={collectionId} onChange={(event) => { setCollectionId(event.target.value); setCategoryId(""); }}>
+              <option value="">Select a collection</option>
+              {linkedCollections.map((collection) => <option key={collection.id} value={collection.id}>{collection.name}</option>)}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-burgundy">
+            Category *
+            <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} disabled={!collectionId}>
+              <option value="">Select a category</option>
+              {availableCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
           </label>
         </div>
@@ -219,7 +229,7 @@ export default function SingleProductForm({ onCreated, collections }: { onCreate
         {renderSlots("video", videos, setVideos)}
         <Button
           className="bg-burgundy text-gold hover:bg-burgundy-rich"
-          disabled={submitting || uploading || hasFailedSlot || !!configError}
+          disabled={submitting || uploading || hasFailedSlot || !!configError || !collectionId || !categoryId}
           onClick={submit}
         >
           {submitting ? "Creating…" : "Create product"}

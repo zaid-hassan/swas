@@ -33,7 +33,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const input: ManualProductInput = {
       name: body.name,
-      category: body.category,
+      categoryId: typeof body.categoryId === "string" ? body.categoryId : "",
+      collectionId: typeof body.collectionId === "string" ? body.collectionId : "",
       description: body.description,
       material: body.material,
       design: body.design,
@@ -42,8 +43,10 @@ export async function POST(req: Request) {
       mrp: body.mrp,
       images: body.images ?? [],
       videos: body.videos ?? [],
-      collectionId: typeof body.collectionId === "string" ? body.collectionId : undefined,
     };
+    if (body.categoryId != null && typeof body.categoryId !== "string") {
+      return NextResponse.json({ success: false, error: "Invalid category id" }, { status: 400 });
+    }
     if (body.collectionId != null && typeof body.collectionId !== "string") {
       return NextResponse.json({ success: false, error: "Invalid collection id" }, { status: 400 });
     }
@@ -62,21 +65,14 @@ export async function POST(req: Request) {
       import("@/lib/firebase-admin"),
       import("@/lib/products"),
     ]);
-    if (input.collectionId) {
-      const collection = await adminDb.collection("collections").doc(input.collectionId).get();
-      if (!collection.exists) {
-        return NextResponse.json({ success: false, error: "Selected collection does not exist" }, { status: 400 });
-      }
-    }
-
     const doc = await createManualProduct(adminDb, input);
     clearProductsCache();
     return NextResponse.json({ success: true, product: docToProduct(doc) });
-  } catch (err: any) {
-    console.error("admin/product create failed:", err);
-    return NextResponse.json(
-      { success: false, error: err?.message || "Create failed" },
-      { status: 500 }
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Create failed";
+    const status = message.includes("maximum product limit") ? 409 :
+      message.includes("does not exist") || message.includes("expired") ? 400 : 500;
+    if (status === 500) console.error("admin/product create failed:", err);
+    return NextResponse.json({ success: false, error: message }, { status });
   }
 }

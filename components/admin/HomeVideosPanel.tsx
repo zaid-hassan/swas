@@ -35,11 +35,8 @@ const emptySlot = (url = ""): Slot => ({
 type SingleSlots = Record<HomeVideoSingleKey, Slot>;
 
 /**
- * Edits the home-page videos: the two single slots (hero, collection film) and
- * the featured carousel, which holds one clip per card. Uploads go straight to
- * Cloudinary (same unsigned preset as the product form) and the URLs are stored
- * in `settings/home`; the home page reads that doc per request, so a save is
- * live immediately.
+ * Edits the home-page hero video and featured carousel, which holds one clip per
+ * card. Collection banners are managed from the Collections panel.
  */
 export default function HomeVideosPanel() {
   const [singles, setSingles] = useState<SingleSlots | null>(null);
@@ -59,7 +56,6 @@ export default function HomeVideosPanel() {
       setLive(videos);
       setSingles({
         hero: emptySlot(videos.hero),
-        collectionFilm: emptySlot(videos.collectionFilm),
       });
       setCarousel(videos.carousel.map((url) => emptySlot(url)));
     } catch (err: any) {

@@ -41,7 +41,7 @@ export default function ProductCard({
   badge,
   badgeStyle = "maroon",
   oldPrice,
-  catLabel = "Silver",
+  catLabel,
 }: ProductCardProps) {
   const [wished, setWished] = useState(false);
 
@@ -81,6 +81,12 @@ export default function ProductCard({
             ].join(" ")}
           >
             {badge}
+          </span>
+        )}
+
+        {product.stockStatus === "out_of_stock" && (
+          <span className="absolute bottom-2.5 left-2.5 z-10 bg-white px-2.5 py-[5px] text-[8.5px] font-medium uppercase tracking-[0.18em] text-red-700 shadow-sm">
+            Sold out
           </span>
         )}
 
@@ -136,7 +142,7 @@ export default function ProductCard({
 
         {/* Category — gold, ultra-small caps */}
         <p className="text-[9.5px] tracking-[0.2em] uppercase text-gold mb-1.5 font-sans font-normal">
-          {catLabel}
+          {catLabel ?? product?.category ?? "Silver"}
         </p>
 
         {/* Name — Cormorant serif */}

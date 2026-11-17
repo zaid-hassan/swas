@@ -10,7 +10,6 @@ import {
 
 import { auth } from "@/lib/firebase";
 import { ensureUserDocument } from "@/lib/create-user-document";
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,11 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage({
-  className,
-}: {
-  className?: string;
-}) {
+export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -87,10 +82,7 @@ export default function LoginPage({
 
   return (
     <div
-      className={cn(
-        "bg-background flex min-h-screen items-center justify-center px-5 py-10 md:px-10 md:py-20",
-        className
-      )}
+      className="bg-background flex min-h-screen items-center justify-center px-5 py-10 md:px-10 md:py-20"
     >
       <div className="w-full max-w-[440px]">
         {/* Heading */}

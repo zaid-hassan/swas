@@ -1,4 +1,4 @@
-import { getProducts } from "@/lib/products";
+import { getCategories, getProducts } from "@/lib/products";
 import ProductCard from "@/components/product/ProductCard";
 import { notFound } from "next/navigation";
 
@@ -10,16 +10,10 @@ type Props = {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const products = await getProducts();
-
-  const filtered = products.filter((product) => {
-    const categorySlug = (product?.category ?? "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-    return categorySlug === slug;
-  });
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
+  const category = categories.find((item) => item.slug === slug || item.id === slug);
+  if (!category) notFound();
+  const filtered = products.filter((product) => product.categoryId === category.id);
 
   if (filtered.length === 0) {
     notFound();
@@ -29,7 +23,7 @@ export default async function CategoryPage({ params }: Props) {
     <div className="mx-auto max-w-7xl px-4 py-16">
       <div className="mb-12 text-center">
         <h1 className="text-3xl md:text-4xl font-heading font-semibold tracking-tight">
-          {filtered[0].category}
+          {category.title}
         </h1>
       </div>
 
@@ -44,23 +38,12 @@ export default async function CategoryPage({ params }: Props) {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const products = await getProducts();
-
-  const match = products.find((product) => {
-    const categorySlug = (product?.category ?? "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-    return categorySlug === slug;
-  });
-
-  if (!match) {
-    return {};
-  }
+  const categories = await getCategories();
+  const category = categories.find((item) => item.slug === slug || item.id === slug);
+  if (!category) return {};
 
   return {
-    title: `${match.category} | SWAS Silver Jewellery`,
-    description: `Explore premium handcrafted silver ${match.category} at SWAS.`,
+    title: `${category.title} | SWAS Silver Jewellery`,
+    description: `Explore premium handcrafted silver ${category.title} at SWAS.`,
   };
 }

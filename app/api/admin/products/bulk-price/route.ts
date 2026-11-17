@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
-import { calculateBulkPrice } from "@/lib/bulk-price";
+import { calculateBulkPrice, productBelongsToBulkPriceCategory } from "@/lib/bulk-price";
+import { isCatalogRecordAvailable } from "@/lib/categories";
 import { productHash } from "@/lib/product-rows";
 
 export async function POST(req: Request) {
@@ -10,8 +11,8 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const category = typeof body.category === "string" ? body.category.trim() : "";
-    if (!category) {
+    const categoryId = typeof body.categoryId === "string" ? body.categoryId.trim() : "";
+    if (!categoryId) {
       return NextResponse.json({ success: false, error: "Select a category" }, { status: 400 });
     }
 
@@ -29,15 +30,26 @@ export async function POST(req: Request) {
       import("@/lib/firebase-admin"),
       import("@/lib/products"),
     ]);
-    const snapshot = await adminDb.collection("products").get();
-    const matching = snapshot.docs.filter((doc) => {
-      const value = doc.data().category;
-      return typeof value === "string" && value.trim().toLowerCase() === category.toLowerCase();
-    });
+    const now = Date.now();
+    const categorySnapshot = await adminDb.collection("categories").doc(categoryId).get();
+    if (!categorySnapshot.exists) {
+      return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });
+    }
+    const categoryData = categorySnapshot.data() ?? {};
+    if (!isCatalogRecordAvailable(categoryData, now)) {
+      return NextResponse.json({ success: false, error: "Category is expired or deleted" }, { status: 400 });
+    }
+    const categoryName = typeof categoryData.name === "string" && categoryData.name.trim()
+      ? categoryData.name.trim()
+      : categoryId;
 
+    // Canonical membership: products carry `categoryId`, so one equality query
+    // selects the category's products in every collection that lists it.
+    const snapshot = await adminDb.collection("products").where("categoryId", "==", categoryId).get();
+    const matching = snapshot.docs.filter((doc) => productBelongsToBulkPriceCategory(doc.data(), categoryId));
     if (!matching.length) {
       return NextResponse.json(
-        { success: false, error: `No products found in category “${category}”` },
+        { success: false, error: `No products found in category “${categoryName}”` },
         { status: 404 }
       );
     }
@@ -54,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     clearProductsCache();
-    return NextResponse.json({ success: true, category, price, updated: matching.length });
+    return NextResponse.json({ success: true, category: categoryName, price, updated: matching.length });
   } catch (error) {
     console.error("bulk product price update failed:", error);
     return NextResponse.json({ success: false, error: "Bulk price update failed" }, { status: 500 });

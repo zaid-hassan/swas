@@ -7,6 +7,9 @@ export type Product = {
   videos: string[];   // Gallery videos (interleaved with images)
   slug: string;
   category: string;
+  categoryId?: string;
+  categorySlug?: string;
+  stockStatus: "in_stock" | "out_of_stock";
   description: string;
   material: string;
   design: string;

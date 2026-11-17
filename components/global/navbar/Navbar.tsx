@@ -34,82 +34,49 @@ import {
 
 /* ───────────────────────────────────────────────────────────── */
 
-const megaMenu = {
-  Shop: {
-    columns: [
-      {
-        heading: "Jewellery",
-        items: [
-          "Anklets",
-          "Earrings",
-          "Bracelets",
-          "Rings",
-          "Chains",
-          "Toe Rings",
-          "Nose Pins",
-        ],
-      },
-      {
-        heading: "Sets & Special",
-        items: [
-          "Jewellery Sets",
-          "Waist Chains",
-          "Mangalsutra",
-          "Pola Bangles",
-        ],
-      },
-      {
-        heading: "Home & Accessories",
-        items: [
-          "Accessories",
-          "Utensils",
-          "Murtis & Decor",
-          "Sindoor Box",
-          "Paan Patta Supari",
-        ],
-      },
-    ],
-  },
+export type NavCategory = { id: string; title: string; slug: string };
 
-  Custom: {
-    columns: [
-      {
-        heading: "Custom Orders",
-        items: ["Custom Jewellery", "Custom Pendants"],
-      },
-    ],
-  },
-};
+type NavItem = { label: string; href: string };
+type NavColumn = { heading: string; items: NavItem[] };
 
-const quickLinks = [
+const customItems: NavItem[] = [
+  { label: "Custom Jewellery", href: "/contact" },
+  { label: "Custom Pendants", href: "/contact" },
+];
+
+const itemsPerColumn = 7;
+
+const quickLinks: NavItem[] = [
   { label: "Best Sellers", href: "/bestseller" },
   { label: "New Arrivals", href: "/newarrivals" },
   { label: "All Products", href: "/shop" },
 ];
 
-const categoryLinks: Record<string, string> = {
-  Anklets: "/shop?category=anklet",
-  Earrings: "/shop?category=earrings",
-  Bracelets: "/shop?category=bracelet",
-  Rings: "/shop?category=ring",
-  Chains: "/shop?category=chain",
-  "Toe Rings": "/shop?category=toe-ring",
-  "Nose Pins": "/shop?category=nose-pin",
+/**
+ * The Shop mega menu is built from saved categories passed in by the server
+ * layout, so navigation only offers categories that actually exist and links
+ * carry the canonical category slug.
+ */
+function buildMegaMenu(categories: NavCategory[]): Record<string, { columns: NavColumn[] }> {
+  const items: NavItem[] = categories.map((category) => ({
+    label: category.title,
+    href: `/shop?category=${encodeURIComponent(category.slug || category.id)}`,
+  }));
+  if (items.length === 0) items.push({ label: "All Products", href: "/shop" });
 
-  Mangalsutra: "/shop?category=mangalsutra",
-  "Jewellery Sets": "/shop?category=jewellery-set",
-  "Waist Chains": "/shop?category=waist-chain",
-  "Pola Bangles": "/shop?category=pola-bangles",
+  const columns: NavColumn[] = [];
+  for (let index = 0; index < items.length; index += itemsPerColumn) {
+    columns.push({
+      heading: index === 0 ? "Shop by Category" : "More Categories",
+      items: items.slice(index, index + itemsPerColumn),
+    });
+  }
 
-  Accessories: "/shop?category=accessories",
-  Utensils: "/shop?category=utensils",
-  "Murtis & Decor": "/shop?category=murtis-decor",
-  "Sindoor Box": "/shop?category=sindoor-box",
-  "Paan Patta Supari": "/shop?category=paan-patta-supari",
-
-  "Custom Jewellery": "/contact",
-  "Custom Pendants": "/contact",
-};
+  return {
+    Shop: { columns },
+    Custom: { columns: [{ heading: "Custom Orders", items: customItems }] },
+  };
+}
 
 const H: React.CSSProperties = {
   fontFamily: "var(--font-heading)",
@@ -117,8 +84,9 @@ const H: React.CSSProperties = {
 
 /* ───────────────────────────────────────────────────────────── */
 
-export default function Navbar() {
+export default function Navbar({ categories = [] }: { categories?: NavCategory[] }) {
   const { user, loading } = useAuth();
+  const megaMenu = buildMegaMenu(categories);
 
   return (
     <div className="sticky top-0 z-40 border-b border-gold/15 bg-burgundy backdrop-blur-xl">
@@ -177,11 +145,11 @@ export default function Navbar() {
                               <div className="flex flex-col gap-2">
                                 {col.items.map((item) => (
                                   <Link
-                                    key={item}
-                                    href={categoryLinks[item] || "/shop"}
+                                    key={item.label}
+                                    href={item.href}
                                     className="text-cream/70 hover:text-gold text-[14px] transition-colors"
                                   >
-                                    {item}
+                                    {item.label}
                                   </Link>
                                 ))}
                               </div>
@@ -257,13 +225,13 @@ export default function Navbar() {
 
                             <ul className="space-y-3">
                               {col.items.map((item) => (
-                                <li key={item}>
+                                <li key={item.label}>
                                   <NavigationMenuLink asChild>
                                     <Link
-                                      href={categoryLinks[item] || "/shop"}
+                                      href={item.href}
                                       className="text-cream/70 hover:text-gold text-[13px] transition-colors"
                                     >
-                                      {item}
+                                      {item.label}
                                     </Link>
                                   </NavigationMenuLink>
                                 </li>

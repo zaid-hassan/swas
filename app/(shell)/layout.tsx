@@ -1,13 +1,21 @@
 import Footer from "@/components/global/footer/Footer";
 import Navbar from "@/components/global/navbar/Navbar";
+import { getCategories } from "@/lib/products";
 import { StickyBanner } from "@/components/ui/sticky-banner";
 import React from "react";
 
-function Layout({
+async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const categories = await getCategories();
+  const navCategories = categories.map((category) => ({
+    id: category.id,
+    title: category.title,
+    slug: category.slug,
+  }));
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* <StickyBanner
@@ -25,11 +33,11 @@ function Layout({
         </p>
       </StickyBanner> */}
 
-      <Navbar />
+      <Navbar categories={navCategories} />
 
       <main>{children}</main>
 
-      <Footer />
+      <Footer categories={navCategories} />
     </div>
   );
 }

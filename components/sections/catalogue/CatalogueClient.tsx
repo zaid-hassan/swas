@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowUpRight, ShoppingBag } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 type Product = {
@@ -9,6 +9,8 @@ type Product = {
   name: string;
   price: number;
   category: string;
+  categoryId?: string;
+  categorySlug?: string;
   image?: string;
   slug: string;
 };
@@ -57,40 +59,40 @@ function CatalogCard({ item }: { item: Product }) {
   );
 }
 
-export default function CatalogueClient({ products }: { products: Product[] }) {
-  const [activeFilter, setActiveFilter] = useState("All");
+type CatalogueCategory = { id: string; title: string; slug: string };
 
-  const filters = useMemo(() => {
-    const categories = Array.from(
-      new Set(
-        products
-          .filter(
-            (p) => !p.category?.trim().toLowerCase().includes("mangalsutra")
-          )
-          .map((p) => p.category?.trim())
-          .filter(
-            (category): category is string => Boolean(category)
-          )
-      )
-    );
+export default function CatalogueClient({
+  products,
+  categories = [],
+}: {
+  products: Product[];
+  categories?: CatalogueCategory[];
+}) {
+  const [activeFilterId, setActiveFilterId] = useState("all");
 
-    return ["All", ...categories].slice(0, 6);
-  }, [products]);
+  const filters = useMemo(
+    () => [
+      { id: "all", label: "All" },
+      ...categories
+        .filter((category) => category.slug !== "mangalsutra")
+        .slice(0, 5)
+        .map((category) => ({ id: category.id, label: category.title })),
+    ],
+    [categories]
+  );
 
   const visibleProducts = useMemo(() => {
     const nonMangalsutraProducts = products.filter(
-      (p) => !p.category?.trim().toLowerCase().includes("mangalsutra")
+      (p) => p.categorySlug !== "mangalsutra"
     );
 
     const filtered =
-      activeFilter === "All"
+      activeFilterId === "all"
         ? nonMangalsutraProducts
-        : nonMangalsutraProducts.filter(
-          (p) => p.category?.trim() === activeFilter
-        );
+        : nonMangalsutraProducts.filter((p) => p.categoryId === activeFilterId);
 
     return filtered.filter((p) => p.image?.trim());
-  }, [products, activeFilter]);
+  }, [products, activeFilterId]);
 
   return (
     <section className="bg-background py-16 md:py-20">
@@ -124,14 +126,14 @@ export default function CatalogueClient({ products }: { products: Product[] }) {
         <div className="mb-10 flex flex-wrap justify-center gap-2">
           {filters.map((filter) => (
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 md:px-5 ${activeFilter === filter
+              key={filter.id}
+              onClick={() => setActiveFilterId(filter.id)}
+              className={`border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 md:px-5 ${activeFilterId === filter.id
                 ? "border-button bg-button text-white"
                 : "border-border text-foreground hover:border-gold hover:text-gold"
                 }`}
             >
-              {filter}
+              {filter.label}
             </button>
           ))}
         </div>

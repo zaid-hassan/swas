@@ -1,5 +1,18 @@
 export type PriceDirection = "increase" | "decrease";
 
+/**
+ * A product belongs to a bulk-price category through its canonical
+ * `categoryId` only. The free-text `category` label and the product's
+ * collection never widen or narrow that assignment: a category shared by
+ * several collections updates every product assigned to it.
+ */
+export function productBelongsToBulkPriceCategory(
+  product: { categoryId?: unknown; category?: unknown; collectionId?: unknown },
+  categoryId: string
+): boolean {
+  return typeof product.categoryId === "string" && product.categoryId === categoryId;
+}
+
 export function calculateBulkPrice(
   basePrice: number,
   percentage: number,

@@ -12,14 +12,12 @@ import { isVideoUrl } from "./media-upload";
 export type HomeVideos = {
   /** Hero section background loop. */
   hero: string;
-  /** "Taruni Collection" film between the hero and the catalogue. */
-  collectionFilm: string;
   /** One clip per carousel card, in display order. */
   carousel: string[];
 };
 
 export type HomeVideoKey = keyof HomeVideos;
-export type HomeVideoSingleKey = "hero" | "collectionFilm";
+export type HomeVideoSingleKey = "hero";
 
 /** The single clip the carousel used to play on every card. */
 const SHIPPED_CAROUSEL_CLIP =
@@ -34,8 +32,6 @@ export const CAROUSEL_MAX = 8;
 export const DEFAULT_HOME_VIDEOS: HomeVideos = {
   hero:
     "https://res.cloudinary.com/dndppvnjl/video/upload/f_mp4,vc_h264,q_auto,w_1200/0820_vhpjoo.mp4",
-  collectionFilm:
-    "https://res.cloudinary.com/dndppvnjl/video/upload/f_mp4,vc_h264,q_auto,w_1200/0825_zphufl.mp4",
   carousel: Array.from(
     { length: CAROUSEL_DEFAULT_COUNT },
     () => SHIPPED_CAROUSEL_CLIP
@@ -44,7 +40,6 @@ export const DEFAULT_HOME_VIDEOS: HomeVideos = {
 
 export const HOME_VIDEO_KEYS: HomeVideoKey[] = [
   "hero",
-  "collectionFilm",
   "carousel",
 ];
 
@@ -58,11 +53,6 @@ export const SINGLE_HOME_VIDEO_SLOTS: Array<{
     key: "hero",
     label: "Hero background video",
     hint: "Silent loop behind the “Heritage / Timeless / Elegance” headline.",
-  },
-  {
-    key: "collectionFilm",
-    label: "Taruni Collection film",
-    hint: "Full-width film between the hero and the catalogue.",
   },
 ];
 
@@ -95,7 +85,6 @@ export function normalizeHomeVideos(raw: unknown): HomeVideos {
 
   return {
     hero: pickSingle("hero"),
-    collectionFilm: pickSingle("collectionFilm"),
     carousel: carousel.length ? carousel : [...DEFAULT_HOME_VIDEOS.carousel],
   };
 }

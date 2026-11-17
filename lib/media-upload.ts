@@ -2,6 +2,17 @@ export const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
 export const VIDEO_EXTENSIONS = ["mp4", "webm"];
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+// Default to the same account used by the shipped SWAS home-video assets.
+const DEFAULT_CLOUDINARY_CLOUD_NAME = "dndppvnjl";
+const DEFAULT_CLOUDINARY_UPLOAD_PRESET = "swas_products";
+
+export function resolveCloudinaryCloudName(configured = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME): string {
+  return configured?.trim() || DEFAULT_CLOUDINARY_CLOUD_NAME;
+}
+
+export function resolveCloudinaryUploadPreset(configured = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET): string {
+  return configured?.trim() || DEFAULT_CLOUDINARY_UPLOAD_PRESET;
+}
 
 function ext(name: string): string {
   const path = name.split("?")[0].split("#")[0];
@@ -41,8 +52,8 @@ export function uploadToCloudinary(
   file: File,
   onProgress: (percent: number) => void
 ): Promise<string> {
-  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+  const cloud = resolveCloudinaryCloudName();
+  const preset = resolveCloudinaryUploadPreset();
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -75,12 +86,6 @@ export function uploadToCloudinary(
 }
 
 export function assertConfigured(): string | null {
-  if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
-    return "Cloudinary cloud name is not configured";
-  }
-  if (!process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
-    return "Cloudinary upload preset is not configured";
-  }
   return null;
 }
 

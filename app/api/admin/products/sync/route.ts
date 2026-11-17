@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireSuperAdmin } from "@/lib/admin-auth";
 import { syncProducts, UnsafeSyncError } from "@/lib/product-sync";
+import type { RawProductRow } from "@/lib/product-rows";
 
 // POST /api/admin/products/sync
 // Body: { rows: RawProductRow[] } parsed from an XLSX upload.
@@ -17,8 +18,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json();
-    const rows: any[] = body.rows ?? [];
+    const payload: unknown = await req.json();
+    const body = typeof payload === "object" && payload !== null ? payload as Record<string, unknown> : {};
+    const rowsValue = Array.isArray(body.rows) ? body.rows : [];
+    const rows: RawProductRow[] = rowsValue.map((row) =>
+      typeof row === "object" && row !== null ? row as RawProductRow : {}
+    );
 
     if (!rows.length) {
       return NextResponse.json(

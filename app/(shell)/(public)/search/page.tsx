@@ -17,6 +17,7 @@ export default async function SearchPage({
     (product) =>
       product?.name.toLowerCase().includes(query) ||
       (product?.category ?? "").toLowerCase().includes(query) ||
+      (product?.categorySlug ?? "").toLowerCase().includes(query) ||
       (product?.material ?? "").toLowerCase().includes(query) ||
       (product?.idealFor ?? "").toLowerCase().includes(query)
   );
@@ -24,7 +25,7 @@ export default async function SearchPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-16">
       <h1 className="text-3xl font-heading font-semibold mb-10">
-        Search Results for "{q}"
+        Search Results for &quot;{q}&quot;
       </h1>
 
       {filtered.length === 0 ? (

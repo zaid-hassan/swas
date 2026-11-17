@@ -1,5 +1,5 @@
 import ProductCard from "@/components/product/ProductCard";
-import { getProducts } from "@/lib/products";
+import { getCategories, getProducts, resolveCategoryParam } from "@/lib/products";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -13,17 +13,16 @@ export default async function AllProducts({
     category?: string;
   }>;
 }) {
-  const { page, category } = await searchParams;
+  const [{ page, category }, products, categories] = await Promise.all([
+    searchParams,
+    getProducts(),
+    getCategories(),
+  ]);
 
-  const products = await getProducts();
-
-  let filteredProducts = products;
-
-  if (category) {
-    filteredProducts = products.filter((product: any) =>
-      product?.category?.toLowerCase().includes(category.toLowerCase())
-    );
-  }
+  const categoryId = category ? resolveCategoryParam(categories, category) : undefined;
+  const filteredProducts = categoryId
+    ? products.filter((product) => product.categoryId === categoryId)
+    : products;
 
   const currentPage = Number(page) || 1;
   const productsPerPage = 12;
@@ -63,7 +62,7 @@ export default async function AllProducts({
         lg:grid-cols-4
         "
       >
-        {paginatedProducts.map((product: any) => (
+        {paginatedProducts.map((product) => (
           <ProductCard key={product?.id} product={product} />
         ))}
       </div>
@@ -73,7 +72,7 @@ export default async function AllProducts({
         {/* Previous */}
         <Link
           href={`?page=${currentPage - 1}${
-            category ? `&category=${encodeURIComponent(category)}` : ""
+            categoryId ? `&category=${encodeURIComponent(categoryId)}` : ""
           }`}
         >
           <Button variant="outline" size="sm" disabled={currentPage === 1}>
@@ -89,7 +88,7 @@ export default async function AllProducts({
             <Link
               key={pageNum}
               href={`?page=${pageNum}${
-                category ? `&category=${encodeURIComponent(category)}` : ""
+                categoryId ? `&category=${encodeURIComponent(categoryId)}` : ""
               }`}
             >
               <Button
@@ -105,7 +104,7 @@ export default async function AllProducts({
         {/* Next */}
         <Link
           href={`?page=${currentPage + 1}${
-            category ? `&category=${encodeURIComponent(category)}` : ""
+            categoryId ? `&category=${encodeURIComponent(categoryId)}` : ""
           }`}
         >
           <Button

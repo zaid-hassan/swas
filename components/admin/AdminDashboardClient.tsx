@@ -12,6 +12,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   CircleDollarSign,
@@ -19,22 +27,30 @@ import {
   Truck,
   CircleCheck,
   RefreshCw,
-  Upload,
   Eye,
   EyeOff,
 } from "lucide-react";
 
 import type { AdminProduct } from "@/types/products";
 import type { AdminCollection } from "@/lib/collections";
+import type { AdminCategory } from "@/lib/categories";
 import { isAdminEmail, isSuperAdminEmail } from "@/lib/admin-auth";
 import type { OrderStatus } from "@/lib/orders";
 import type { Refund, RefundStatus } from "@/types/refunds";
 import SingleProductForm from "@/components/admin/SingleProductForm";
 import ProductEditor from "@/components/admin/ProductEditor";
 import CollectionManager from "@/components/admin/CollectionManager";
+import CategoryManager from "@/components/admin/CategoryManager";
 import HomeVideosPanel from "@/components/admin/HomeVideosPanel";
 
 const PRODUCTS_PER_PAGE = 12;
+
+type CatalogView = "products" | "new-product" | "collections" | "categories";
+type AdminView = CatalogView | "orders" | "refunds" | "home";
+
+function isCatalogView(view: AdminView): view is CatalogView {
+  return view === "products" || view === "new-product" || view === "collections" || view === "categories";
+}
 
 const ORDER_STATUS_OPTIONS: OrderStatus[] = ["paid", "shipped", "delivered", "cancelled"];
 
@@ -50,7 +66,7 @@ export default function AdminDashboardClient() {
 
   const [authChecked, setAuthChecked] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "refunds" | "home">("orders");
+  const [activeView, setActiveView] = useState<AdminView>("orders");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -73,55 +89,69 @@ export default function AdminDashboardClient() {
     );
   }
 
+  const viewTitles: Record<AdminView, string> = {
+    products: "All Products",
+    "new-product": "Add Product",
+    collections: "Collection",
+    categories: "Category",
+    orders: "Orders",
+    refunds: "Refunds",
+    home: "Home page",
+  };
+
+  const sidebarItemClass = (view: AdminView, nested = false) =>
+    `block w-full rounded-sm px-4 py-3 text-left text-sm transition-colors ${nested ? "ml-4 w-[calc(100%-1rem)] border-l border-gold/30 pl-5 text-xs" : ""} ${activeView === view ? "bg-gold/15 font-semibold text-burgundy" : "text-burgundy hover:bg-gold/10"}`;
+
   return (
-    <section className="admin-dashboard mx-auto max-w-7xl space-y-8 px-4 py-10 [&_[data-slot=card]]:border-gold/25 [&_[data-slot=card]]:shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
-      <div className="space-y-4 border-b border-gold/25 pb-4">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-soft">SWAS · Management</p>
-            <h1 className="mt-1 font-heading text-3xl font-medium text-burgundy md:text-4xl">Admin Dashboard</h1>
+    <section className="admin-dashboard flex min-h-[calc(100vh-78px)] w-full [&_[data-slot=card]]:border-gold/25 [&_[data-slot=card]]:shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
+      <aside className="sticky top-[78px] hidden h-[calc(100vh-78px)] w-[184px] shrink-0 overflow-y-auto border-r border-gold/30 bg-cream/70 md:block">
+        <nav aria-label="Admin sections" className="flex h-full flex-col">
+          <div className="space-y-1 border-b border-gold/30 py-3">
+            <button type="button" aria-current={activeView === "orders" ? "page" : undefined} onClick={() => setActiveView("orders")} className={sidebarItemClass("orders")}>Orders</button>
+            <button type="button" aria-current={activeView === "refunds" ? "page" : undefined} onClick={() => setActiveView("refunds")} className={sidebarItemClass("refunds")}>Refunds</button>
           </div>
-          <span className="hidden border border-gold/30 bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-burgundy sm:inline-flex">Control centre</span>
-        </div>
+          <div className="space-y-1 border-b border-gold/30 py-3">
+            <button type="button" aria-current={activeView === "collections" ? "page" : undefined} onClick={() => setActiveView("collections")} className={sidebarItemClass("collections")}>Collection</button>
+            <button type="button" aria-current={activeView === "categories" ? "page" : undefined} onClick={() => setActiveView("categories")} className={sidebarItemClass("categories")}>Category</button>
+            <button type="button" aria-current={activeView === "products" ? "page" : undefined} onClick={() => setActiveView("products")} className={sidebarItemClass("products")}>All Products</button>
+            <button type="button" aria-current={activeView === "new-product" ? "page" : undefined} onClick={() => setActiveView("new-product")} className={sidebarItemClass("new-product", true)}>Add Product</button>
+          </div>
+          <div className="py-3">
+            <button type="button" aria-current={activeView === "home" ? "page" : undefined} onClick={() => setActiveView("home")} className={sidebarItemClass("home")}>Home page</button>
+          </div>
+        </nav>
+      </aside>
 
-        <div className="flex flex-wrap gap-2 border-b border-gold/20 pb-3">
-          <Button
-            variant={activeTab === "products" ? "default" : "outline"}
-            className={activeTab === "products" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
-            onClick={() => setActiveTab("products")}
-          >
-            All Products
-          </Button>
-          <Button
-            variant={activeTab === "orders" ? "default" : "outline"}
-            className={activeTab === "orders" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
-            onClick={() => setActiveTab("orders")}
-          >
-            Orders
-          </Button>
-          <Button
-            variant={activeTab === "refunds" ? "default" : "outline"}
-            className={activeTab === "refunds" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
-            onClick={() => setActiveTab("refunds")}
-          >
-            Refunds
-          </Button>
-          <Button
-            variant={activeTab === "home" ? "default" : "outline"}
-            className={activeTab === "home" ? "border-burgundy bg-burgundy text-gold hover:bg-burgundy-rich" : "border-gold/30 text-burgundy hover:bg-gold/10"}
-            onClick={() => setActiveTab("home")}
-          >
-            Home page
-          </Button>
-        </div>
+      <div className="min-w-0 flex-1 px-4 py-6 sm:px-6">
+        <label className="mb-4 block md:hidden">
+          <span className="sr-only">Admin section</span>
+          <select value={activeView} onChange={(event) => setActiveView(event.target.value as AdminView)} className="w-full rounded-sm border border-gold/30 bg-white px-3 py-2.5 text-sm text-burgundy">
+            <optgroup label="Sales">
+              <option value="orders">Orders</option>
+              <option value="refunds">Refunds</option>
+            </optgroup>
+            <optgroup label="Catalog">
+              <option value="collections">Collection</option>
+              <option value="categories">Category</option>
+              <option value="products">All Products</option>
+              <option value="new-product">Add Product</option>
+            </optgroup>
+            <optgroup label="Storefront">
+              <option value="home">Home page</option>
+            </optgroup>
+          </select>
+        </label>
+
+        <main>
+          <div className="mb-5 border-b border-gold/20 pb-3">
+            <h1 className="font-heading text-2xl font-medium text-burgundy">{viewTitles[activeView]}</h1>
+          </div>
+          {isCatalogView(activeView) && <ProductsTab canBulkUpload={isSuperAdminEmail(userEmail)} view={activeView} />}
+          {activeView === "orders" && <OrdersTab />}
+          {activeView === "refunds" && <RefundsTab />}
+          {activeView === "home" && <HomeVideosPanel />}
+        </main>
       </div>
-
-      {activeTab === "products" && (
-        <ProductsTab canBulkUpload={isSuperAdminEmail(userEmail)} />
-      )}
-      {activeTab === "orders" && <OrdersTab />}
-      {activeTab === "refunds" && <RefundsTab />}
-      {activeTab === "home" && <HomeVideosPanel />}
     </section>
   );
 }
@@ -130,18 +160,21 @@ export default function AdminDashboardClient() {
 /* PRODUCTS                                                                    */
 /* -------------------------------------------------------------------------- */
 
-function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
+function ProductsTab({ canBulkUpload, view }: { canBulkUpload: boolean; view: CatalogView }) {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [collections, setCollections] = useState<AdminCollection[]>([]);
+  const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [bulkCategory, setBulkCategory] = useState("");
+  const [bulkCategoryId, setBulkCategoryId] = useState("");
   const [basePrice, setBasePrice] = useState("");
   const [percentage, setPercentage] = useState("");
   const [priceDirection, setPriceDirection] = useState<"increase" | "decrease">("increase");
   const [updatingPrices, setUpdatingPrices] = useState(false);
+  const [bulkPriceConfirmOpen, setBulkPriceConfirmOpen] = useState(false);
+  const [stockUpdatingId, setStockUpdatingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -168,10 +201,22 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
     }
   }, []);
 
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/categories", { headers: adminHeaders() });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || "Failed to load categories");
+      setCategories(data.categories);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to load categories");
+    }
+  }, []);
+
   useEffect(() => {
     load();
     loadCollections();
-  }, [load, loadCollections]);
+    loadCategories();
+  }, [load, loadCollections, loadCategories]);
 
   async function handleFile(file: File) {
     setSyncing(true);
@@ -224,11 +269,32 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
     );
   }
 
+  async function toggleStock(product: AdminProduct) {
+    const stockStatus = product.stockStatus === "out_of_stock" ? "in_stock" : "out_of_stock";
+    setStockUpdatingId(product.id);
+    try {
+      const res = await fetch(`/api/admin/products/p-${product.id}`, {
+        method: "PATCH",
+        headers: adminHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ stockStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Stock status update failed");
+      setProducts((prev) => prev.map((item) => item.id === product.id ? { ...item, stockStatus } : item));
+      toast.success(stockStatus === "out_of_stock" ? "Product marked out of stock" : "Product restocked");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Stock status update failed");
+    } finally {
+      setStockUpdatingId(null);
+    }
+  }
 
-  async function updateCategoryPrices() {
+
+  async function updateCategoryPrices(confirmed = false) {
     const base = Number(basePrice);
     const percent = Number(percentage);
-    if (!bulkCategory || !Number.isFinite(base) || base <= 0 || !Number.isFinite(percent) || percent < 0) {
+    const selectedCategory = categories.find((category) => category.id === bulkCategoryId);
+    if (!selectedCategory || !Number.isFinite(base) || base <= 0 || !Number.isFinite(percent) || percent < 0) {
       toast.error("Choose a category and enter a valid base price and percentage");
       return;
     }
@@ -236,15 +302,18 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
       toast.error("A price decrease cannot exceed 100%");
       return;
     }
-    const newPrice = Math.round(base * (priceDirection === "increase" ? 1 + percent / 100 : 1 - percent / 100));
-    if (!window.confirm(`Set every product in “${bulkCategory}” to ₹${newPrice} (${priceDirection} ${percent}% from ₹${base})?`)) return;
+    if (!confirmed) {
+      setBulkPriceConfirmOpen(true);
+      return;
+    }
+    setBulkPriceConfirmOpen(false);
 
     setUpdatingPrices(true);
     try {
       const response = await fetch("/api/admin/products/bulk-price", {
         method: "POST",
         headers: adminHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ category: bulkCategory, basePrice: base, percentage: percent, direction: priceDirection }),
+        body: JSON.stringify({ categoryId: selectedCategory.id, basePrice: base, percentage: percent, direction: priceDirection }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Bulk price update failed");
@@ -262,23 +331,37 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
     const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
     return products.slice(start, start + PRODUCTS_PER_PAGE);
   }, [products, currentPage]);
+  const bulkCategoryForConfirm = categories.find((category) => category.id === bulkCategoryId);
+  const bulkBase = Number(basePrice);
+  const bulkPercent = Number(percentage);
+  const bulkPreviewPrice = Number.isFinite(bulkBase) && Number.isFinite(bulkPercent)
+    ? Math.round(bulkBase * (priceDirection === "increase" ? 1 + bulkPercent / 100 : 1 - bulkPercent / 100))
+    : null;
 
   return (
     <>
-      <CollectionManager collections={collections} onCreated={() => { void loadCollections(); }} />
-      <SingleProductForm collections={collections} onCreated={() => { void load(); void loadCollections(); }} />
+      {view === "collections" && <CollectionManager collections={collections} categories={categories} onCreated={() => { void loadCollections(); void loadCategories(); }} />}
+      {view === "categories" && <CategoryManager categories={categories} onChanged={() => { void loadCategories(); void loadCollections(); void load(); }} />}
+      {view === "new-product" && <SingleProductForm categories={categories} onCreated={() => { void load(); void loadCollections(); void loadCategories(); }} />}
+      {view === "products" && <>
       <Card className="overflow-hidden border-gold/30 bg-white shadow-sm">
         <CardContent className="space-y-4 p-5">
           <div className="border-l-2 border-gold pl-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-soft">Pricing tools</p>
             <h3 className="font-heading text-xl text-burgundy">Bulk price update by category</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Sets every product in the selected category to the base price adjusted by the percentage.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Sets every product assigned to the selected saved category to the base price adjusted by the percentage, across all collections.</p>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             <label className="text-sm">Category
-              <select className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={bulkCategory} onChange={(event) => setBulkCategory(event.target.value)}>
+              <select className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={bulkCategoryId} onChange={(event) => setBulkCategoryId(event.target.value)}>
                 <option value="">Select category</option>
-                {Array.from(new Set(products.map((product) => product.category.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b)).map((category) => <option key={category} value={category}>{category}</option>)}
+                {categories.filter((category) => category.assignedCollectionIds.length > 0 && !category.expired)
+                  .sort((a, b) => a.name.localeCompare(b.name) || a.collectionName.localeCompare(b.collectionName))
+                  .map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}{category.collectionNames.length ? ` — ${category.collectionNames.join(", ")}` : ""}
+                    </option>
+                  ))}
               </select>
             </label>
             <label className="text-sm">Base price (₹)<Input className="mt-1" type="number" min="1" value={basePrice} onChange={(event) => setBasePrice(event.target.value)} /></label>
@@ -288,11 +371,29 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
               <Button type="button" variant={priceDirection === "decrease" ? "default" : "outline"} onClick={() => setPriceDirection("decrease")}>Decrease</Button>
             </div>
           </div>
-          <Button disabled={updatingPrices || loading || !products.length} onClick={updateCategoryPrices}>
+          <Button disabled={updatingPrices || loading || !products.length} onClick={() => void updateCategoryPrices()}>
             {updatingPrices ? "Updating prices…" : "Apply to category"}
           </Button>
         </CardContent>
       </Card>
+      <Dialog open={bulkPriceConfirmOpen} onOpenChange={setBulkPriceConfirmOpen}>
+        <DialogContent className="border-gold/30 bg-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-burgundy">Confirm bulk price update</DialogTitle>
+            <DialogDescription>
+              {bulkCategoryForConfirm
+                ? `This will set all products assigned to “${bulkCategoryForConfirm.name}” across its collections, including hidden products, to ₹${bulkPreviewPrice ?? "—"}.`
+                : "Select a category before applying this price update."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setBulkPriceConfirmOpen(false)} disabled={updatingPrices}>Cancel</Button>
+            <Button type="button" className="bg-burgundy text-gold hover:bg-burgundy-rich" disabled={updatingPrices || !bulkCategoryForConfirm} onClick={() => void updateCategoryPrices(true)}>
+              {updatingPrices ? "Updating…" : "Update prices"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Card className="border-gold/25 shadow-[0_8px_28px_rgba(41,7,7,0.045)]">
         <CardContent className="p-6 space-y-6">
           <div className="space-y-3 border-b pb-5">
@@ -352,11 +453,12 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
                   {editingId === product.id ? (
                     <ProductEditor
                       product={product}
-                      collections={collections}
+                      categories={categories}
                       onSaved={() => {
                         setEditingId(null);
                         void load();
                         void loadCollections();
+                        void loadCategories();
                       }}
                       onCancel={() => setEditingId(null)}
                     />
@@ -378,6 +480,11 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
                             Hidden
                           </span>
                         )}
+                        {product.stockStatus === "out_of_stock" && (
+                          <span className="absolute bottom-2 left-2 rounded bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-red-700 shadow">
+                            Out of stock
+                          </span>
+                        )}
                       </div>
                       <div>
                         <p className="text-xs text-gold-soft">#{product.id} · {product.category}</p>
@@ -388,6 +495,9 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
                           <Button size="sm" variant="outline" className="border-gold/35 text-burgundy hover:bg-gold/10" onClick={() => setEditingId(product.id)}>Edit</Button>
                           <Button size="sm" variant="outline" className="border-gold/35 text-burgundy hover:bg-gold/10" onClick={() => toggleVisible(product)}>
                             {product.isVisible ? <><EyeOff className="mr-1 h-3.5 w-3.5" /> Hide</> : <><Eye className="mr-1 h-3.5 w-3.5" /> Show</>}
+                          </Button>
+                          <Button size="sm" variant="outline" className={product.stockStatus === "out_of_stock" ? "border-red-300 text-red-700" : "border-gold/35 text-burgundy hover:bg-gold/10"} disabled={stockUpdatingId === product.id} onClick={() => void toggleStock(product)}>
+                            {stockUpdatingId === product.id ? "Saving…" : product.stockStatus === "out_of_stock" ? "Restock" : "Stock out"}
                           </Button>
                         </div>
                       </div>
@@ -424,6 +534,7 @@ function ProductsTab({ canBulkUpload }: { canBulkUpload: boolean }) {
           )}
         </CardContent>
       </Card>
+      </>}
     </>
   );
 }

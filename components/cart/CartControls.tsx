@@ -24,6 +24,7 @@ export function AddToCartButton({
   const addItem = useCartStore((s) => s.addItem);
 
   function handleAdd() {
+    if (product.stockStatus === "out_of_stock") return;
     addItem({
       id: product.id,
       name: product.name,
@@ -41,7 +42,8 @@ export function AddToCartButton({
         type="button"
         size="icon"
         onClick={handleAdd}
-        aria-label={`Add ${product.name} to cart`}
+        disabled={product.stockStatus === "out_of_stock"}
+        aria-label={product.stockStatus === "out_of_stock" ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
         className="
           h-11 w-11
           border border-burgundy
@@ -63,6 +65,7 @@ export function AddToCartButton({
     <Button
       type="button"
       onClick={handleAdd}
+      disabled={product.stockStatus === "out_of_stock"}
       className="
         bg-button hover:bg-burgundy-rich
         h-12 w-full
@@ -77,8 +80,7 @@ export function AddToCartButton({
         hover:border-gold
       "
     >
-      <ShoppingBag size={18} strokeWidth={1.5} />
-      Add to Cart
+      {product.stockStatus === "out_of_stock" ? "Sold Out" : <><ShoppingBag size={18} strokeWidth={1.5} /> Add to Cart</>}
     </Button>
   );
 }
@@ -203,6 +205,6 @@ export function CartBadge() {
 /* CART SUBTOTAL                                                              */
 /* -------------------------------------------------------------------------- */
 
-export function calculateCartSubtotal(items: any[]) {
+export function calculateCartSubtotal(items: Array<{ price: number; quantity: number }>) {
   return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 }

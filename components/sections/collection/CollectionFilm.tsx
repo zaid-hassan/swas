@@ -137,18 +137,13 @@ export default function CollectionFilm({
         <video
           ref={videoRef}
           src={video}
+          aria-label={`${title} collection banner video`}
           muted
           autoPlay
           loop
           playsInline
           preload="auto"
-          className="
-      absolute
-      inset-0
-      h-full
-      w-full
-      object-cover
-    "
+          className="absolute inset-0 h-full w-full object-cover"
         />
 
         {/* Overlay */}

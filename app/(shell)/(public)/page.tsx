@@ -7,7 +7,7 @@ import HeroFeatures from "@/components/sections/features/HeroFeatures";
 import FeaturedVideoCarousel from "@/components/sections/features/FeaturedVideoCarousel";
 import CollectionFilm from "@/components/sections/collection/CollectionFilm";
 
-import { getHomeVideos } from "@/lib/site-settings";
+import { getHomepageCollection, getHomeVideos } from "@/lib/site-settings";
 
 // Catalog is read from Firestore at request time (cached in lib/products),
 // so the page must not be prerendered with a build-time Firestore read.
@@ -15,16 +15,18 @@ import { getHomeVideos } from "@/lib/site-settings";
 export const dynamic = "force-dynamic";
 
 async function page() {
-  const videos = await getHomeVideos();
+  const [videos, activeCollection] = await Promise.all([getHomeVideos(), getHomepageCollection()]);
 
   return (
     <div>
       <Hero video={videos.hero} />
-      <CollectionFilm
-        title="Taruni Collection"
-        href="/collection/taruni"
-        video={videos.collectionFilm}
-      />
+      {activeCollection && (
+        <CollectionFilm
+          title={activeCollection.name}
+          href={`/collection/${activeCollection.slug}`}
+          video={activeCollection.bannerUrl}
+        />
+      )}
       <Showcase />
       <Catalogue />
       <FeaturedVideoCarousel videos={videos.carousel} />

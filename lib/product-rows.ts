@@ -1,6 +1,6 @@
 import type { Product } from "@/types/products";
 
-export type RawProductRow = Record<string, any>;
+export type RawProductRow = Record<string, unknown>;
 
 export type NormalizedProductDoc = {
   sNo: number;
@@ -21,7 +21,11 @@ export type NormalizedProductDoc = {
   video1: string;
   video2: string;
   source: 'excel' | 'manual';
+  categoryId?: string;
+  categorySlug?: string;
   collectionId?: string;
+  stockStatus?: "in_stock" | "out_of_stock";
+  storefrontAvailable?: boolean;
   dateOfAdd: string;
   slug: string;
   isVisible: boolean;
@@ -43,7 +47,7 @@ function pick(row: RawProductRow, ...keys: string[]) {
     }
   }
   // fall back to case-insensitive match
-  const lower: Record<string, any> = {};
+  const lower: Record<string, unknown> = {};
   for (const k of Object.keys(row)) lower[k.toLowerCase()] = row[k];
   for (const k of keys) {
     const v = lower[k.toLowerCase()];
@@ -56,10 +60,27 @@ export function productDocId(sNo: number | string) {
   return `p-${String(sNo).trim()}`;
 }
 
+/**
+ * Reads the sheet's linkage columns verbatim. These are *labels* the operator
+ * typed (a collection/category name, slug, or ID) — never identity. The sync
+ * planner resolves them against saved records and rejects unknown values.
+ */
+export function productLinkageFromRow(row: RawProductRow): {
+  collectionValue: string;
+  categoryValue: string;
+} {
+  return {
+    collectionValue: String(pick(row, "Collection", "collection", "Collection Name", "CollectionId", "collectionId") || "").trim(),
+    categoryValue: String(pick(row, "Category", "category", "Category Name", "CategoryId", "categoryId") || "").trim(),
+  };
+}
+
 export function productHash(d: Omit<NormalizedProductDoc, "hash" | "updatedAt">) {
   const s = [
     d.sNo,
     d.category,
+    d.categoryId ?? "",
+    d.collectionId ?? "",
     d.name,
     d.description,
     d.material,
@@ -144,6 +165,7 @@ export function normalizeProductRow(row: RawProductRow): {
     video1,
     video2,
     source: 'excel' as const,
+    stockStatus: "in_stock" as const,
     dateOfAdd,
     slug,
     isVisible,
@@ -166,6 +188,9 @@ export function docToProduct(doc: NormalizedProductDoc): Product {
   return {
     id: String(doc.sNo),
     category: doc.category,
+    ...(doc.categoryId ? { categoryId: doc.categoryId } : {}),
+    ...(doc.categorySlug ? { categorySlug: doc.categorySlug } : {}),
+    stockStatus: doc.stockStatus === "out_of_stock" ? "out_of_stock" : "in_stock",
     name: doc.name,
     description: doc.description,
     material: doc.material,

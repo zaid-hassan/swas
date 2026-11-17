@@ -16,7 +16,7 @@ export default async function ProductDetail({
 
   const products = await getProducts();
 
-  const product = products.find((p: any) => p.slug?.trim() === slug?.trim());
+  const product = products.find((p) => p.slug?.trim() === slug?.trim());
 
   if (!product) {
     return (
@@ -30,7 +30,7 @@ export default async function ProductDetail({
           </h1>
 
           <p className="text-burgundy/60 mt-4">
-            The product you're looking for is unavailable.
+            The product you&apos;re looking for is unavailable.
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default async function ProductDetail({
   }
 
   const relatedProducts = products
-    .filter((p: any) => p.category === product.category && p.id !== product.id)
+    .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
     .slice(0, 4);
 
   return (
@@ -207,7 +207,7 @@ export default async function ProductDetail({
               </div>
 
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
-                {relatedProducts.map((item: any) => (
+                {relatedProducts.map((item) => (
                   <ProductCard key={item.id} product={item} />
                 ))}
               </div>

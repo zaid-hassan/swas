@@ -8,12 +8,14 @@ export type ProductEditInput = Pick<
   | "images"
   | "videos"
   | "category"
+  | "categoryId"
+  | "collectionId"
+  | "stockStatus"
   | "description"
   | "material"
   | "design"
   | "finish"
   | "idealFor"
-  | "collectionId"
   | "isVisible"
 >;
 
@@ -25,12 +27,14 @@ export function buildProductEditPatch(input: ProductEditInput) {
     name: input.name,
     mrp: input.price,
     category: input.category,
+    categoryId: input.categoryId,
+    collectionId: input.collectionId,
     description: input.description,
     material: input.material,
     design: input.design,
     finish: input.finish,
     idealFor: input.idealFor,
-    collectionId: input.collectionId ?? "",
+
     image: images[0] ?? "",
     image1: images[1] ?? "",
     image2: images[2] ?? "",
@@ -39,5 +43,6 @@ export function buildProductEditPatch(input: ProductEditInput) {
     video1: videos[1] ?? "",
     video2: videos[2] ?? "",
     isVisible: input.isVisible,
+    stockStatus: input.stockStatus,
   };
 }

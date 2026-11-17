@@ -23,6 +23,20 @@ export async function getHomeVideos(): Promise<HomeVideos> {
   }
 }
 
+/** Read the active collection without caching so homepage changes show immediately. */
+export async function getHomepageCollection() {
+  try {
+    const [{ adminDb }, { getActiveCollection }] = await Promise.all([
+      import("./firebase-admin"),
+      import("./collections"),
+    ]);
+    return await getActiveCollection(adminDb);
+  } catch (err) {
+    console.error("getHomepageCollection failed:", err);
+    return null;
+  }
+}
+
 /** Merge a validated patch into the settings doc. */
 export async function saveHomeVideos(
   patch: Partial<HomeVideos>,

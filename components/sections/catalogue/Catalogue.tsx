@@ -1,10 +1,14 @@
 // components/sections/catalogue/Catalogue.tsx
 
-import { getProducts } from "@/lib/products";
+import { getCategories, getProducts } from "@/lib/products";
 import CatalogueClient from "./CatalogueClient";
 
 export default async function Catalogue() {
-  const products = await getProducts();
-  console.log(products.map((p) => p.category));
-  return <CatalogueClient products={products} />;
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  return (
+    <CatalogueClient
+      products={products}
+      categories={categories.map((category) => ({ id: category.id, title: category.title, slug: category.slug }))}
+    />
+  );
 }

@@ -8,11 +8,10 @@ import { adminHeaders } from "@/components/admin/AdminDashboardClient";
 import { assertConfigured, isMediaAllowed, uploadToCloudinary } from "@/lib/media-upload";
 import { buildProductEditPatch } from "@/lib/product-edit";
 import type { AdminProduct } from "@/types/products";
-import type { AdminCollection } from "@/lib/collections";
+import type { AdminCategory } from "@/lib/categories";
 
-type Props = { product: AdminProduct; collections: AdminCollection[]; onSaved: () => void; onCancel: () => void };
+type Props = { product: AdminProduct; categories: AdminCategory[]; onSaved: () => void; onCancel: () => void };
 const textFields = [
-  ["category", "Category"],
   ["description", "Description"],
   ["material", "Material"],
   ["design", "Design"],
@@ -20,7 +19,7 @@ const textFields = [
   ["idealFor", "Ideal for"],
 ] as const;
 
-export default function ProductEditor({ product, collections, onSaved, onCancel }: Props) {
+export default function ProductEditor({ product, categories, onSaved, onCancel }: Props) {
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState(String(product.price));
   const [fields, setFields] = useState<Record<string, string>>({
@@ -34,9 +33,16 @@ export default function ProductEditor({ product, collections, onSaved, onCancel 
   const [images, setImages] = useState(() => product.images.slice(0, 4));
   const [videos, setVideos] = useState(() => product.videos.slice(0, 3));
   const [visible, setVisible] = useState(product.isVisible);
+  const [categoryId, setCategoryId] = useState(product.categoryId ?? "");
   const [collectionId, setCollectionId] = useState(product.collectionId ?? "");
   const [uploading, setUploading] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const linkedCollections = Array.from(new Map(categories.flatMap((category) =>
+    category.assignedCollectionIds.map((id, index) => [id, { id, name: category.collectionNames[index] ?? id }] as const)
+  )).values());
+  const availableCategories = categories.filter((category) =>
+    category.assignedCollectionIds.includes(collectionId) && (!category.expired || category.id === product.categoryId)
+  );
 
   async function upload(kind: "image" | "video", index: number, file?: File) {
     if (!file) return;
@@ -64,8 +70,8 @@ export default function ProductEditor({ product, collections, onSaved, onCancel 
 
   async function save() {
     const numericPrice = Number(price);
-    if (!name.trim() || !Number.isFinite(numericPrice) || numericPrice < 0) {
-      toast.error("Enter a product name and a valid non-negative price");
+    if (!name.trim() || !categoryId || !collectionId || !Number.isFinite(numericPrice) || numericPrice < 0) {
+      toast.error("Enter a product name, select a category, and enter a valid non-negative price");
       return;
     }
     setSaving(true);
@@ -76,14 +82,16 @@ export default function ProductEditor({ product, collections, onSaved, onCancel 
         image: images[0] ?? "",
         images,
         videos,
-        category: fields.category ?? "",
+        category: categories.find((category) => category.id === categoryId)?.name ?? product.category,
+        categoryId,
+        collectionId,
         description: fields.description ?? "",
         material: fields.material ?? "",
         design: fields.design ?? "",
         finish: fields.finish ?? "",
         idealFor: fields.idealFor ?? "",
-        collectionId,
         isVisible: visible,
+        stockStatus: product.stockStatus,
       });
       const response = await fetch(`/api/admin/products/p-${product.id}`, {
         method: "PATCH",
@@ -144,14 +152,18 @@ export default function ProductEditor({ product, collections, onSaved, onCancel 
           </label>
         ))}
         <label className="text-xs font-medium text-burgundy">
-          Collection
-          <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={collectionId} onChange={(event) => setCollectionId(event.target.value)}>
-            <option value="">No collection</option>
-            {product.collectionId && !collections.some((collection) => collection.id === product.collectionId) && (
-              <option value={product.collectionId}>Current collection ({product.collectionId})</option>
-            )}
-            {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>{collection.name} · {collection.productCount} products</option>
+          Collection *
+          <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={collectionId} onChange={(event) => { setCollectionId(event.target.value); setCategoryId(""); }}>
+            <option value="">Select a collection</option>
+            {linkedCollections.map((collection) => <option key={collection.id} value={collection.id}>{collection.name}</option>)}
+          </select>
+        </label>
+        <label className="text-xs font-medium text-burgundy">
+          Category *
+          <select className="mt-1 h-9 w-full rounded-md border border-input bg-white px-3 text-sm" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} disabled={!collectionId}>
+            <option value="">Select a category</option>
+            {availableCategories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}{category.expired ? " (expired)" : ""}</option>
             ))}
           </select>
         </label>
